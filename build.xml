@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir=".." name="Ropen Backend">
+    <!-- 
+    #######################################################
+    # Imports, used Salvador Modules 
+    #######################################################
+    -->
+    <import file="./build/build.xml"/>
+    <import file="./build/modules/exist.xml"/>
+
+
+    <!-- 
+    #######################################################
+    # Settings
+    #######################################################
+    -->
+    <property name="exist.base.url" value="http://134.76.21.92:8080"/>
+    
+    <!-- 
+    #######################################################
+    # Targets needed by the build system 
+    #######################################################
+    -->
+    
+    <!-- Simple help -->
+    <target name="help" description="Prints some help">
+        <echo>ant help - This help</echo>
+    </target>
+    
+    <!-- 
+    #######################################################
+    # eXist sync
+    #######################################################
+    -->
+
+</project>
