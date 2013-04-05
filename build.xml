@@ -14,53 +14,96 @@
     # Settings
     #######################################################
     -->
-    <property name="exist.base.url" value="http://134.76.21.92:8080"/>
+    <!-- Login data, this is usually stored in exist.properties. You can also uncommnt these lines and use the Ant file-->
+    <!--
+    <property name="exist.url" value=""/>
+    <property name="exist.user" value=""/>
+    <property name="exist.pass" value=""/>
+    -->
+    <property name="exist.properties.file" value="./exist.properties"/>
     
+    <!-- Paths inside the database -->
+    <property name="exist.remote.base" value="/exist/xmlrpc/db"/>
+    
+    <!-- Local paths -->
+    <property name="exist.local.base" value="./src"/>
+    <property name="exist.local.backup" value="${target.dir}/backup"/>
+    <property name="exist.local.restore" value="${target.dir}/backup"/>
+
+    <!-- Computed Properties -->
+    
+    <!-- Replace http:// with xmldb:exist:// need property regex for this -->
+    <property name="exist.base.uri" value="${exist.url}/${exist.remote.base}"/>
+
     <!-- 
     #######################################################
     # Targets needed by the build system 
     #######################################################
     -->
-    
+
     <!-- Simple help -->
     <target name="help" description="Prints some help">
         <echo>ant help - This help</echo>
+        <echo>ant exist.properties - creates a empty property file for the login date (warning: overwrites existing file)</echo>
     </target>
-    
-    <!-- Creates the needed directories -->
-    <target name="init" depends="">
+
+    <!-- Creates the needed directories, reads properties, checks if login data is present, and contructs exist URL -->
+    <target name="init" depends="salvador.base.ant.contrib.install">
         <!-- Let the user override propeties, usefull for passwords etc. -->
         <!-- See http://ant.apache.org/manual/Tasks/property.html -->
-        <property file="./exist.properties"/>
+        <property file="${exist.properties.file}"/>
+        
+        <echo>Checking eXist login data</echo>
+        <fail message="eXist login data not set!">
+            <condition>
+                <or>
+                    <equals arg1="${exist.url}" arg2=""/>
+                    <not>
+                        <isset property="exist.url"/>
+                    </not>
+                    <equals arg1="${exist.user}" arg2=""/>
+                    <not>
+                        <isset property="exist.user"/>
+                    </not>
+                    <equals arg1="${exist.pass}" arg2=""/>
+                    <not>
+                        <isset property="exist.pass"/>
+                    </not>
+                </or>
+            </condition>
+        </fail>
+        <propertyregex property="png.out" input="@{png.file}" regexp="(.*)[\\/](.*\.png)" select="\2" casesensitive="false"/>
         <mkdir dir="${target.dir}"/>
         <mkdir dir="${js.target.dir}"/>
     </target>
-    
+
+    <target name="exist.properties">
+        <echo append="false" encoding="UTF-8" file="${exist.properties.file}" message="exist.url=${line.separator}exist.user=${line.separator}exist.pass="/>
+    </target>
+
     <!-- 
     #######################################################
     # eXist sync
     #######################################################
     -->
-    
+
+    <!-- This is needed to sync the Git repository with the current developments made inside the database itself -->
     <target name="server.extract" depends="salvador.exist.install">
-        
-        <xdb:extract xmlns:xdb="http://exist-db.org/ant"
-            uri="xmldb:exist://localhost:8080/exist/xmlrpc/db/shakespeare/plays" destdir
-            ="/tmp" subcollections="true" createdirectories="true"/>
-        
+
+        <xdb:extract uri="xmldb:exist://localhost:8080/exist/xmlrpc/db/shakespeare/plays" destdir="/tmp" subcollections="true" createdirectories="true"/>
+
     </target>
-    
+
     <target name="server.backup" depends="salvador.exist.install">
-    
-    <xdb:backup xmlns:xdb="http://exist-db.org/ant"
-        uri="${backup.uri}/db/system"
-        dir="${backup.dir}" user="${backup.user}" password="${backup.pass}"/>
-    
+
+        <xdb:backup  uri="${backup.uri}/db/system" dir="${backup.dir}" user="${backup.user}" password="${backup.pass}"/>
+
     </target>
     <!-- 
         TODO: Missing Targets:
         * Upload to the Database
         * create EXPath Package for easy deployment 
+        * Maybe start exist inside Jetty for a live demo
     -->
 
 </project>
