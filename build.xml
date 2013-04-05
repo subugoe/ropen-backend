@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir=".." name="Ropen Backend" xmlns:xdb="http://exist-db.org/ant">
+<project basedir="." name="Ropen Backend" xmlns:xdb="http://exist-db.org/ant">
     <!-- 
     #######################################################
     # Imports, used Salvador Modules 
@@ -31,9 +31,7 @@
     <property name="exist.local.restore" value="${target.dir}/backup"/>
 
     <!-- Computed Properties -->
-    
-    <!-- Replace http:// with xmldb:exist:// need property regex for this -->
-    <property name="exist.base.uri" value="${exist.url}/${exist.remote.base}"/>
+
 
     <!-- 
     #######################################################
@@ -52,7 +50,6 @@
         <!-- Let the user override propeties, usefull for passwords etc. -->
         <!-- See http://ant.apache.org/manual/Tasks/property.html -->
         <property file="${exist.properties.file}"/>
-        
         <echo>Checking eXist login data</echo>
         <fail message="eXist login data not set!">
             <condition>
@@ -72,9 +69,11 @@
                 </or>
             </condition>
         </fail>
-        <propertyregex property="png.out" input="@{png.file}" regexp="(.*)[\\/](.*\.png)" select="\2" casesensitive="false"/>
+        <!-- Replace http:// with xmldb:exist:// need property regex for this -->
+        <propertyregex property="exist.base.uri" input="${exist.url}/${exist.remote.base}" regexp="http://(.*)" select="xmldb:exist://\1" casesensitive="false"/>
+        <echo message="eXist base set to ${exist.base.uri}"/>
         <mkdir dir="${target.dir}"/>
-        <mkdir dir="${js.target.dir}"/>
+        <mkdir dir="${exist.local.base}"/>
     </target>
 
     <target name="exist.properties">
