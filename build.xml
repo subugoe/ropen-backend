@@ -30,15 +30,11 @@
     <property name="exist.local.base" value="./src/main"/>
     <property name="exist.local.base.xquery" value="${exist.local.base}/xquery"/>
     <property name="exist.local.base.xslt" value="${exist.local.base}/xslt"/>
+    <property name="exist.local.base.resources" value="${exist.local.base}/resources"/>
     <property name="exist.local.backup" value="${target.dir}/backup"/>
     <property name="exist.local.restore" value="${target.dir}/backup"/>
     <property name="exist.local.deploy" value="${target.dir}/deploy"/>
     <!-- Properties of local eXist database -->
-    <property name="exist.local.url" value=""/>
-    <property name="exist.local.user" value="admin"/>
-    <property name="exist.local.pass" value="ant"/>
-
-    <!-- Computed Properties -->
 
 
     <!-- 
@@ -63,6 +59,7 @@
         <mkdir dir="${exist.local.base}"/>
         <mkdir dir="${exist.local.base.xquery}"/>
         <mkdir dir="${exist.local.base.xslt}"/>
+        <mkdir dir="${exist.local.base.resources}"/>
     </target>
 
     <target name="clean" depends="salvador.base.clean">
@@ -144,6 +141,7 @@
         <copy todir="${exist.local.deploy}">
             <fileset dir="${exist.local.base.xslt}"/>
             <fileset dir="${exist.local.base.query}"/>
+            <fileset dir="${exist.local.base.resources}"/>
         </copy>
         <!-- Deploy -->
         <xdb:store uri="${exist.base.uri}${exist.remote.ropen}" user="${exist.user}" password="${exist.pass}" createcollection="true">
@@ -169,9 +167,9 @@
     </target>
     <!-- 
         TODO: Missing Targets:
-        * Upload to the Database
+        * Upload to the Database - there but not testet
         * create EXPath Package for easy deployment 
-        * Maybe start exist inside Jetty for a live demo
+        * Maybe start exist inside Jetty for a live demo - a demo is part of Salvador
     -->
 
 </project>

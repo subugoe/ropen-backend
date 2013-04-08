@@ -1,0 +1,14 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0"><index xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xqdoc="http://www.xqdoc.org/1.0"><fulltext default="none" attributes="false"/><lucene><analyzer id="de" class="org.apache.lucene.analysis.de.GermanAnalyzer"/><analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/><analyzer id="ws" class="org.apache.lucene.analysis.WhitespaceAnalyzer"/><text qname="TEI:div" analyzer="de"><inline qname="TEI:expan"/><inline qname="TEI:ins"/><inline qname="TEI:add"/><inline qname="TEI:emph"/><inline qname="TEI:hi"/><inline qname="TEI:damage"/><inline qname="TEI:corr"/><inline qname="TEI:gap"/>
+                <!-- Try to find words spanning two lines --><ignore qname="TEI:lb"/>
+                <!-- Dont find deletions or errors -->
+                <!--
+                <inline qname="TEI:del"/>
+                <ignore qname="TEI:sic"/>
+                --></text><text qname="TEI:p" analyzer="de"><inline qname="TEI:expan"/><inline qname="TEI:ins"/><inline qname="TEI:add"/><inline qname="TEI:emph"/><inline qname="TEI:hi"/><inline qname="TEI:damage"/><inline qname="TEI:corr"/><inline qname="TEI:gap"/>
+                <!-- Try to find words spanning two lines --><ignore qname="TEI:lb"/>
+                <!-- Dont find deletions or errors -->
+                <!--
+                <inline qname="TEI:del"/>
+                <ignore qname="TEI:sic"/>
+                --></text><text qname="TEI:foreign" analyzer="ws"/><text match="//TEI:teiHeader"/><text qname="TEI:placeName" boost="2.0"/><text qname="TEI:persName" boost="2.0"/><text qname="TEI:addName" boost="2.0"/><text qname="TEI:bibl" boost="2.0"/><text qname="TEI:term" boost="2.0"/><text qname="TEI:ref"/><text qname="TEI:date" boost="2.0"/><text qname="TEI:head" boost="1.5"/><text qname="TEI:note"/><text qname="TEI:hi"/></lucene><create qname="TEI:pb" type="xs:string"/><create qname="@n" type="xs:integer"/><create qname="@TEI:n" type="xs:integer"/><create qname="@xml:id" type="xs:string"/><create qname="@id" type="xs:string"/><create qname="@ref" type="xs:string"/><create qname="@TEI:ref" type="xs:string"/>
+        <!-- Range index for dates --><create path="//TEI:date/@when" type="xs:date"/><ngram qname="TEI:placeName"/><ngram qname="TEI:persName"/><ngram qname="TEI:addName"/></index></collection>
