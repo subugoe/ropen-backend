@@ -24,11 +24,13 @@
     
     <!-- Paths should start with a slash (/) but not end with one -->
     <!-- Paths inside the database -->
-    <property name="exist.remote.base" value="/exist/xmlrpc/db"/>
-    <property name="exist.remote.ropen" value="/archaeo18"/>
+    <property name="exist.remote.base" value="/exist/xmlrpc"/>
+    <property name="exist.remote.ropen" value="/db/archaeo18"/>
     
     <!-- Local paths -->
-    <property name="exist.local.base" value="./src/main/xquery"/>
+    <property name="exist.local.base" value="./src/main"/>
+    <property name="exist.local.base.xquery" value="${exist.local.base}/xquery"/>
+    <property name="exist.local.base.xslt" value="${exist.local.base}/xslt"/>
     <property name="exist.local.backup" value="${target.dir}/backup"/>
     <property name="exist.local.restore" value="${target.dir}/backup"/>
 
@@ -54,6 +56,8 @@
         <property file="${exist.properties.file}"/>
         <mkdir dir="${target.dir}"/>
         <mkdir dir="${exist.local.base}"/>
+        <mkdir dir="${exist.local.xquery}"/>
+        <mkdir dir="${exist.local.xslt}"/>
     </target>
 
     <target name="exist.properties">
@@ -104,8 +108,20 @@
         -->
         <!-- Create a backup, clean it from eXist collection metadata and copy it to the source tree -->
         <antcall target="server.backup"/>
-        <copy todir="${exist.local.base}">
-            
+        <copy todir="${exist.local.base.xquery}">
+            <fileset dir="${exist.local.backup}${exist.remote.ropen}">
+                <include name="**/*.xq"/>
+                <include name="**/*.xquery"/>
+                <include name="**/*.xqm"/>
+                <exclude name="**/__contents__.xml"/>
+            </fileset>
+        </copy>
+        <copy todir="${exist.local.base.xslt}">
+            <fileset dir="${exist.local.backup}${exist.remote.ropen}">
+                <include name="**/*.xsl"/>
+                <include name="**/*.xslt"/>
+                <exclude name="**/__contents__.xml"/>
+            </fileset>
         </copy>
     </target>
 
