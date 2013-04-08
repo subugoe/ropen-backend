@@ -87,21 +87,38 @@
             </condition>
         </fail>
         <!-- Replace http:// with xmldb:exist:// need property regex for this -->
-        <propertyregex property="exist.base.uri" input="${exist.url}/${exist.remote.base}" regexp="http://(.*)" select="xmldb:exist://\1" casesensitive="false"/>
+        <!-- Be sure not do use multiple slashes here -->
+        <propertyregex property="exist.base.uri" input="${exist.url}${exist.remote.base}" regexp="http://(.*)" select="xmldb:exist://\1" casesensitive="false"/>
         <echo message="eXist base set to ${exist.base.uri}"/>
+        <!-- Create directories -->
+        <mkdir dir="${exist.local.backup}"/>
     </target>
 
     <!-- This is needed to sync the Git repository with the current developments made inside the database itself -->
     <target name="server.extract" depends="init.exist, salvador.exist.install">
-
-        <xdb:extract uri="${exist.base.uri}${exist.remote.ropen}" destdir="${exist.local.base}" subcollections="true" createdirectories="true" user="${exist.user}" password="${exist.pass}"/>
-
+        <property name="ropen.url" value="${exist.base.uri}${exist.remote.ropen}"></property>
+        <echo>Exracting Ropen Backend from ${ropen.url}</echo>
+        <!-- This doesn't preserve file names, don't use it -->
+        <!--
+        <xdb:extract uri="${exist.base.uri}${exist.remote.ropen}" destdir="${exist.local.base}" subcollections="true" createdirectories="true" overwrite="true" user="${exist.user}" password="${exist.pass}"/>
+        -->
+        <!-- Create a backup, clean it from eXist collection metadata and copy it to the source tree -->
+        <antcall target="server.backup"/>
+        <copy todir="${exist.local.base}">
+            
+        </copy>
     </target>
 
     <target name="server.backup" depends="init.exist, salvador.exist.install">
 
-        <xdb:backup  uri="${backup.uri}/db/system" dir="${backup.dir}" user="${exist.user}" password="${exist.pass}"/>
+        <xdb:backup  uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
 
+    </target>
+    
+    <target name="server.restore" depends="init.exist, salvador.exist.install">
+        
+        <xdb:restore  uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
+        
     </target>
     <!-- 
         TODO: Missing Targets:
