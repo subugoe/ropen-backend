@@ -8,7 +8,6 @@
     <import file="./build/build.xml"/>
     <import file="./build/modules/exist.xml"/>
 
-
     <!-- 
     #######################################################
     # Settings
@@ -21,18 +20,23 @@
     <property name="exist.pass" value=""/>
     -->
     <property name="exist.properties.file" value="./exist.properties"/>
-    
+
     <!-- Paths should start with a slash (/) but not end with one -->
     <!-- Paths inside the database -->
     <property name="exist.remote.base" value="/exist/xmlrpc"/>
     <property name="exist.remote.ropen" value="/db/archaeo18"/>
-    
+
     <!-- Local paths -->
     <property name="exist.local.base" value="./src/main"/>
     <property name="exist.local.base.xquery" value="${exist.local.base}/xquery"/>
     <property name="exist.local.base.xslt" value="${exist.local.base}/xslt"/>
     <property name="exist.local.backup" value="${target.dir}/backup"/>
     <property name="exist.local.restore" value="${target.dir}/backup"/>
+    <property name="exist.local.deploy" value="${target.dir}/deploy"/>
+    <!-- Properties of local eXist database -->
+    <property name="exist.local.url" value=""/>
+    <property name="exist.local.user" value="admin"/>
+    <property name="exist.local.pass" value="ant"/>
 
     <!-- Computed Properties -->
 
@@ -47,6 +51,7 @@
     <target name="help" description="Prints some help">
         <echo>ant help - This help</echo>
         <echo>ant exist.properties - creates a empty property file for the login date (warning: overwrites existing file)</echo>
+        <echo>ant server.extract - extracts the contents of the database and puts the code (XQuery and XSLT under src)</echo>
     </target>
 
     <!-- Creates the needed directories, reads properties -->
@@ -56,8 +61,12 @@
         <property file="${exist.properties.file}"/>
         <mkdir dir="${target.dir}"/>
         <mkdir dir="${exist.local.base}"/>
-        <mkdir dir="${exist.local.xquery}"/>
-        <mkdir dir="${exist.local.xslt}"/>
+        <mkdir dir="${exist.local.base.xquery}"/>
+        <mkdir dir="${exist.local.base.xslt}"/>
+    </target>
+
+    <target name="clean" depends="salvador.base.clean">
+        <delete dir="${target.dir}"/>
     </target>
 
     <target name="exist.properties">
@@ -100,7 +109,7 @@
 
     <!-- This is needed to sync the Git repository with the current developments made inside the database itself -->
     <target name="server.extract" depends="init.exist, salvador.exist.install">
-        <property name="ropen.url" value="${exist.base.uri}${exist.remote.ropen}"></property>
+        <property name="ropen.url" value="${exist.base.uri}${exist.remote.ropen}"/>
         <echo>Exracting Ropen Backend from ${ropen.url}</echo>
         <!-- This doesn't preserve file names, don't use it -->
         <!--
@@ -108,14 +117,18 @@
         -->
         <!-- Create a backup, clean it from eXist collection metadata and copy it to the source tree -->
         <antcall target="server.backup"/>
+        <echo>Splitting XQueries into ${exist.local.base.xquery}</echo>
         <copy todir="${exist.local.base.xquery}">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
                 <include name="**/*.xq"/>
                 <include name="**/*.xquery"/>
                 <include name="**/*.xqm"/>
+                <!-- Exclude Configuration since it contains a Password -->
+                <exclude name="**/conf.xqm"/>
                 <exclude name="**/__contents__.xml"/>
             </fileset>
         </copy>
+        <echo>Splitting XSLT into ${exist.local.base.xslt}</echo>
         <copy todir="${exist.local.base.xslt}">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
                 <include name="**/*.xsl"/>
@@ -125,16 +138,34 @@
         </copy>
     </target>
 
-    <target name="server.backup" depends="init.exist, salvador.exist.install">
-
-        <xdb:backup  uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
-
+    <target name="server.deploy" depends="init.exist, salvador.exist.install">
+        <!-- Build a directory with all files -->
+        <mkdir dir="${exist.local.deploy}"/>
+        <copy todir="${exist.local.deploy}">
+            <fileset dir="${exist.local.base.xslt}"/>
+            <fileset dir="${exist.local.base.query}"/>
+        </copy>
+        <!-- Deploy -->
+        <xdb:store uri="${exist.base.uri}${exist.remote.ropen}" user="${exist.user}" password="${exist.pass}" createcollection="true">
+            <fileset dir="${exist.local.deploy}">
+                <include name="*.xml"/>
+                <include name="*.xsl"/>
+                <include name="*.xslt"/>
+                <include name="*.xq"/>
+                <include name="*.xqm"/>
+                <include name="*.xquery"/>
+            </fileset>
+        </xdb:store>
     </target>
-    
+
+    <target name="server.backup" depends="init.exist, salvador.exist.install">
+        <echo>Creating Backup to ${exist.local.backup}</echo>
+        <xdb:backup uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
+    </target>
+
     <target name="server.restore" depends="init.exist, salvador.exist.install">
-        
-        <xdb:restore  uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
-        
+        <echo>Restoring from ${exist.local.backup}</echo>
+        <xdb:restore uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
     </target>
     <!-- 
         TODO: Missing Targets:
