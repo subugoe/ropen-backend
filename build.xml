@@ -23,8 +23,10 @@
 
     <!-- Paths should start with a slash (/) but not end with one -->
     <!-- Paths inside the database -->
-    <property name="exist.remote.base" value="/exist/xmlrpc"/>
+    <property name="exist.remote.base.xmlrpc" value="/exist/xmlrpc"/>
+    <property name="exist.remote.base.rest" value="/exist/rest"/>
     <property name="exist.remote.ropen" value="/db/archaeo18"/>
+    <property name="exist.remote.upload" value="/queries/upload.xq"/>
 
     <!-- Local paths -->
     <property name="exist.local.base" value="./src/main"/>
@@ -34,6 +36,7 @@
     <property name="exist.local.backup" value="${target.dir}/backup"/>
     <property name="exist.local.restore" value="${target.dir}/backup"/>
     <property name="exist.local.deploy" value="${target.dir}/deploy"/>
+    <property name="exist.local.docs" value="${target.dir}/docs"/>
     <!-- Properties of local eXist database -->
 
 
@@ -98,7 +101,7 @@
         </fail>
         <!-- Replace http:// with xmldb:exist:// need property regex for this -->
         <!-- Be sure not do use multiple slashes here -->
-        <propertyregex property="exist.base.uri" input="${exist.url}${exist.remote.base}" regexp="http://(.*)" select="xmldb:exist://\1" casesensitive="false"/>
+        <propertyregex property="exist.base.uri" input="${exist.url}${exist.remote.base.xmlrpc}" regexp="http://(.*)" select="xmldb:exist://\1" casesensitive="false"/>
         <echo message="eXist base set to ${exist.base.uri}"/>
         <!-- Create directories -->
         <mkdir dir="${exist.local.backup}"/>
@@ -165,11 +168,39 @@
         <echo>Restoring from ${exist.local.backup}</echo>
         <xdb:restore uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
     </target>
+    
+    <target name="archeo18.upload" depends="init.exist, salvador.base.ant.httptask.install">
+        <echo>Installing Archaeo18 upload macro</echo>
+        <macrodef name="archeo18.upload">
+            <attribute name="url"/>
+            <attribute name="src"/>
+            <sequential>
+                <http url="@{url}" method="POST" entityProperty="archaeo18.upload.result">
+                    <credentials username="${exist.user}" password="${exist.pass}"/>
+                    <entity file="@{src}" binary="true"/>
+                </http>
+            </sequential>
+        </macrodef>
+    </target>
+    
+    <target name="server.upload.documents" depends="archeo18.upload">
+        <property name="upload.url" value="${exist.url}${exist.remote.base.rest}${exist.remote.ropen}${exist.remote.upload}"/>
+        <echo>Uploading files from ${exist.local.docs} to ${upload.url} (This will fail if one of the paths is missing)</echo>
+        <for param="tei.file">
+            <path>
+                <fileset dir="${exist.local.docs}" includes="*.xml"/>
+            </path>
+            <sequential>
+                <archeo18.upload src="@{tei.file}" url="${upload.url}"/>
+            </sequential>
+        </for>
+    </target>
     <!-- 
         TODO: Missing Targets:
-        * Upload to the Database - there but not testet
+        * Upload to the Database (XQueries, XSLT) - there but not testet
         * create EXPath Package for easy deployment 
         * Maybe start exist inside Jetty for a live demo - a demo is part of Salvador
+        * Upload documents
     -->
 
 </project>
