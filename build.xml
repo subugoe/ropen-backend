@@ -7,6 +7,7 @@
     -->
     <import file="./build/build.xml"/>
     <import file="./build/modules/exist.xml"/>
+    <import file="./build/modules/http.xml"/>
 
     <!-- 
     #######################################################
@@ -169,8 +170,11 @@
         <xdb:restore uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
     </target>
     
-    <target name="archeo18.upload" depends="init.exist, salvador.base.ant.httptask.install">
+    <target name="archeo18.upload" depends="init.exist, salvador.http.macros, salvador.base.ant.contrib.install">
         <echo>Installing Archaeo18 upload macro</echo>
+        <!--
+            The Ant HTTP Tasks don't work here, see:
+            http://code.google.com/p/missing-link/issues/detail?id=32&colspec=ID%20Project%20Type%20Status%20Priority%20Milestone%20Owner%20Summary
         <macrodef name="archeo18.upload">
             <attribute name="url"/>
             <attribute name="src"/>
@@ -179,6 +183,19 @@
                     <credentials username="${exist.user}" password="${exist.pass}"/>
                     <entity file="@{src}" binary="true"/>
                 </http>
+            </sequential>
+        </macrodef>
+         -->
+        <macrodef name="archeo18.upload">
+            <attribute name="url"/>
+            <attribute name="src"/>
+            <sequential>
+                <!-- Get the file name -->
+                <var name="upload.filename" unset="true"/>
+                <propertyregex property="upload.filename" input="@{src}" regexp="(.*)[\\/](.*\..*)$" select="\2" casesensitive="false"/>
+                <echo>Uploading @{src} as ${upload.filename} to @{url}</echo>
+                <!-- Post it -->
+                <salvador.http.postfile url="@{url}" file="@{src}" name="${upload.filename}"/>
             </sequential>
         </macrodef>
     </target>
@@ -200,7 +217,7 @@
         * Upload to the Database (XQueries, XSLT) - there but not testet
         * create EXPath Package for easy deployment 
         * Maybe start exist inside Jetty for a live demo - a demo is part of Salvador
-        * Upload documents
+        * Upload documents - there but not testet
     -->
 
 </project>
