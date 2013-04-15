@@ -44,12 +44,15 @@ else
             let $tei-enriched-location := concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix, $id, '-enriched.xml')
             let $tei-enriched := doc($tei-enriched-location)
             let $title := $tei-enriched/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[not(@type = 'display')]/text()
+            let $origDate := $tei-enriched/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:sourceDesc/TEI:msDesc/TEI:history/TEI:origin/TEI:origDate/text()
             let $title-short := $tei-enriched/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()
             let $metsFile := concat($archeao18conf:dataBase, $archeao18conf:metsPrefix, $id, '.mets.xml')
             let $preview := data(doc($metsFile)//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)        
             let $tei-location := concat($archeao18conf:dataBase, $archeao18conf:teiPrefix, $id, '.xml')
             let $pageCount := count($tei-enriched//TEI:pb)
     
+            (: This orders the documents by publication date :)
+            order by $tei-enriched/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:sourceDesc/TEI:msDesc/TEI:history/TEI:origin/TEI:origDate/text()
             
             return 
                 <doc>
@@ -61,5 +64,6 @@ else
                     <teiEnriched>{$tei-enriched-location}</teiEnriched>
                     <mets>{$metsFile}</mets>
                     <pageCount>{$pageCount}</pageCount>
+                    <origDate>{$origDate}</origDate>
                 </doc>
 }</docs>
