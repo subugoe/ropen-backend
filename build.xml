@@ -124,7 +124,7 @@
                 <include name="**/*.xq"/>
                 <include name="**/*.xquery"/>
                 <include name="**/*.xqm"/>
-                <!-- Exclude Configuration since it contains a Password -->
+                <!-- Exclude Configuration since it contains a Password, there is another target that cleans this file up. -->
                 <exclude name="**/conf.xqm"/>
                 <exclude name="**/__contents__.xml"/>
             </fileset>
@@ -136,6 +136,23 @@
                 <include name="**/*.xslt"/>
                 <exclude name="**/__contents__.xml"/>
             </fileset>
+        </copy>
+        <antcall target="server.extract.config"/>
+    </target>
+
+    <target name="server.extract.config">
+        <copy todir="${exist.local.base.xquery}" overwrite="true">
+            <fileset dir="${exist.local.backup}${exist.remote.ropen}">
+                <!-- <exclude name="**/*.*"/> -->
+                <include name="**/conf.xqm"/>
+            </fileset>
+            <filterchain>
+                <tokenfilter>
+                    <containsregex pattern="^.*$" byline="true"/>
+                    <replaceregex pattern="^(.*?)(\$archeao18conf:user\s?:=\s?')(.*)('\s?;)$" replace="\1\2\4" byline="true"/>
+                    <replaceregex pattern="^(.*?)(\$archeao18conf:password\s?:=\s?')(.*)('\s?;)$" replace="\1\2\4" byline="true"/>
+                </tokenfilter>
+            </filterchain>
         </copy>
     </target>
 
@@ -169,7 +186,7 @@
         <echo>Restoring from ${exist.local.backup}</echo>
         <xdb:restore uri="${exist.base.uri}${exist.remote.ropen}" dir="${exist.local.backup}" user="${exist.user}" password="${exist.pass}"/>
     </target>
-    
+
     <target name="archeo18.upload" depends="init.exist, salvador.http.macros, salvador.base.ant.contrib.install">
         <echo>Installing Archaeo18 upload macro</echo>
         <!--
@@ -199,7 +216,7 @@
             </sequential>
         </macrodef>
     </target>
-    
+
     <target name="server.upload.documents" depends="archeo18.upload">
         <property name="upload.url" value="${exist.url}${exist.remote.base.rest}${exist.remote.ropen}${exist.remote.upload}"/>
         <echo>Uploading files from ${exist.local.docs} to ${upload.url} (This will fail if one of the paths is missing)</echo>
