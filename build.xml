@@ -143,7 +143,6 @@
     <target name="server.extract.config">
         <copy todir="${exist.local.base.xquery}" overwrite="true">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
-                <!-- <exclude name="**/*.*"/> -->
                 <include name="**/conf.xqm"/>
             </fileset>
             <filterchain>
@@ -233,8 +232,8 @@
         TODO: Missing Targets:
         * Upload to the Database (XQueries, XSLT) - there but not testet
         * create EXPath Package for easy deployment 
-        * Maybe start exist inside Jetty for a live demo - a demo is part of Salvador
-        * Upload documents - there but not testet
+        * Maybe start eXist inside Jetty for a live demo - a demo is part of Salvador
+        * Upload documents - works here, but the server have some problems
     -->
 
 </project>
