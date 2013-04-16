@@ -140,6 +140,7 @@
         <antcall target="server.extract.config"/>
     </target>
 
+    <!-- Filter the user name and password from the configuration -->
     <target name="server.extract.config">
         <copy todir="${exist.local.base.xquery}" overwrite="true">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
