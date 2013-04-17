@@ -33,13 +33,13 @@
     <property name="exist.local.base" value="./src/main"/>
     <property name="exist.local.base.xquery" value="${exist.local.base}/xquery"/>
     <property name="exist.local.base.xslt" value="${exist.local.base}/xslt"/>
+    <property name="exist.local.base.odd" value="${exist.local.base}/odd"/>
     <property name="exist.local.base.resources" value="${exist.local.base}/resources"/>
     <property name="exist.local.backup" value="${target.dir}/backup"/>
     <property name="exist.local.restore" value="${target.dir}/backup"/>
     <property name="exist.local.deploy" value="${target.dir}/deploy"/>
     <property name="exist.local.docs" value="${target.dir}/docs"/>
     <!-- Properties of local eXist database -->
-
 
     <!-- 
     #######################################################
@@ -63,6 +63,7 @@
         <mkdir dir="${exist.local.base}"/>
         <mkdir dir="${exist.local.base.xquery}"/>
         <mkdir dir="${exist.local.base.xslt}"/>
+        <mkdir dir="${exist.local.base.odd}"/>
         <mkdir dir="${exist.local.base.resources}"/>
     </target>
 
@@ -137,6 +138,13 @@
                 <exclude name="**/__contents__.xml"/>
             </fileset>
         </copy>
+        <echo>Splitting Schema into ${exist.local.base.odd}</echo>
+        <copy todir="${exist.local.base.odd}">
+            <fileset dir="${exist.local.backup}${exist.remote.ropen}">
+                <include name="**/*.odd"/>
+                <exclude name="**/__contents__.xml"/>
+            </fileset>
+        </copy>
         <antcall target="server.extract.config"/>
     </target>
 
@@ -163,6 +171,7 @@
             <fileset dir="${exist.local.base.xslt}"/>
             <fileset dir="${exist.local.base.query}"/>
             <fileset dir="${exist.local.base.resources}"/>
+            <fileset dir="${exist.local.base.odd}"/>
         </copy>
         <!-- Deploy -->
         <xdb:store uri="${exist.base.uri}${exist.remote.ropen}" user="${exist.user}" password="${exist.pass}" createcollection="true">
