@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- See http://demo.exist-db.org/exist/apps/doc/repo.xml -->
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>ROPEN Backend</description>
+    <author>Christian Mahnke</author>
+    <website>https://github.com/subugoe/ropen-backend</website>
+    <status>alpha</status>
+    <license>GNU-AGPL</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>ropen</target>
+    <finish/>
+    <permissions user="admin" password="" group="dba" mode="rw-rw-r--"/>
+</meta>
+
