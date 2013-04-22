@@ -39,6 +39,10 @@
     <property name="exist.local.restore" value="${target.dir}/backup"/>
     <property name="exist.local.deploy" value="${target.dir}/deploy"/>
     <property name="exist.local.docs" value="${target.dir}/docs"/>
+    
+    <!-- Deployment settings -->
+    <property name="ropen.xar.file" value="${target.dir}/ropen.xar"/>
+    
     <!-- Properties of local eXist database -->
 
     <!-- 
@@ -52,6 +56,7 @@
         <echo>ant help - This help</echo>
         <echo>ant exist.properties - creates a empty property file for the login date (warning: overwrites existing file)</echo>
         <echo>ant server.extract - extracts the contents of the database and puts the code (XQuery and XSLT under src)</echo>
+        <echo>ant xar - create a Xar archive</echo>
     </target>
 
     <!-- Creates the needed directories, reads properties -->
@@ -163,16 +168,20 @@
             </filterchain>
         </copy>
     </target>
-
-    <target name="server.deploy" depends="init.exist, salvador.exist.install">
+    
+    <target name="server.files">
         <!-- Build a directory with all files -->
         <mkdir dir="${exist.local.deploy}"/>
+        <mkdir dir="${exist.local.deploy}/data"/>
         <copy todir="${exist.local.deploy}">
             <fileset dir="${exist.local.base.xslt}"/>
-            <fileset dir="${exist.local.base.query}"/>
+            <fileset dir="${exist.local.base.xquery}"/>
             <fileset dir="${exist.local.base.resources}"/>
             <fileset dir="${exist.local.base.odd}"/>
         </copy>
+    </target>
+
+    <target name="server.deploy" depends="init.exist, server.files, salvador.exist.install">
         <!-- Deploy -->
         <xdb:store uri="${exist.base.uri}${exist.remote.ropen}" user="${exist.user}" password="${exist.pass}" createcollection="true">
             <fileset dir="${exist.local.deploy}">
@@ -238,10 +247,18 @@
             </sequential>
         </for>
     </target>
+    
+    <target name="xar" depends="server.files">
+        <zip destfile="${ropen.xar.file}"
+            basedir="${exist.local.deploy}"
+            update="true"
+        />
+    </target>
+    
     <!-- 
         TODO: Missing Targets:
         * Upload to the Database (XQueries, XSLT) - there but not testet
-        * create EXPath Package for easy deployment 
+        * create EXPath Package for easy deployment  - started
         * Maybe start eXist inside Jetty for a live demo - a demo is part of Salvador
         * Upload documents - works here, but the server have some problems
     -->
