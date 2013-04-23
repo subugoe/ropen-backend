@@ -1,1 +1,3 @@
-<package xmlns="http://expath.org/ns/pkg" name="http://sub.uni-goettingen.de/apps/ropen" abbrev="ropen" version="0.1" spec="1.0"><title>Ropen Backend</title></package>
+<package xmlns="http://expath.org/ns/pkg" name="http://sub.uni-goettingen.de/apps/ropen" abbrev="ropen" version="0.1" spec="1.0">
+    <title>Ropen Backend</title>
+</package>
