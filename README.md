@@ -13,16 +13,38 @@ URL, user name and password for the database are tored in a property file (exist
 
 > exist.pass=
 
-#Development
+#Ant targets
+##Development
 You can use Ant to do some developement tasks like:
 
 * Get the contents of the eXist database
-* Import changes into an existing or new database
-* Create a EXPAth package
 
-#Deploymnet
+>ant server.extract
+
+* Import changes into an existing or new database
+
+> ant server.deploy
+
+* Create a EXPath package
+
+>ant xar
+
+##Deploymnet
 You can use Ant to do some deployment tasks like:
 
 * Create and restore a backup of the database
-* Import changes into an existing or new database
+
+> ant server.backup
+
+and
+> ant server.restore
+
+## Planed Features
 * Reindex the database after manual Dataimport
+* Compile the ODD Schema to RelexNG
+
+
+# Installation
+The XAR Package isn't tested yes, you need to deploy the application either by "ant server.deploy" or manually. The application doesn't contain data, you need to add it via "queries/upload.xq"
+
+# Configuration
