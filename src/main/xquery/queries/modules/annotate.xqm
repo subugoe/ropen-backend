@@ -16,7 +16,6 @@ declare function annotate:sequence-to-string ($seq as item()*) as xs:string {
     return string-join($strs, '')
 };
 
-
 declare function annotate:tokenize ($str as xs:string) as xs:string* {
     let $token := replace($str, '^(\w+|\W+)(.*)$', '$1')
     let $remainder := substring($str, string-length($token) + 1, string-length($str))

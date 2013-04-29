@@ -3,7 +3,6 @@ xquery version "1.0";
 module namespace date="http://archaeo18.sub.uni-goettingen.de/exist/date";
 
 declare namespace util="http://exist-db.org/xquery/util";
-
 declare namespace xhtml="http://www.w3.org/1999/xhtml";
 
 import module namespace strings = "http://archaeo18.sub.uni-goettingen.de/exist/strings" at "./strings.xqm";
