@@ -88,6 +88,13 @@ declare function archaeo18lib:get-doc-name($str as xs:string) as xs:string {
     substring($str, 1, string-length($str) - string-length($archeao18conf:teiEnrichedSuffix))
 };
 
+declare function archaeo18lib:get-doc-display-name($str as xs:string) as xs:string {
+    let $tei-enriched-location := concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix, $str, '-enriched.xml')
+    let $tei-enriched := doc($tei-enriched-location)
+    let $title-short := $tei-enriched/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()
+    return $title-short
+};
+
 declare function archaeo18lib:check-elements($str as xs:string, $elements as element()*) as xs:boolean {
     let $elementName := if (contains($str, ':')) then substring-after($str, ':')
                         else $str
