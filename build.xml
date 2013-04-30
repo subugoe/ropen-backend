@@ -8,6 +8,11 @@
     <import file="./build/build.xml"/>
     <import file="./build/modules/exist.xml"/>
     <import file="./build/modules/http.xml"/>
+    <import file="./build/modules/saxon.xml"/>
+    <!--
+    <import file="./build/modules/xspec.xml"/>
+    -->
+    <import file="./build/modules/xml.xml"/>
 
     <!-- 
     #######################################################
@@ -39,10 +44,10 @@
     <property name="exist.local.restore" value="${target.dir}/backup"/>
     <property name="exist.local.deploy" value="${target.dir}/deploy"/>
     <property name="exist.local.docs" value="${target.dir}/docs"/>
-    
+
     <!-- Deployment settings -->
     <property name="ropen.xar.file" value="${target.dir}/ropen.xar"/>
-    
+
     <!-- Properties of local eXist database -->
 
     <!-- 
@@ -115,8 +120,9 @@
     </target>
 
     <!-- This is needed to sync the Git repository with the current developments made inside the database itself -->
-    <target name="server.extract" depends="init.exist, salvador.exist.install">
+    <target name="server.extract" depends="init.exist, salvador.exist.install, salvador.xml.install">
         <property name="ropen.url" value="${exist.base.uri}${exist.remote.ropen}"/>
+        <property name="ropen.transformations" value="transformations/"/>
         <echo>Exracting Ropen Backend from ${ropen.url}</echo>
         <!-- This doesn't preserve file names, don't use it -->
         <!--
@@ -136,6 +142,8 @@
             </fileset>
         </copy>
         <echo>Splitting XSLT into ${exist.local.base.xslt}</echo>
+        <!-- This is done by pretty printing  -->
+        <!-- 
         <copy todir="${exist.local.base.xslt}">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
                 <include name="**/*.xsl"/>
@@ -143,6 +151,13 @@
                 <exclude name="**/__contents__.xml"/>
             </fileset>
         </copy>
+        -->
+        <fileset dir="${exist.local.backup}${exist.remote.ropen}" id="xslt.files">
+            <include name="**/*.xsl"/>
+            <include name="**/*.xslt"/>
+            <exclude name="**/__contents__.xml"/>
+        </fileset>
+        <salvador.xml.prettyprint.dir refid="xslt.files" todir="${exist.local.base.xslt}/${ropen.transformations}"/>
         <echo>Splitting Schema into ${exist.local.base.odd}</echo>
         <copy todir="${exist.local.base.odd}">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
@@ -168,7 +183,7 @@
             </filterchain>
         </copy>
     </target>
-    
+
     <target name="server.files">
         <!-- Build a directory with all files -->
         <mkdir dir="${exist.local.deploy}"/>
@@ -247,14 +262,26 @@
             </sequential>
         </for>
     </target>
-    
+
     <target name="xar" depends="server.files">
-        <zip destfile="${ropen.xar.file}"
-            basedir="${exist.local.deploy}"
-            update="true"
-        />
+        <zip destfile="${ropen.xar.file}" basedir="${exist.local.deploy}" update="true"/>
     </target>
-    
+
+    <target name="serve" depends="salvador.exist.install, salvador.jetty.install"> </target>
+
+    <target name="xquery.lint" depends="salvador.saxon.install">
+        <property name="xquery.results.dir" value="${target.dir}/xquery-results"/>
+        <mkdir dir="xquery.results.dir"/>
+        <salvador.saxon.xquery query="${exist.local.base.xquery}/queries/modules/conf.xqm" destfile="${xquery.results.dir}/conf.xqm"/>
+        <!-- exist.local.base.xquery -->
+
+    </target>
+
+    <!-- 
+    <target name="xquery.test" depends="salvador.xspec.install">
+        <salvador.xspec.xquery xspec.xml.xquery="./src/test/xspec/test.xml"/>
+    </target>
+    -->
     <!-- 
         TODO: Missing Targets:
         * Upload to the Database (XQueries, XSLT) - there but not testet
