@@ -123,6 +123,7 @@
     <target name="server.extract" depends="init.exist, salvador.exist.install, salvador.xml.install">
         <property name="ropen.url" value="${exist.base.uri}${exist.remote.ropen}"/>
         <property name="ropen.transformations" value="transformations/"/>
+        <property name="ropen.transformations.lib" value="${ropen.transformations}lib/"/>
         <echo>Exracting Ropen Backend from ${ropen.url}</echo>
         <!-- This doesn't preserve file names, don't use it -->
         <!--
@@ -153,11 +154,15 @@
         </copy>
         -->
         <fileset dir="${exist.local.backup}${exist.remote.ropen}" id="xslt.files">
-            <include name="**/*.xsl"/>
-            <include name="**/*.xslt"/>
-            <exclude name="**/__contents__.xml"/>
+            <include name="${ropen.transformations}*.xsl"/>
+            <include name="${ropen.transformations}*.xslt"/>
         </fileset>
         <salvador.xml.prettyprint.dir refid="xslt.files" todir="${exist.local.base.xslt}/${ropen.transformations}"/>
+        <fileset dir="${exist.local.backup}${exist.remote.ropen}" id="xslt.lib.files">
+            <include name="${ropen.transformations.lib}*.xsl"/>
+            <include name="${ropen.transformations.lib}*.xslt"/>
+        </fileset>
+        <salvador.xml.prettyprint.dir refid="xslt.lib.files" todir="${exist.local.base.xslt}/${ropen.transformations.lib}"/>
         <echo>Splitting Schema into ${exist.local.base.odd}</echo>
         <copy todir="${exist.local.base.odd}">
             <fileset dir="${exist.local.backup}${exist.remote.ropen}">
