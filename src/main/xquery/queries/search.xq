@@ -47,8 +47,13 @@ let $facet := util:catch('*', request:get-parameter("facet", ''), '')
 let $mode := util:catch('*', request:get-parameter("mode", $archeao18conf:searchDefaultMode), $archeao18conf:searchDefaultMode)
 let $summary := util:catch('*', request:get-parameter("summary", 0), 0)
 
+(:change this to a static value if you want to use alway use stream-transform() :)
+let $streamTransform :=  if ($archeao18conf:httpIsRequest) then true()
+                         else false()
+
 (: Other configuration :)
 let $serialization := 'xquery'
+let $summarization := 'kwic'
 
 (: Set up XSLT transformation :)
 let $transform := doc(concat($archeao18conf:transformationsBase, $archeao18conf:stylesheetXhtml))
@@ -81,7 +86,7 @@ let $limit := if ($limit castable as xs:integer) then xs:integer($limit)
               else if ($mode = 'suggesion') then $archeao18conf:searchSuggesionLimit
               else 0
               
-let $filter := if ($filter = 'false' or $filter = '0')
+let $filter := if ($filter = 'false' or $filter = '0' or $mode = 'xhtml')
               then false()
               else true()
               
@@ -164,7 +169,7 @@ let $results := if ($start != 0 or $limit != 0) then
 (:Search is done, time used after this is related to serilisation:)
 let $timerEnd := util:system-time()
 
-return <results><query>
+let $answer := <results><query>
          <searchString>{$query}</searchString>
          <hits>{count($results)}</hits>
          <limit>{$limit}</limit>
@@ -176,90 +181,103 @@ return <results><query>
          <filter>{$filter}</filter>
          <duration type="search">{$timerStart - $timerEnd}</duration>
          {
-         if ($summary != 0) then <summary>{$summary}</summary>
-         else ()
+             if ($summary != 0) then <summary>{$summary}</summary>
+             else ()
          }
-       </query>
-{
-    
-    if ($mode = 'statistics' or count($results) < 1) then
-        let $hitDocuments := for $r in $results return util:document-name($r)
-        for $d in distinct-values($hitDocuments)
-        return <document>{archaeo18lib:get-doc-name($d)}</document>
-    (: TODO: Add list of given Facets :)
-    else if ($query ='' and count($facets) > 0) then
-        ()
-    
-    (: TODO: Try to make this faster :)
-    else if ($mode = 'suggestion') then
-        if (string-length($query) < 2) then <nosuggestion/>
-        else 
-            let $suggestions := for $r in $results 
-                   (: let $r := util:expand($r) :)
-                   (: order by ft:score($r) descending :)
-                   return util:expand($r)//exist:match   
-            for $s in distinct-values($suggestions)
-                   let $c := count($suggestions[.=$s])
-                   order by $c descending
-                   return <suggestion count="{$c}">{$s}</suggestion>
-    (: Handling of modes 'results' and 'xhtml' :)      
-    else for $s in $results
-        (: TODO: change this to element of search space :)
-        let $pageBreak := $searchSpace//*[@id = data($s/@id)]/preceding::TEI:pb[1]
+         </query>
+        {
+            if ($mode = 'statistics' or count($results) < 1) then
+                let $hitDocuments := for $r in $results return util:document-name($r)
+                for $d in distinct-values($hitDocuments)
+                return <document>{archaeo18lib:get-doc-name($d)}</document>
+            (: TODO: Add list of given Facets :)
+            else if ($query ='' and count($facets) > 0) then
+                ()
+            
+            (: TODO: Try to make this faster :)
+            else if ($mode = 'suggestion') then
+                if (string-length($query) < 2) then <nosuggestion/>
+                else 
+                    let $suggestions := for $r in $results 
+                           (: let $r := util:expand($r) :)
+                           (: order by ft:score($r) descending :)
+                           return util:expand($r)//exist:match   
+                    for $s in distinct-values($suggestions)
+                           let $c := count($suggestions[.=$s])
+                           order by $c descending
+                           return <suggestion count="{$c}">{$s}</suggestion>
+            (: Handling of modes 'results' and 'xhtml' :)      
+            else for $s in $results
+                (: TODO: change this to element of search space :)
+                let $pageBreak := $searchSpace//*[@id = data($s/@id)]/preceding::TEI:pb[1]
+                
+                let $pageNr := if (empty($pageBreak)) then
+                                    0
+                               else if ($pageBreak/@n) then
+                                    data($pageBreak/@n)
+                               else
+                                    count($pageBreak/preceding::TEI:pb)
+                                    
+                  (: TODO:
+                let $pageNr := $searchSpace//*[@id = data($s/@id)]/preceding::TEI:pb[1]
+                 
+              
+                        * There is a bug somewere, sometimes there is no page number, sometimes there is more then one
+                        * Remove this stupid workaround
+               
+                
+                let $pageNr := if (count($pageNr) > 1) then string($pageNr[1]/@n)
+                               else if ($pageNr/@n) then string($pageNr/@n)
+                               else ''
+           :)
+                let $snippet := kwic:summarize($s, <config width="{$summary}"/>)
+                let $result := (: if ($summary != 0) then
+                                    kwic:summarize($s, <config width="{$summary}"/>)
+                               else :) if ($highlight = true()) then 
+                                    util:expand($s)
+                               else $s
         
-        let $pageNr := if (empty($pageBreak)) then
-                            0
-                       else if ($pageBreak/@n) then
-                            data($pageBreak/@n)
-                       else
-                            count($pageBreak/preceding::TEI:pb)
-                            
-          (: TODO:
-        let $pageNr := $searchSpace//*[@id = data($s/@id)]/preceding::TEI:pb[1]
-         
-      
-                * There is a bug somewere, sometimes there is no page number, sometimes there is more then one
-                * Remove this stupid workaround
-       
+                (: filter for enrichment :)
+                let $result := if ($filter = true() or $summary != 0) then archaeo18lib:filter-elements($result, <TEI:addName/>, <exist:match/>)
+                               else $result
         
-        let $pageNr := if (count($pageNr) > 1) then string($pageNr[1]/@n)
-                       else if ($pageNr/@n) then string($pageNr/@n)
-                       else ''
-   :)
-        let $result := (: if ($summary != 0) then
-                            kwic:summarize($s, <config width="{$summary}"/>)
-                       else :) if ($highlight = true()) then 
-                            util:expand($s)
-                       else $s
-
-        (: filter for enrichment :)
-        let $result := if ($filter = true() or $summary != 0) then archaeo18lib:filter-elements($result, <TEI:addName/>, <exist:match/>)
-                       else $result
-
-        (: Create summary :)
-        (: TODO: Make this work :)
-        let $result := if ($summary != 0 and $highlight = true()) then archaeo18lib:shorten($result, local-name(<exist:match/>), 50)
-                       else $result
-
-        (: Get the name of the document the hit is in :)
-        let $hitDocument := if ($document != '') then $document
-                            else archaeo18lib:get-doc-name(util:document-name($s))
-                            (:
-                            else util:document-name($s)
-                            :)
-   
-        order by ft:score($s) descending
-        return 
-            <result>
-                <doc>{$hitDocument}</doc>
-                <page>{$pageNr}</page>
-                <score>{ft:score($s)}</score>
-                <fragment>{
-                if ($mode = 'xhtml') then transform:transform($result, $transform, $params)
-                else $result
-                }</fragment>
-            </result>
-        }
+                (: Create summary :)
+                (: TODO: Make this work :)
+                let $result := if ($summary != 0 and $highlight = true()) then archaeo18lib:shorten($result, local-name(<exist:match/>), 50)
+                               else $result
+        
+                (: Get the name of the document the hit is in :)
+                let $hitDocument := if ($document != '') then $document
+                                    else archaeo18lib:get-doc-name(util:document-name($s))
+                                    (:
+                                    else util:document-name($s)
+                                    :)
+           
+                order by ft:score($s) descending
+                return 
+                    <result>
+                        <doc>{$hitDocument}</doc>
+                        <page>{$pageNr}</page>
+                        <score>{ft:score($s)}</score>
+                        <fragment>
+                        {$result
+                        (:
+                        if ($mode = 'xhtml') then transform:transform($result, $transform, $params)
+                        else $result
+                        :)
+                        }
+                        </fragment>
+                    </result>
+                }
        
-        <duration type="serializer">{$timerEnd - util:system-time()}</duration>
-</results>
+            <duration type="serializer">{$timerEnd - util:system-time()}</duration>
+        </results>
+
+
+return if ($mode = 'xhtml') then
+            if ($streamTransform = true()) then
+                (: transform:stream-transform is faster :)
+                transform:stream-transform($answer, $transform, $params)
+            else
+                transform:transform($answer, $transform, $params)
+       else $answer
