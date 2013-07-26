@@ -21,6 +21,7 @@
    <xsl:variable name="output"
                  select="if ($output-param castable as xs:string) then xs:string($output-param) else 'tei'"
                  as="xs:string"/>
+   <xsl:strip-space elements="TEI:*"/>
     <!--
     <xsl:variable name="output" select="'tei'"/>
     -->
@@ -32,7 +33,7 @@
    <xsl:variable name="locPrefix">loc</xsl:variable>
    <xsl:template match="/">
       <xsl:choose>
-         <xsl:when test="$output='tei'">
+         <xsl:when test="$output = 'tei'">
             <TEI:TEI>
                <TEI:teiHeader> </TEI:teiHeader>
                <TEI:text>
@@ -42,7 +43,7 @@
                </TEI:text>
             </TEI:TEI>
          </xsl:when>
-         <xsl:when test="$output='mets'">
+         <xsl:when test="$output = 'mets'">
             <METS:mets>
                <METS:structMap TYPE="LOGICAL">
                   <METS:div TYPE="Monograph" DMDID="dmdSec_00000001" ADMID="amdSec_00000001">
@@ -56,10 +57,10 @@
                </METS:structMap>
             </METS:mets>
          </xsl:when>
-         <xsl:when test="$output='xhtml'">
-            <html xmlns:gn="http://www.geonames.org/ontology#"
+         <xsl:when test="$output = 'xhtml'">
+            <html xmlns:dc="http://purl.org/dc/elements/1.1/"
+                  xmlns:gn="http://www.geonames.org/ontology#"
                   xmlns="http://www.w3.org/1999/xhtml"
-                  xmlns:dc="http://purl.org/dc/elements/1.1/"
                   xmlns:foaf="http://xmlns.com/foaf/0.1/"
                   xmlns:bibo="http://purl.org/ontology/bibo/1.3/"
                   version="XHTML+RDFa 1.0">
@@ -74,6 +75,10 @@
                </body>
             </html>
          </xsl:when>
+         <xsl:otherwise>
+            <xsl:message terminate="yes">Unknown output mode: <xsl:value-of select="$output"/>
+            </xsl:message>
+         </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:div" mode="mets">
@@ -148,7 +153,7 @@
             <xsl:value-of select="parent::TEI:div/@id"/>
          </xsl:variable>
          <xsl:variable name="name">
-            <xsl:apply-templates/>
+            <xsl:apply-templates mode="xhtml"/>
          </xsl:variable>
          <xsl:choose>
             <xsl:when test="$id != ''">
@@ -160,8 +165,8 @@
                      <xsl:value-of select="concat(local-name(.), '-anchor')"/>
                   </xsl:attribute>
                   <xsl:value-of select="$name"/>
-                        
-                        
+
+
                         <!--
                             <xsl:value-of select="normalize-space(string-join($name/text(), ''))"/>
                     <xsl:apply-templates/>
@@ -179,6 +184,9 @@
          <xsl:message terminate="yes">Nesting to high, max is 9, <xsl:value-of select="count(ancestor::TEI:div)"/> given!</xsl:message>
       </xsl:if>
    </xsl:template>
+   <xsl:template match="TEI:lb" mode="xhtml">
+      <xsl:text> </xsl:text>
+   </xsl:template>
    <xsl:template match="TEI:div" mode="xhtml">
       <xsl:choose>
             <!-- Get rid of empty div tags --><xsl:when test="TEI:head">
@@ -188,7 +196,7 @@
                      <xsl:value-of select="@id"/>
                   </xsl:attribute>
                </xsl:if>
-               <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb" mode="xhtml"/>
+               <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb|TEI:lb" mode="xhtml"/>
             </xsl:element>
          </xsl:when>
          <xsl:otherwise>
