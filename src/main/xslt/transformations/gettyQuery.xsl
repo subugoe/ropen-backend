@@ -21,7 +21,8 @@
    <xsl:param name="link-prefix" select="'http://134.76.21.92:8080/images/'"/>
    <xsl:include href="gettyLib.xsl"/>
    <xsl:param name="pageAsYear" select="false()" as="xs:boolean"/>
-   <xsl:param name="linkImage" select="true()" as="xs:boolean"/>
+   <xsl:param name="linkImage" select="false()" as="xs:boolean"/>
+   <xsl:param name="showSource" select="true()" as="xs:boolean"/>
    <xsl:param name="description" select="true()" as="xs:boolean"/>
    <xsl:param name="normalize" select="false()" as="xs:boolean"/>
    <xsl:param name="normalizeBase" select="300"/>
@@ -153,6 +154,15 @@
                         <!-- Use this if CDATA stuff is working disable-output-escaping="yes" --><xsl:call-template name="getDesc">
                      <xsl:with-param name="node" select="$gettyEntry"/>
                   </xsl:call-template>
+                  <xsl:if test="$showSource = true()">
+                     <xsl:element name="p">
+                        <xsl:text>Description from </xsl:text>
+                        <xsl:element name="a">
+                           <xsl:attribute name="href" select="'http://www.getty.edu/'"/>
+                           <xsl:text>Getty Thesaurus</xsl:text>
+                        </xsl:element>
+                     </xsl:element>
+                  </xsl:if>
                </xsl:if>
             </xsl:variable>
             <description>
