@@ -31,6 +31,7 @@ declare variable $archeao18conf:transformationsPrefix := 'transformations/';
 declare variable $archeao18conf:queriesPrefix := 'queries/';
 declare variable $archeao18conf:teiEnrichedPrefix := 'tei-enriched/';
 declare variable $archeao18conf:teiEnrichedSuffix := "-enriched.xml";
+declare variable $archeao18conf:facets-xml := "facets.xml";
 
 (: search related configuration :)
 (: Defines findable document fragments, update indexer configuration if you change this. :)
@@ -43,39 +44,39 @@ declare variable $archeao18conf:searchDefaultMode := 'result';
 (: "Width" of summaries:)
 declare variable $archeao18conf:searchSummaryWidth := 200;
 
-(: Entities :)
-declare variable  $archeao18conf:entities :=  <tei:tei>
+(:
+<tei:tei>
         <tei:persName rend="true"><foreign xml:lang="de">Person</foreign>
-        <foreign xml:lang="en">person</foreign>
+        <foreign xml:lang="en">Person</foreign>
         </tei:persName>
         <tei:placeName rend="true">
         <foreign xml:lang="de">Ortsname</foreign>
-        <foreign xml:lang="en">place</foreign>
+        <foreign xml:lang="en">Place</foreign>
         </tei:placeName>
         <tei:bibl rend="true">
         <foreign xml:lang="de">Literatur</foreign>
-        <foreign xml:lang="en">literature</foreign>
+        <foreign xml:lang="en">Literature</foreign>
         </tei:bibl>
         <tei:term rend="true"><foreign xml:lang="de">Werk</foreign>
-        <foreign xml:lang="en">work</foreign></tei:term>
+        <foreign xml:lang="en">Work</foreign></tei:term>
         <tei:date><foreign xml:lang="de">Datum</foreign>
-        <foreign xml:lang="en">date</foreign></tei:date>
+        <foreign xml:lang="en">Date</foreign></tei:date>
         <tei:head><foreign xml:lang="de">Überschrift</foreign>
-        <foreign xml:lang="en">heading</foreign></tei:head>
+        <foreign xml:lang="en">Heading</foreign></tei:head>
         <tei:teiHeader>
         <foreign xml:lang="de">Metadaten</foreign>
-        <foreign xml:lang="en">metadata</foreign>
+        <foreign xml:lang="en">Metadata</foreign>
         </tei:teiHeader>
         <tei:note>
         <foreign xml:lang="de">Anmerkungen</foreign>
-        <foreign xml:lang="en">notes</foreign>
+        <foreign xml:lang="en">Notes</foreign>
         </tei:note>
         <tei:hi>
         <foreign xml:lang="de">Hervorgehoben</foreign>
-        <foreign xml:lang="en">highlighted</foreign>
+        <foreign xml:lang="en">Highlighted</foreign>
         </tei:hi>
         </tei:tei>;
-
+:)
 
 (:!!!!! DON'T CHANGE THE SETTINGS BELOW !!!!!:)
 
@@ -97,6 +98,11 @@ declare variable $archeao18conf:transformationRestBase := concat($archeao18conf:
 declare variable $archeao18conf:cacheBase := concat($archeao18conf:dataBase, $archeao18conf:cachePrefix);
 declare variable $archeao18conf:schemaBase := concat($archeao18conf:base, $archeao18conf:configPrefix, $archeao18conf:schemaPrefix);
 declare variable $archeao18conf:schemaCacheBase := concat($archeao18conf:dataBase, $archeao18conf:cachePrefix, $archeao18conf:schemaPrefix);
+declare variable $archeao18conf:configBase := concat($archeao18conf:base, $archeao18conf:configPrefix);
+
+(: Entities :)
+declare variable  $archeao18conf:entities :=  doc(concat($archeao18conf:configBase, $archeao18conf:facets-xml));
+
 
 (: Computed HTTP specific configuration :)
 (: Find out if the query was called via HTTP :)
