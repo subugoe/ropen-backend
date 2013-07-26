@@ -192,7 +192,7 @@
                </xsl:if>
                <xsl:value-of select="@n"/>
             </a>
-            <xsl:if test="position() != last()">
+                <!-- This only works for one document --><xsl:if test="position() != last() or not(following-sibling::page/@doc = $doc-id)">
                <xsl:text>, </xsl:text>
             </xsl:if>
          </xsl:if>
