@@ -27,6 +27,7 @@
    <xsl:param name="resolve-links-param" select="true()"/>
    <xsl:param name="fatal-param" select="false()"/>
    <xsl:param name="nested-links-param" select="false()"/>
+   <xsl:param name="result-width-param" select="40"/>
     <!-- Iternal Variables for parameters --><xsl:variable name="filterAnnotations"
                  select="if ($filter-annotations-param castable as xs:boolean) then xs:boolean($filter-annotations-param) else true()"
                  as="xs:boolean"/>
@@ -42,30 +43,20 @@
    <xsl:variable name="nested-links"
                  select="if ($nested-links-param castable as xs:boolean) then xs:boolean($nested-links-param) else false()"
                  as="xs:boolean"/>
+   <xsl:variable name="result-width"
+                 select="if ($result-width-param castable as xs:integer) then xs:integer($result-width-param) else 40"
+                 as="xs:integer"/>
+   <xsl:variable name="showHeader" as="xs:boolean" select="false()"/>
     <!-- 
     Always create a <a/> tag for the outer entity, even if there is no link in it. 
     --><xsl:variable name="always-link" select="true()" as="xs:boolean"/>
-   <xsl:variable name="prefixes">
-      <a18:prefixes>
-         <a18:prefix name="getty"
-                     uri="http://www.getty.edu/vow/TGNFullDisplay?find=&amp;place=&amp;nation=&amp;english=Y&amp;subjectid="
-                     pattern="GettyID:(\d{{7,8}})"
-                     start="GettyID"/>
-         <a18:prefix name="cerl"
-                     uri="http://thesaurus.cerl.org/cgi-bin/record.pl?rid="
-                     pattern="CerlID:(cn[pi]\d{{8,9}})"
-                     start="CerlID"/>
-         <a18:prefix name="census"
-                     uri="http://census.bbaw.de/easydb/censusID="
-                     pattern="CensusID:(\d{{9}})"
-                     start="CensusID"/>
-         <a18:prefix name="http" uri="http" pattern="http(s?://.*)" start="http"/>
-         <a18:prefix name="page" uri="#" pattern="(p.+)" start="p"/>
-            <!-- This is needed for malformed URIs --><a18:prefix name="" uri="" pattern="(.+)" start=""/>
-      </a18:prefixes>
-   </xsl:variable>
-   <xsl:variable name="dnbURL" select="'http://d-nb.info/gnd/'" as="xs:string"/>
    <xsl:variable name="class-prefix" select="'tei:'" as="xs:string"/>
+    <!-- The element indicating a match 
+        This isn't used anymore, since it's forces name checks uses the following XPath to make this work again:
+        .[name() = name($match-element)]
+    --><xsl:variable name="match-element" as="element()">
+      <xsl:element name="exist:match" namespace="http://exist.sourceforge.net/NS/exist"/>
+   </xsl:variable>
    <xsl:variable name="terminate" as="xs:string">
       <xsl:choose>
          <xsl:when test="$fatal = true()">
@@ -76,6 +67,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:variable>
+   <xsl:include href="./lib/a18.xsl"/>
    <xsl:template match="/">
         <!-- TODO: Use XSLT Modes to get rid of variables --><html xmlns:dc="http://purl.org/dc/elements/1.1/"
             xmlns:gn="http://www.geonames.org/ontology#"
@@ -83,6 +75,8 @@
             xmlns:bibo="http://purl.org/ontology/bibo/1.3/"
             version="XHTML+RDFa 1.0"
             type="bibo:Manuscript">
+         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+         <meta charset="UTF-8"/>
          <xsl:variable name="pageMode" as="xs:boolean">
             <xsl:choose>
                <xsl:when test="not(/TEI:TEI/TEI:teiHeader) and //TEI:text">
@@ -107,7 +101,14 @@
             <head>
                <xsl:if test="$pageMode != true()">
                   <title type="dc:title">
-                     <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title/text()"/>
+                     <xsl:choose>
+                        <xsl:when test="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']">
+                           <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title/text()"/>
+                        </xsl:otherwise>
+                     </xsl:choose>
                   </title>
                </xsl:if>
             </head>
@@ -142,14 +143,14 @@
     <!-- Figures -->
     <!--
   TODO: Insert Link.
-  --><xsl:template match="TEI:figure">
+  --><xsl:template match="TEI:figure" mode="#default schema">
       <div class="{concat($class-prefix, local-name(.))}">
          <span xml:lang="de">Zeichnung/Skizze: siehe Digitalisat der Handschrift</span>
          <span xml:lang="en">Figure/Sketch: see digitized manuscript</span>
          <xsl:apply-templates/>
       </div>
    </xsl:template>
-   <xsl:template match="TEI:figDesc">
+   <xsl:template match="TEI:figDesc" mode="#default schema">
       <div class="{concat($class-prefix, local-name(.))}">
          <span xml:lang="de">Inhalt der Zeichnung/Skizze: </span>
          <span xml:lang="en">Content of figure/sketch:</span>
@@ -157,14 +158,16 @@
       </div>
    </xsl:template>
 
-    <!-- Document blocks --><xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="#all">
+    <!-- Document blocks --><xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="#default schema">
       <xsl:element name="{local-name(.)}">
          <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
          <xsl:apply-templates/>
       </xsl:element>
    </xsl:template>
 
-    <!-- breaks --><xsl:template match="TEI:lb|TEI:cb|TEI:handShift" name="br">
+    <!-- breaks --><xsl:template match="TEI:lb|TEI:cb|TEI:handShift"
+                 name="br"
+                 mode="#default schema">
       <br class="{concat($class-prefix, local-name(.))}"/>
         <!-- TODO: This could be faster using a mode --><xsl:if test="$lineMode = true()">
          <xsl:call-template name="lineSpan"/>
@@ -174,7 +177,7 @@
       <xsl:call-template name="br"/>
       <xsl:call-template name="lineSpan"/>
    </xsl:template>
-   <xsl:template match="TEI:pb" mode="#all">
+   <xsl:template match="TEI:pb" mode="#default schema">
         <!--
         <xsl:call-template name="pageSpan"/>
         --><xsl:variable name="page-nr">
@@ -195,38 +198,50 @@
          </xsl:call-template>
       </xsl:if>
    </xsl:template>
-   <xsl:template match="TEI:sic|TEI:corr" mode="#all">
+   <xsl:template match="TEI:sic|TEI:corr" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- headings --><xsl:template match="TEI:head" mode="#all">
-      <xsl:element name="{concat('h', count(ancestor::TEI:div))}">
-         <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
-         <xsl:variable name="id">
-            <xsl:value-of select="parent::TEI:div/@id"/>
-         </xsl:variable>
+    <!-- headings --><xsl:template match="TEI:head" mode="#default schema">
+      <xsl:variable name="level">
          <xsl:choose>
-            <xsl:when test="$id != ''">
-               <a name="{$id}" class="{concat(name(.), '-anchor')}">
-                  <xsl:apply-templates/>
-               </a>
+            <xsl:when test="count(ancestor::TEI:div) &gt; 0">
+               <xsl:value-of select="count(ancestor::TEI:div)"/>
             </xsl:when>
             <xsl:otherwise>
-               <xsl:apply-templates/>
+               <xsl:value-of select="1"/>
             </xsl:otherwise>
          </xsl:choose>
-      </xsl:element>
+      </xsl:variable>
+      <xsl:if test="./text() != ''">
+         <xsl:element name="{concat('h', $level)}">
+            <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
+            <xsl:variable name="id">
+               <xsl:value-of select="parent::TEI:div/@id"/>
+            </xsl:variable>
+            <xsl:choose>
+               <xsl:when test="$id != ''">
+                  <a name="{$id}" class="{concat(name(.), '-anchor')}">
+                     <xsl:apply-templates/>
+                  </a>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:apply-templates/>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:element>
+      </xsl:if>
       <xsl:if test="count(ancestor::TEI:div) &gt; 9">
          <xsl:message terminate="yes">TEI2XHTML: Nesting to high, max is 9, <xsl:value-of select="count(ancestor::TEI:div)"/> given!</xsl:message>
       </xsl:if>
    </xsl:template>
-   <xsl:template match="TEI:emph">
+   <xsl:template match="TEI:emph" mode="#default schema">
       <em class="{concat($class-prefix, local-name(.))}">
          <xsl:apply-templates/>
       </em>
    </xsl:template>
-   <xsl:template match="TEI:add|TEI:expan|TEI:supplied">
+   <xsl:template match="TEI:add|TEI:expan|TEI:supplied" mode="#default schema">
       <ins>
          <xsl:choose>
             <xsl:when test="@resp">
@@ -244,7 +259,8 @@
          <xsl:apply-templates/>
       </ins>
    </xsl:template>
-   <xsl:template match="TEI:unclear|TEI:damage|TEI:gap|TEI:foreign" mode="#all">
+   <xsl:template match="TEI:unclear|TEI:damage|TEI:gap|TEI:foreign"
+                 mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:if test="@xml:lang">
             <xsl:attribute name="xml:lang" select="@xml:lang"/>
@@ -252,12 +268,12 @@
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- Mapping for Tags not part of Archaeo18, might be merged with others later --><xsl:template match="TEI:profession">
+    <!-- Mapping for Tags not part of Archaeo18, might be merged with others later --><xsl:template match="TEI:profession" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-   <xsl:template match="TEI:anchor">
+   <xsl:template match="TEI:anchor" mode="#default schema">
       <a>
          <xsl:attribute name="name">
             <xsl:value-of select="@xml:id"/>
@@ -271,7 +287,7 @@
          </xsl:attribute>
       </a>
    </xsl:template>
-   <xsl:template match="TEI:fw" mode="#all">
+   <xsl:template match="TEI:fw" mode="#default schema">
       <xsl:choose>
          <xsl:when test="@place ='top'">
             <span class="{concat($class-prefix, local-name(.), ' ', $class-prefix, local-name(.),'-', translate(@place, ' ', '-'))}">
@@ -288,7 +304,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:choice" mode="#all">
+   <xsl:template match="TEI:choice" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:apply-templates select="./TEI:sic"/>
          <xsl:text> [</xsl:text>
@@ -296,13 +312,13 @@
          <xsl:text>]</xsl:text>
       </span>
    </xsl:template>
-   <xsl:template match="TEI:hi" mode="#all">
+   <xsl:template match="TEI:hi" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
          <xsl:apply-templates/>
       </span>
    </xsl:template>
 
-    <!-- Column breaks inside the text --><xsl:template match="TEI:milestone" mode="#all">
+    <!-- Column breaks inside the text --><xsl:template match="TEI:milestone" mode="#default schema">
       <xsl:choose>
          <xsl:when test="@unit = 'column' and @type = 'start'">
             <xsl:variable name="columns"
@@ -328,7 +344,8 @@
     <!-- Entities (inkluding pseudo entities - everything that links) start here -->
     <!-- 
         Also match <name type="place|person|org"/>
-    --><xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']">
+    --><xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']"
+                 mode="#default schema">
         <!-- The following pattern can be used to find multiple links "#[^"]*?#.*?" for one entity 
              The following XPath can be used to fin nested linking entities
         -->
@@ -505,7 +522,7 @@
          </xsl:choose>
       </xsl:element>
    </xsl:template>
-    <!-- Dates --><xsl:template match="TEI:date" mode="#all">
+    <!-- Dates --><xsl:template match="TEI:date" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:if test="@when">
             <xsl:attribute name="property" select="'dc:date'"/>
@@ -514,7 +531,7 @@
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- Notes --><xsl:template match="TEI:note">
+    <!-- Notes --><xsl:template match="TEI:note" mode="#default schema">
       <xsl:choose>
          <xsl:when test="@place = 'margin'">
             <span class="{concat($class-prefix, local-name(.), ' ', $class-prefix, local-name(.),'-', translate(@place, ' ', '-'))}">
@@ -558,21 +575,88 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
+
+    <!-- Schema mode --><xsl:template match="TEI:body[child::TEI:schemaSpec]"/>
+   <xsl:template match="TEI:titlePage" mode="schema">
+      <xsl:if test="./TEI:docTitle/TEI:titlePart[@type = 'main']">
+         <h1 class="{concat($class-prefix, local-name(.))}">
+            <xsl:value-of select="./TEI:docTitle/TEI:titlePart[@type = 'main']"/>
+         </h1>
+      </xsl:if>
+      <xsl:for-each select="./TEI:docTitle/TEI:titlePart[@type != 'main']">
+         <h2 class="{concat($class-prefix, local-name(.))}">
+            <xsl:value-of select="."/>
+         </h2>
+      </xsl:for-each>
+      <xsl:for-each select="./TEI:docAutor">
+         <span class="{concat($class-prefix, local-name(.))}">
+            <xsl:value-of select="."/>
+         </span>
+         <xsl:if test="position() != last()">
+            <xsl:text>, </xsl:text>
+         </xsl:if>
+      </xsl:for-each>
+   </xsl:template>
+   <xsl:template match="TEI:gi">
+      <span class="{concat($class-prefix, local-name(.))}">
+         <xsl:text>&lt;</xsl:text>
+         <xsl:value-of select="."/>
+         <xsl:text>/&gt;</xsl:text>
+      </span>
+   </xsl:template>
+   <xsl:template match="TEI:code">
+      <code class="{concat($class-prefix, local-name(.))}">
+         <blockquote>
+            <xsl:apply-templates/>
+         </blockquote>
+      </code>
+   </xsl:template>
+   <xsl:template match="TEI:list">
+      <ul class="{concat($class-prefix, local-name(.))}">
+         <xsl:apply-templates/>
+      </ul>
+   </xsl:template>
+   <xsl:template match="TEI:label">
+      <span class="{concat($class-prefix, local-name(.))}">
+         <xsl:apply-templates/>
+         <xsl:text>: </xsl:text>
+      </span>
+   </xsl:template>
+   <xsl:template match="TEI:item">
+      <li class="{concat($class-prefix, local-name(.))}">
+         <xsl:apply-templates/>
+      </li>
+   </xsl:template>
+
     <!-- Catch undeclared TEI tags -->
     <!--
         TODO:
             * Merge this with template match="*"
        
-        --><xsl:template match="TEI:*" mode="#all">
-      <xsl:if test="not(ancestor-or-self::TEI:teiHeader)">
-         <xsl:message terminate="yes">TEI2XHTML: Undeclared Element detected <xsl:value-of select="local-name(.)"/>: <xsl:value-of select="."/>
-         </xsl:message>
-         <xsl:element name="{name()}">
-            <xsl:copy-of select="@*"/>
-            <xsl:apply-templates/>
-         </xsl:element>
-      </xsl:if>
+        --><xsl:template match="TEI:*" mode="#default">
+        <!-- Check if we are processing a TEI schema --><xsl:choose>
+         <xsl:when test="ancestor-or-self::TEI:front">
+            <xsl:apply-templates mode="schema"/>
+         </xsl:when>
+         <xsl:when test="not(ancestor-or-self::TEI:teiHeader)">
+            <xsl:message terminate="yes">TEI2XHTML: Undeclared Element detected <xsl:value-of select="local-name(.)"/>: <xsl:value-of select="."/>
+            </xsl:message>
+            <xsl:element name="{name()}">
+               <xsl:copy-of select="@*"/>
+               <xsl:apply-templates/>
+            </xsl:element>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:message terminate="no">TEI2XHTML: Undeclared Element detected <xsl:value-of select="local-name(.)"/>: <xsl:value-of select="."/> Assuming Header mode
+                </xsl:message>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
+    <!--
+    <xsl:template match="TEI:text" mode="#all">
+        <xsl:apply-templates/>
+    </xsl:template>
+    -->
     <!--
     <xsl:template match="*">
         <xsl:if test="not(ancestor-or-self::TEI:teiHeader)">
@@ -607,7 +691,7 @@
 
     <!-- 
     TODO: Check if this works
-    --><xsl:template match="TEI:addName" mode="#all">
+    --><xsl:template match="TEI:addName" mode="#default">
       <xsl:choose>
          <xsl:when test="$filterAnnotations = true() and @type = 'display'">
             <span class="{concat($class-prefix, local-name(.))}" style="display: none;">
@@ -621,7 +705,7 @@
    </xsl:template>
     <!-- 
     This is needed by the highlighting of eXist
-    --><xsl:template match="exist:match" mode="#all">
+    --><xsl:template match="exist:match" mode="#default">
       <span class="{name(.)}">
          <xsl:apply-templates/>
       </span>
@@ -787,9 +871,19 @@
       <xsl:if test="(/TEI:teiHeader) and not(//TEI:text)">
          <div class="{concat($class-prefix, local-name(.))}">
             <h3>
-               <span xml:lang="de" class="tei:hi-bold">Allgemeine Informationen</span>
-               <span xml:lang="en" class="tei:hi-bold">General Information</span>:</h3>
-            <xsl:apply-templates mode="header" select="//TEI:titleStmt//TEI:title"/>
+               <xsl:choose>
+                  <xsl:when test="$showHeader">
+                     <span xml:lang="de">Allgemeine Informationen</span>
+                     <span xml:lang="en">General Information</span>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <xsl:apply-templates mode="header" select="//TEI:titleStmt//TEI:title"/>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </h3>
+            <xsl:if test="$showHeader">
+               <xsl:apply-templates mode="header" select="//TEI:titleStmt//TEI:title"/>
+            </xsl:if>
             <xsl:apply-templates mode="header" select="//TEI:repository"/>
             <xsl:apply-templates mode="header" select="//TEI:idno"/>
             <xsl:apply-templates mode="header" select="//TEI:titleStmt//TEI:author"/>
@@ -799,8 +893,8 @@
             <xsl:apply-templates mode="header" select="//TEI:msIdentifier"/>
             <xsl:apply-templates mode="header" select="//TEI:principal"/>
             <h3>
-               <span xml:lang="de" class="tei:hi-bold">Wissenschaftliche Informationen</span>
-               <span xml:lang="en" class="tei:hi-bold">Scientific Informationen</span>
+               <span xml:lang="de">Wissenschaftliche Informationen</span>
+               <span xml:lang="en">Scientific Informationen</span>
             </h3>
             <xsl:apply-templates mode="header" select="//TEI:editionStmt|//TEI:encodingDesc"/>
          </div>
@@ -818,10 +912,36 @@
       </div>
    </xsl:template>
    <xsl:template match="TEI:title[not(@type)]" mode="header">
-      <div class="{concat($class-prefix, local-name(.))}">
-         <span xml:lang="en" class="tei:hi-bold">Title</span>
-         <span xml:lang="de" class="tei:hi-bold">Titel</span>: <xsl:value-of select="."/>
-      </div>
+      <xsl:choose>
+         <xsl:when test="$showHeader">
+            <div class="{concat($class-prefix, local-name(.))}">
+               <span xml:lang="en" class="tei:hi-bold">Title</span>
+               <span xml:lang="de" class="tei:hi-bold">Titel</span>
+               <xsl:text>: </xsl:text>
+               <xsl:value-of select="."/>
+            </div>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:value-of select="."/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   <xsl:template match="TEI:title[@type = 'display']" mode="header">
+        <!-- Ignore this title if the is a regular title --><xsl:if test="not(../TEI:title[not(@type)])">
+         <xsl:choose>
+            <xsl:when test="$showHeader">
+               <div class="{concat($class-prefix, local-name(.))}">
+                  <span xml:lang="en" class="tei:hi-bold">Title</span>
+                  <span xml:lang="de" class="tei:hi-bold">Titel</span>
+                  <xsl:text>: </xsl:text>
+                  <xsl:value-of select="."/>
+               </div>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:value-of select="."/>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:if>
    </xsl:template>
    <xsl:template match="TEI:author" mode="header">
       <xsl:variable name="name" select="normalize-space(string-join(./text(), ''))"/>
@@ -829,10 +949,12 @@
         <xsl:variable name="name">
             <xsl:apply-templates/>
         </xsl:variable>
-        --><div class="{concat($class-prefix, local-name(.))}">
-         <span xml:lang="en" class="tei:hi-bold">Author / Copyist / Owner</span>
-         <span xml:lang="de" class="tei:hi-bold">Autor / Kopist / Besitzer</span>: <xsl:value-of select="$name"/>
-      </div>
+        --><xsl:if test="$name != ''">
+         <div class="{concat($class-prefix, local-name(.))}">
+            <span xml:lang="en" class="tei:hi-bold">Author / Copyist / Owner</span>
+            <span xml:lang="de" class="tei:hi-bold">Autor / Kopist / Besitzer</span>: <xsl:value-of select="$name"/>
+         </div>
+      </xsl:if>
    </xsl:template>
    <xsl:template match="TEI:objectDesc" mode="header">
       <div class="{concat($class-prefix, local-name(.))}">
@@ -875,15 +997,17 @@
       </div>
    </xsl:template>
    <xsl:template match="//TEI:titleStmt" mode="header" name="editors">
-      <div class="{concat($class-prefix, local-name(.))}">
-         <span xml:lang="en" class="tei:hi-bold">Editor(s)</span>
-         <span xml:lang="de" class="tei:hi-bold">Bearbeiter</span>: <xsl:for-each select=".//TEI:respStmt">
-            <xsl:value-of select="./TEI:name"/>
-            <xsl:if test="position() != last()">
-               <xsl:text>, </xsl:text>
-            </xsl:if>
-         </xsl:for-each>
-      </div>
+      <xsl:if test=".//TEI:respStmt.//TEI:name">
+         <div class="{concat($class-prefix, local-name(.))}">
+            <span xml:lang="en" class="tei:hi-bold">Editor(s)</span>
+            <span xml:lang="de" class="tei:hi-bold">Bearbeiter</span>: <xsl:for-each select=".//TEI:respStmt">
+               <xsl:value-of select="./TEI:name"/>
+               <xsl:if test="position() != last()">
+                  <xsl:text>, </xsl:text>
+               </xsl:if>
+            </xsl:for-each>
+         </div>
+      </xsl:if>
    </xsl:template>
    <xsl:template match="//TEI:msIdentifier" mode="header" name="location">
       <div class="{concat($class-prefix, local-name(.))}" style="display: none;">
@@ -898,6 +1022,7 @@
          <xsl:apply-templates/>
       </div>
    </xsl:template>
+    <!-- Add a Template to filter HTML Results for the KWIC Module http://exist-db.org/exist/apps/doc/kwic.xml  -->
     <!--
     <xsl:template name="hideElement">
         <xsl:attribute name="style" select="'display: none;'"/>
@@ -920,40 +1045,179 @@
          <xsl:value-of select="."/>
       </xsl:for-each>
    </xsl:function>
-   <xsl:function name="a18:resolve-id" as="xs:string">
-        <!-- See XQuery implementation in modules/archaeo18lib.xq --><xsl:param name="id" as="xs:string"/>
-        <!-- Clean up leading # --><xsl:variable name="identifier"
-                    as="xs:string"
-                    select="replace($id, '^#(.*)$', '$1')"/>
-      <xsl:variable name="name" as="xs:string">
-         <xsl:choose>
-                <!-- URIs with schema prefix --><xsl:when test="contains($identifier, ':')">
-               <xsl:value-of select="$prefixes//a18:prefix[@start = substring-before($identifier, ':')]/@name"/>
+    
+    <!-- Filtering of Results --><xsl:template match="fragment">
+      <xsl:variable name="fragment-clean">
+         <xsl:apply-templates mode="fragment"/>
+      </xsl:variable>
+      <xsl:copy>
+         <body>
+            <p>
+               <xsl:variable name="start" as="node()">
+                  <xsl:element name="start"/>
+               </xsl:variable>
+               <xsl:choose>
+                  <xsl:when test="string-length(normalize-space($fragment-clean)) &lt; $result-width">
+                     <xsl:copy-of select="$fragment-clean"/>
+                  </xsl:when>
+                  <xsl:when test="not($fragment-clean//html:span[@class='tei:lb']) and count($fragment-clean//html:span[@class = 'exist:match']) = 1">
+                     <xsl:copy-of select="$fragment-clean"/>
+                  </xsl:when>
+                  <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) &gt; 1 and count($fragment-clean//html:span[@class = 'tei:lb']) &lt;= 4">
+                     <xsl:copy-of select="$fragment-clean"/>
+                  </xsl:when>
+                        <!--
+                        <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) = 1 and count($fragment-clean//html:span[@class = 'tei:lb']) > 4">
+                            <xsl:copy-of select="sub:chunk($fragment-clean//html:span[@class = 'exist:match']/preceding::html:span[@class='tei:lb'][1], $fragment-clean//html:span[@class = 'exist:match']/following::html:span[@class='tei:lb'][1], $fragment-clean/*)"/>
+                        </xsl:when>
+                        
+                        <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) > 1">
+                      --><xsl:otherwise>
+                     <xsl:for-each select="$fragment-clean//html:span[@class = 'exist:match']">
+                        <xsl:variable name="start-node" as="element()">
+                           <xsl:choose>
+                              <xsl:when test="./preceding::html:span[@class='tei:lb'][1]">
+                                 <xsl:copy-of select="./preceding::html:span[@class='tei:lb'][1]"/>
+                              </xsl:when>
+                              <xsl:when test="./preceding::html:hr">
+                                 <xsl:copy-of select="./preceding::html:hr/following::*[1]"/>
+                              </xsl:when>
+                              <xsl:when test="./preceding-sibling::*[position() = last()]">
+                                 <xsl:copy-of select="./preceding-sibling::*[position() = last()]"/>
+                              </xsl:when>
+                              <xsl:when test="./preceding::*[position() = last()]">
+                                 <xsl:copy-of select="./preceding::*[position() = last()]"/>
+                              </xsl:when>
+                              <xsl:otherwise>
+                                 <xsl:copy-of select="$fragment-clean/*[1]"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </xsl:variable>
+                        <xsl:variable name="end-node" as="element()">
+                           <xsl:choose>
+                              <xsl:when test="./following::html:span[@class='tei:lb'][1]">
+                                 <xsl:copy-of select="./following::html:span[@class='tei:lb'][1]"/>
+                              </xsl:when>
+                              <xsl:when test="./following::html:hr">
+                                 <xsl:copy-of select="./following::html:hr/preceding::*[1]"/>
+                              </xsl:when>
+                              <xsl:otherwise>
+                                 <xsl:copy-of select="$fragment-clean/*[position() = last()]"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </xsl:variable>
+                        <xsl:copy-of select="a18:chunk($start-node, $end-node, $fragment-clean/*)"/>
+                     </xsl:for-each>
+                  </xsl:otherwise>
+                            <!--
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:copy-of select="$fragment-clean"/>
+                        </xsl:otherwise>
+                            --></xsl:choose>
+            </p>
+         </body>
+      </xsl:copy>
+   </xsl:template>
+
+    
+   <!--
+    <xsl:function name="sub:chunk-node">
+        <xsl:param name="ms1" as="node()"/>
+        <xsl:param name="ms2" as="node()"/>
+        <xsl:param name="node" as="node()"/>
+        <xsl:choose>
+            <xsl:when test="$node instance of element()">
+                <xsl:choose>
+                    <xsl:when test="$node is $ms1">
+                        <xsl:copy-of select="$node"/>
+                    </xsl:when>
+                    <xsl:when test="some $n in $node/descendant::* satisfies ($n is $ms1 or $n is $ms2)">
+                        <xsl:element name="{local-name($node)}" namespace="{namespace-uri($node)}">
+                            <xsl:for-each select="$node/node() | $node/@*">
+                                <xsl:copy-of select="sub:chunk-node($ms1, $ms2, .)"/>
+                            </xsl:for-each>
+                        </xsl:element>
+                    </xsl:when>
+                    <xsl:when test="$node >> $ms1 and $node << $ms2">
+                        <xsl:copy-of select="$node"/>
+                    </xsl:when>
+                </xsl:choose>
             </xsl:when>
-                <!-- local anchors --><xsl:when test="matches($id, '#[\w-]')">
-               <xsl:value-of select="$prefixes//a18:prefix[@start = replace($identifier, '([A-Za-z]+).*', '$1')]/@name"/>
+            <xsl:when test="$node instance of attribute()">
+                <xsl:copy-of select="$node"/>
             </xsl:when>
             <xsl:otherwise>
-                    <!-- This stylesheet will fail here, since a empty result for this variable will fail later on when it's given to the function. --><xsl:message terminate="{$terminate}">Can't extract prefix for id <xsl:value-of select="$id"/>
-               </xsl:message>
-               <xsl:value-of select="$prefixes//a18:prefix[@start = '']/@name"/>
+                <xsl:if test="$node >> $ms1 and $node << $ms2">
+                    <xsl:copy-of select="$node"/>
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+--><xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment">
+      <span class="{concat($class-prefix, local-name(.))}">
+         <xsl:choose>
+            <xsl:when test="./TEI:addName/exist:match and not(./descendant::exist:match[not(parent::TEI:addName)])">
+               <span class="{name($match-element)}">
+                  <xsl:apply-templates mode="fragment"/>
+               </span>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:apply-templates mode="fragment"/>
             </xsl:otherwise>
          </xsl:choose>
-      </xsl:variable>
-      <xsl:value-of select="concat($prefixes//a18:prefix[@name = $name]/@uri, replace($identifier, $prefixes//a18:prefix[@name = $name]/@pattern, '$1'))"/>
-   </xsl:function>
-   <xsl:function name="a18:normalize-space">
-      <xsl:param name="str" as="xs:string"/>
+      </span>
+   </xsl:template>
+   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment">
+      <xsl:element name="{local-name(.)}">
+         <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
+         <xsl:apply-templates mode="fragment"/>
+      </xsl:element>
+   </xsl:template>
+   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign"
+                 mode="fragment">
+      <span class="{concat($class-prefix, local-name(.))}">
+         <xsl:apply-templates mode="fragment"/>
+      </span>
+   </xsl:template>
+   <xsl:template match="TEI:lb" mode="fragment">
+      <span class="{concat($class-prefix, local-name(.))}"/>
+   </xsl:template>
+   <xsl:template match="TEI:pb" mode="fragment">
+      <hr class="{concat($class-prefix, local-name(.))}"/>
+   </xsl:template>
+    <!-- Stuff to be filtered in result preview --><xsl:template match="TEI:note[@resp]" mode="fragment"/>
+    <!-- Stuff to be ignored in result preview --><xsl:template match="TEI:note|TEI:ref" mode="fragment">
+      <xsl:apply-templates mode="fragment"/>
+   </xsl:template>
+    <!-- Stuf to ignore, don't apply templates --><xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment"/>
+   <xsl:template match="TEI:*" mode="fragment">
+      <span class="{concat($class-prefix, local-name(.))}">
+         <xsl:apply-templates mode="fragment"/>
+      </span>
+      <xsl:message terminate="no">Unrecognized element: <xsl:value-of select="name(.)"/>
+      </xsl:message>
+   </xsl:template>
+   <xsl:template match="TEI:hi" mode="fragment">
+      <span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
+         <xsl:apply-templates mode="fragment"/>
+      </span>
+   </xsl:template>
+    <!--
+    <xsl:template match="text()" mode="fragment">
+        <xsl:value-of select="a18:normalize-space(.)"></xsl:value-of>
+    </xsl:template>
+    --><xsl:template match="comment()" mode="fragment"/>
+   <xsl:template match="exist:match" mode="fragment">
       <xsl:choose>
-            <!-- TODO: no space if the next element is a lb - and contains($str, '
-') --><xsl:when test="matches($str, '^\s*[\r\n]\s+$')">
-            <xsl:value-of select="' '"/>
+         <xsl:when test="./parent::TEI:addName">
+            <xsl:apply-templates mode="fragment"/>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:value-of select="$str"/>
-                <!--
-                <xsl:value-of select="normalize-space($str)"></xsl:value-of>
-           --></xsl:otherwise>
+            <span class="{name(.)}">
+               <xsl:apply-templates mode="fragment"/>
+            </span>
+         </xsl:otherwise>
       </xsl:choose>
-   </xsl:function>
+   </xsl:template>
 </xsl:stylesheet>
