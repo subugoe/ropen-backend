@@ -3,41 +3,60 @@ declare namespace TEI="http://www.tei-c.org/ns/1.0";
 declare namespace request="http://exist-db.org/xquery/request";
 declare namespace util="http://exist-db.org/xquery/util";
 
-import module namespace archeao18conf = "http://archaeo18.sub.uni-goettingen.de/exist/conf" at "./modules/conf.xqm";
+import module namespace archeao18conf = "http://archaeo18.sub.uni-goettingen.de/exist/conf" at "../modules/conf.xqm";
+import module namespace archaeo18lib="http://archaeo18.sub.uni-goettingen.de/exist/archaeo18lib" at "../modules/archaeo18lib.xqm";
+
 
 declare default collation "?lang=de-DE"; 
 
-<cloud>{
-    let $base := $archeao18conf:dataBase
-    let $teiPrefix := $archeao18conf:teiPrefix
-    let $teiEnrichedPrefix := $archeao18conf:teiEnrichedPrefix
-    let $suffix := $archeao18conf:teiEnrichedSuffix
-    let $transformationRESTBase := $archeao18conf:transformationRestBase
+declare function local:generate-cloud ($text as node()*, $facets as xs:string*) as node() {
+    let $facetPath := string-join(for $f in $facets
+                                         return concat('$text//', $f, '/@ref'),
+                                         '|')
 
-    let $document := util:catch('*', request:get-parameter("doc", ''), '')
+    return <tags prefix="{lower-case($archeao18conf:teiNamespacePrefix)}">{
+        for $id in distinct-values(util:eval($facetPath))
+        (:
+        TODO: Add a check for the searches entity here instead of '*'
+        :)
+        let $entries := $text//TEI:*[@ref=$id]
     
-    let $text := if ($document != '') then doc(concat($base, $teiPrefix, $document, $suffix))//TEI:text
-             else collection(concat($archeao18conf:dataBase, $teiEnrichedPrefix))
-    
-    let $cerlPrefix := "http://thesaurus.cerl.org/record/"
 
-    for $id in distinct-values($text//TEI:persName/@ref)
-    let $personEntries  := $text//TEI:persName[@ref=$id]
-    (: This isn't complete clean yet, there might be tags and linebreaks in the names, too :)
-    (: this also doesn't handle persons without identifier :)
-    (: let $personName := replace(($personEntries[1]/text()), '- \n', '') :)
-    let $personName := $personEntries[1]/text()
-    let $cerlLink := if ( matches($id, '#CerlID:.*') =  true())
-                then concat($cerlPrefix, replace($id, '#CerlID:', ''))
-                else ''
-                
-    order by count($personEntries) descending
- 
-    return
-        <cloudEntry>
-            <id>{$id}</id>
-            <count>{count($personEntries)}</count>
-            <name>{$personName}</name>
-            <cerlLink>{$cerlLink}</cerlLink>
-        </cloudEntry>
-}</cloud>
+        (:Get rid of line breaks:)
+
+        let $type := local-name($entries[1])
+        
+        (:
+        order by count($entries) descending
+        :)
+        return 
+        <tag> 
+            <pages> 
+            {
+                for $page in $entries
+                return <page doc="{archaeo18lib:get-doc-id($page)}" n="{data($page/preceding::TEI:pb[1]/@n)}">
+                    {$page}
+                </page>
+            }
+            </pages> 
+        </tag> 
+    }</tags> 
+};
+
+
+let $facet := util:catch('*', request:get-parameter("facet", ''), '')
+let $document := util:catch('*', request:get-parameter("doc", ''), '')
+
+(: parse the facets :)
+let $facets := if ($facet != '') then archaeo18lib:parse-facets($facet)
+               else ()
+
+(: check if we should search inside a specific document or in the whole colection :)
+let $text := if ($document != '') then 
+                doc(concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix, $document, $archeao18conf:teiEnrichedSuffix))/*
+             else
+                collection(concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix))
+
+let $cloud := local:generate-cloud($text, $facets)
+
+return $cloud

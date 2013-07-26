@@ -16,6 +16,7 @@ let $streamTransform :=  if ($archeao18conf:httpIsRequest) then true()
 let $document := util:catch('*', request:get-parameter("doc", ''), '')
 let $facet := util:catch('*', request:get-parameter("facet", ''), '')
 let $format := util:catch('*', request:get-parameter("format", 'xhtml'), 'xhtml')
+let $limit := util:catch('*', request:get-parameter("limit", 50), 50)
 
 (: Should the entities be unique per page? :)
 let $distict := true()
@@ -80,7 +81,10 @@ return if ($format = 'xhtml2') then
                 <td>
                     {$name-link}
                 </td>
+                <td>{archaeo18lib:get-doc-display-name(util:document-name($entry))}</td>
+                (:
                 <td>{archaeo18lib:get-doc-name(util:document-name($entry))}</td>
+                :)
                 <td class="pagelink"><a>{data($pageNr)}</a></td></tr>
     }</tbody>
     <tfoot>

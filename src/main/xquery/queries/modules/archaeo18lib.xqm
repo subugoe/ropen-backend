@@ -5,6 +5,7 @@ module namespace archaeo18lib="http://archaeo18.sub.uni-goettingen.de/exist/arch
 declare namespace TEI="http://www.tei-c.org/ns/1.0";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 
+import module namespace kwic="http://exist-db.org/xquery/kwic";
 import module namespace archeao18conf = "http://archaeo18.sub.uni-goettingen.de/exist/conf" at "./conf.xqm";
 
 (: TODO:
@@ -168,21 +169,22 @@ declare function archaeo18lib:generate-cloud ($text as node()*, $facets as xs:st
         :)
         let $entries  := $text//TEI:*[@ref=$id]
     
-        let $name := if ($entries[1]/TEI:addName[@type = 'display']) then
-                        $entries[1]/TEI:addName[@type = 'display']/text()
+        let $name := if ($entries[1]//TEI:addName[@type = 'display'][1]) then
+                        $entries[1]//TEI:addName[@type = 'display'][1]/text()
                      else
                         $entries[1]/text()
         (:Get rid of line breaks:)
         (:let $name := replace($name, '- &#xA;\s*', ''):)
         let $type := local-name($entries[1])
-        let $links := archaeo18lib:resolve-identifiers($entries/@ref)
+        let $links := archaeo18lib:resolve-identifiers(distinct-values($entries/@ref))
         
         (:
         order by count($entries) descending
         :)
         return 
         <tag> 
-            <tag>{$name}</tag> 
+            <tag>{$name}</tag>
+            <nodes>{$entries}</nodes>
             <facet>{concat(lower-case($archeao18conf:teiNamespacePrefix), $type)}</facet> 
             <count>{count($entries)}</count>
             {
@@ -227,7 +229,7 @@ declare function archaeo18lib:resolve-identifiers ($ids as xs:string) as xs:stri
                         -->
                         <prefix name="getty" uri="http://www.getty.edu/vow/TGNFullDisplay?find=&amp;place=&amp;nation=&amp;english=Y&amp;subjectid=" pattern="GettyID:(\d{{7,8}})" start="GettyID"/>
                         <prefix name="cerl" uri="http://thesaurus.cerl.org/cgi-bin/record.pl?rid=" pattern="CerlID:(cn[pi]\d{{8,9}})" start="CerlID"/>
-                        <prefix name="census" uri="http://census.bbaw.de/easydb/censusID=" pattern="CensusID:(\d{{9}})" start="CensusID"/>
+                        <prefix name="census" uri="http://census.bbaw.de/easydb/censusID=" pattern="CensusID:(\d{{6,9}})" start="CensusID"/>
                         <prefix name="http" uri="http" pattern="http(s?://.*)" start="http"/>
                         <!--
                         <prefix name="" uri="" pattern=""/>
@@ -256,4 +258,12 @@ declare function archaeo18lib:filter-xslt ($element as element()*) as element()*
              </parameters>
     let $transform := doc(concat($archeao18conf:transformationsBase, 'lib/filter.xsl'))
     return transform:transform($element, $transform, $params)
+};
+
+declare function archaeo18lib:shorten  ($element as element()*, $width as xs:integer) as element()* {
+    let $method := 'kwic'
+    
+    return if ($method = 'kwic') then
+        kwic:summarize($hit, <config width="40"/>)
+    else ()
 };
