@@ -38,15 +38,21 @@
                     </xsl:variable>
 
                     <!-- Contructed file names -->
-                    <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)"/>
-                    <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)"/>
+                    <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
+                    <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
                     <td>
                         <xsl:value-of select="$in-file"/>
                     </td>
                     <td>
                         <span>
+                            <xsl:variable name="success" as="xs:boolean">
+                                <xsl:call-template name="ropen:enrich-tei">
+                                    <xsl:with-param name="input" select="document-uri(.)"/>
+                                    <xsl:with-param name="output" select="$mets-file"/>
+                                </xsl:call-template>
+                            </xsl:variable>
                             <xsl:choose>
-                                <xsl:when test="ropen:create-mets(document-uri(.), $mets-file)">
+                                <xsl:when test="$success">
                                     <xsl:attribute name="style">
                                         <xsl:text>color: green;</xsl:text>
                                     </xsl:attribute>
@@ -62,8 +68,14 @@
                     </td>
                     <td>
                         <span>
+                            <xsl:variable name="success" as="xs:boolean">
+                                <xsl:call-template name="ropen:enrich-tei">
+                                    <xsl:with-param name="input" select="document-uri(.)"/>
+                                    <xsl:with-param name="output" select="$tei-enriched-file"/>
+                                </xsl:call-template>
+                            </xsl:variable>
                             <xsl:choose>
-                                <xsl:when test="ropen:enrich-tei(document-uri(.), $tei-enriched-file)">
+                                <xsl:when test="$success">
                                     <xsl:attribute name="style">
                                         <xsl:text>color: green;</xsl:text>
                                     </xsl:attribute>
@@ -85,28 +97,25 @@
 
     <xsl:template match="text()"/>
 
-    <xsl:function name="ropen:create-mets" as="xs:boolean">
-        <xsl:param name="input"/>
-        <xsl:param name="output"/>
+    <xsl:template name="ropen:create-mets" as="xs:boolean">
+        <xsl:param name="input" as="xs:anyURI"/>
+        <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="$output">
-            <xsl:apply-templates select="document($input)"/>
+            <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
-    </xsl:function>
+    </xsl:template>
 
-    <xsl:function name="ropen:enrich-tei" as="xs:boolean">
-        <xsl:param name="input"/>
-        <xsl:param name="output"/>
-        <xsl:variable name="result-tree">
+    <xsl:template name="ropen:enrich-tei" as="xs:boolean">
+        <xsl:param name="input" as="xs:anyURI"/>
+        <xsl:param name="output" as="xs:anyURI"/>
+        <xsl:result-document href="$output">
             <xsl:apply-templates select="document($input)" mode="enrichment"/>
-        </xsl:variable>
-        <xsl:result-document href="$output">
-            <xsl:copy-of select="$result-tree"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
-    </xsl:function>
+    </xsl:template>
 
-    <xsl:function name="ropen:concat-path" as="xs:string">
+    <xsl:function name="ropen:concat-path" as="xs:anyURI">
         <xsl:param name="path" as="xs:string"/>
         <xsl:param name="filename" as="xs:string"/>
         <xsl:choose>
