@@ -2,6 +2,7 @@
     xmlns="http://www.w3.org/1999/xhtml" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs xd ropen" version="2.0">
     <!-- Imports -->
     <xsl:import href="./metadata-enrichment.xsl"/>
+    <xsl:import href="./mets.xsl"/>
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>
@@ -44,9 +45,8 @@
                     </td>
                     <td>
                         <span>
-                            <!--
                             <xsl:choose>
-                                <xsl:when test="ropen:create-mets(., $mets-file)">
+                                <xsl:when test="ropen:create-mets(document-uri(.), $mets-file)">
                                     <xsl:attribute name="style">
                                         <xsl:text>color: green;</xsl:text>
                                     </xsl:attribute>
@@ -57,14 +57,13 @@
                                     </xsl:attribute>
                                 </xsl:otherwise>
                             </xsl:choose>
-                            -->
                             <xsl:value-of select="$mets-file"/>
                         </span>
                     </td>
                     <td>
                         <span>
                             <xsl:choose>
-                                <xsl:when test="ropen:enrich-tei(., $tei-enriched-file)">
+                                <xsl:when test="ropen:enrich-tei(document-uri(.), $tei-enriched-file)">
                                     <xsl:attribute name="style">
                                         <xsl:text>color: green;</xsl:text>
                                     </xsl:attribute>
@@ -84,6 +83,8 @@
         </table>
     </xsl:template>
 
+    <xsl:template match="text()"/>
+
     <xsl:function name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input"/>
         <xsl:param name="output"/>
@@ -100,7 +101,7 @@
             <xsl:apply-templates select="document($input)" mode="enrichment"/>
         </xsl:variable>
         <xsl:result-document href="$output">
-            <xsl:copy-of select="$result-tree"></xsl:copy-of>
+            <xsl:copy-of select="$result-tree"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:function>
@@ -117,6 +118,7 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+
 
     <!-- 
     declare function ingest:enrichTEI ($content as node()) as node() {
