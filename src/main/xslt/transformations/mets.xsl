@@ -24,8 +24,6 @@
     - Check if it works
     - Add a fallback to saxon:node-set() for older Saxon versions
     --><xsl:output encoding="UTF-8" exclude-result-prefixes="#all" indent="yes"/>
-
-    <!-- Needed for EXSL vs. XSLT 2.0 related Saxon problems. --><xsl:include href="./lib/xsl-compat.xsl"/>
    <xsl:param name="identifier" select="string('REPLACEME')"/>
    <xsl:param name="locationPrefix">http://134.76.21.92:8080/images/</xsl:param>
    <xsl:param name="locationSuffix">.jpeg</xsl:param>
@@ -51,38 +49,17 @@
          <xsl:call-template name="metsHeader"/>
             <!-- the file section --><METS:fileSec>
             <xsl:variable name="nodes" select="//TEI:pb"/>
-            <xsl:choose>
-               <xsl:when test="$useEXSL = string(true())">
-                  <xsl:for-each select="exsl:node-set($fileGroups)/group">
-                     <xsl:call-template name="pbFileSect">
-                        <xsl:with-param name="use">
-                           <xsl:value-of select="text()"/>
-                        </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes"/>
-                        <xsl:with-param name="prefix" select="@locationPrefix"/>
-                        <xsl:with-param name="suffix" select="@locationSuffix"/>
-                        <xsl:with-param name="width" select="@width"/>
-                     </xsl:call-template>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:when test="$xslVersion &gt; 1">
-                  <xsl:for-each select="$fileGroups/group">
-                     <xsl:call-template name="pbFileSect">
-                        <xsl:with-param name="use">
-                           <xsl:value-of select="text()"/>
-                        </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes"/>
-                        <xsl:with-param name="prefix" select="@locationPrefix"/>
-                        <xsl:with-param name="suffix" select="@locationSuffix"/>
-                        <xsl:with-param name="width" select="@width"/>
-                     </xsl:call-template>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:message terminate="yes">XSLT Processor is not capable of uing EXSL or
-                            not Version 2.0</xsl:message>
-               </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="$fileGroups/group">
+               <xsl:call-template name="pbFileSect">
+                  <xsl:with-param name="use">
+                     <xsl:value-of select="text()"/>
+                  </xsl:with-param>
+                  <xsl:with-param name="nodes" select="$nodes"/>
+                  <xsl:with-param name="prefix" select="@locationPrefix"/>
+                  <xsl:with-param name="suffix" select="@locationSuffix"/>
+                  <xsl:with-param name="width" select="@width"/>
+               </xsl:call-template>
+            </xsl:for-each>
          </METS:fileSec>
             <!-- The logical struct map --><METS:structMap TYPE="LOGICAL">
             <METS:div TYPE="Monograph" DMDID="dmdSec_00000001" ADMID="amdSec_00000001">
@@ -191,38 +168,17 @@
                <xsl:text>_</xsl:text>
                <xsl:value-of select="$pageId"/>
             </xsl:attribute>
-            <xsl:choose>
-               <xsl:when test="$useEXSL = string(true())">
-                  <xsl:for-each select="exsl:node-set($fileGroups)/group">
-                     <METS:fptr>
-                        <xsl:attribute name="FILEID">
-                           <xsl:value-of select="$filePrefix"/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="."/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="$pageId"/>
-                        </xsl:attribute>
-                     </METS:fptr>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:when test="$xslVersion &gt; 1">
-                  <xsl:for-each select="$fileGroups/group">
-                     <METS:fptr>
-                        <xsl:attribute name="FILEID">
-                           <xsl:value-of select="$filePrefix"/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="."/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="$pageId"/>
-                        </xsl:attribute>
-                     </METS:fptr>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:message terminate="yes">XSLT Processor is not capable of uing EXSL or
-                            not Version 2.0</xsl:message>
-               </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="$fileGroups/group">
+               <METS:fptr>
+                  <xsl:attribute name="FILEID">
+                     <xsl:value-of select="$filePrefix"/>
+                     <xsl:text>_</xsl:text>
+                     <xsl:value-of select="."/>
+                     <xsl:text>_</xsl:text>
+                     <xsl:value-of select="$pageId"/>
+                  </xsl:attribute>
+               </METS:fptr>
+            </xsl:for-each>
          </METS:div>
       </xsl:for-each>
    </xsl:template>
@@ -331,7 +287,7 @@
                <MODS:mods>
                   <MODS:titleInfo>
                      <MODS:title>
-                        <xsl:value-of select="TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title"/>
+                        <xsl:value-of select="TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[not(@type = 'display')]"/>
                      </MODS:title>
                   </MODS:titleInfo>
                </MODS:mods>
