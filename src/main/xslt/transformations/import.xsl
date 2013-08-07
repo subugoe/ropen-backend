@@ -22,7 +22,7 @@
         <!-- Loop over the input collection -->
         <table>
             <thead>
-                <td>Input</td>
+                <td>Input path</td>
                 <td>Filename</td>
                 <td>Enriched</td>
                 <td>METS</td>
@@ -31,7 +31,7 @@
             <tr>
                 <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                     <td>
-                        <xsl:value-of select="."/>
+                        <xsl:value-of select="document-uri(.)"/>
                     </td>
                     <xsl:variable name="in-file">
                         <xsl:value-of select="tokenize(document-uri(.), '/')[last()]"/>
@@ -100,7 +100,7 @@
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="$output">
+        <xsl:result-document href="{$output}">
             <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
@@ -109,7 +109,7 @@
     <xsl:template name="ropen:enrich-tei" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="$output">
+        <xsl:result-document href="{$output}">
             <xsl:apply-templates select="document($input)" mode="enrichment"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
