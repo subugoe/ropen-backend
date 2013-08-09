@@ -9,9 +9,10 @@
         </xd:desc>
     </xd:doc>
     <!-- Public params -->
-    <xsl:param name="collection"/>
+    <xsl:param name="collection-base"/>
     <xsl:param name="mets-collection"/>
     <xsl:param name="tei-enriched-collection"/>
+    <xsl:param name="tei-collection"/>
     <xsl:param name="doc"/>
     <xsl:template match="/">
         <!-- Loop over the input collection -->
@@ -26,7 +27,7 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
-            <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
+            <xsl:for-each select="collection(concat($tei-collection, '/?select=*.xml'))">
                 <doc>
                     <id>{$id}</id>
                     <title>{$title}</title>
