@@ -1,5 +1,5 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt"
-    xmlns="http://www.w3.org/1999/xhtml" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs xd ropen" version="2.0">
+    xmlns="http://www.w3.org/1999/xhtml" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" xmlns:err="http://www.w3.org/2005/xqt-errors" exclude-result-prefixes="xs xd ropen" version="2.0">
     <!-- Imports -->
     <xsl:import href="./metadata-enrichment.xsl"/>
     <xsl:import href="./mets.xsl"/>
@@ -100,18 +100,48 @@
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
+        <!-- See http://www.saxonica.com/documentation/xsl-elements/try.html -->
+        <!-- XSLT 3.0
+        <xsl:try>
+        -->
         <xsl:result-document href="{$output}">
             <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
+        <!-- XSLT 3.0
+            <xsl:catch>
+                <xsl:message>
+                    <xsl:value-of select="$err:code"/>
+                    <xsl:text>: </xsl:text>
+                    <xsl:value-of select="$err:description"/>
+                </xsl:message>
+                <xsl:value-of select="false()"/>
+            </xsl:catch>
+        </xsl:try>
+        -->
         <xsl:value-of select="true()"/>
     </xsl:template>
 
     <xsl:template name="ropen:enrich-tei" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
+        <!-- See http://www.saxonica.com/documentation/xsl-elements/try.html -->
+        <!-- XSLT 3.0
+        <xsl:try>
+        -->
         <xsl:result-document href="{$output}">
             <xsl:apply-templates select="document($input)" mode="enrichment"/>
         </xsl:result-document>
+        <!-- XSLT 3.0
+            <xsl:catch>
+                <xsl:message>
+                    <xsl:value-of select="$err:code"/>
+                    <xsl:text>: </xsl:text>
+                    <xsl:value-of select="$err:description"/>
+                </xsl:message>
+                <xsl:value-of select="false()"/>
+            </xsl:catch>
+        </xsl:try>
+        -->
         <xsl:value-of select="true()"/>
     </xsl:template>
 
