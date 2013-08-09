@@ -3,6 +3,7 @@
     <!-- Imports -->
     <xsl:import href="./metadata-enrichment.xsl"/>
     <xsl:import href="./mets.xsl"/>
+    <xsl:include href="./lib/ropen.xsl"/>
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>
@@ -144,18 +145,5 @@
         -->
         <xsl:value-of select="true()"/>
     </xsl:template>
-
-    <xsl:function name="ropen:concat-path" as="xs:anyURI">
-        <xsl:param name="path" as="xs:string"/>
-        <xsl:param name="filename" as="xs:string"/>
-        <xsl:choose>
-            <xsl:when test="ends-with($path, '/') or starts-with($filename, '/')">
-                <xsl:value-of select="concat($path, $filename)"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="concat($path, '/', $filename)"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
 
 </xsl:stylesheet>
