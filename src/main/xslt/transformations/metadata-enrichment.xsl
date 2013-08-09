@@ -161,17 +161,14 @@
    </xsl:template>
    <xsl:template match="@*|node()" mode="enrichment">
       <xsl:copy>
-         <xsl:copy>
-            <xsl:apply-templates select="@*|node()" mode="enrichment"/>
-         </xsl:copy>
+         <xsl:apply-templates select="@*|node()" mode="enrichment"/>
       </xsl:copy>
    </xsl:template>
+   <!--
    <xsl:template match="TEI:*" mode="enrichment">
-      <xsl:copy>
          <xsl:copy>
             <xsl:apply-templates select="@*|node()" mode="enrichment"/>
-         </xsl:copy>
       </xsl:copy>
    </xsl:template>
-  
+  -->
 </xsl:stylesheet>
