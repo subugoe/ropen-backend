@@ -12,7 +12,7 @@
             <xd:p/>
         </xd:desc>
     </xd:doc>
-
+    <xsl:output indent="no"></xsl:output>
     <!-- Public params -->
     <xsl:param name="collection"/>
     <xsl:param name="mets-collection"/>

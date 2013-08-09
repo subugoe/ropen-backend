@@ -159,24 +159,19 @@
          </xsl:attribute>
       </xsl:copy>
    </xsl:template>
-   <xsl:template match="*" priority="-1">
+   <xsl:template match="@*|node()" mode="enrichment">
       <xsl:copy>
-         <xsl:for-each select="@*">
-            <xsl:attribute name="{name()}">
-               <xsl:value-of select="."/>
-            </xsl:attribute>
-         </xsl:for-each>
-         <xsl:apply-templates select="node()" mode="#current"/>
+         <xsl:copy>
+            <xsl:apply-templates select="@*|node()" mode="enrichment"/>
+         </xsl:copy>
       </xsl:copy>
    </xsl:template>
-   <xsl:template match="*" priority="-1">
+   <xsl:template match="TEI:*" mode="enrichment">
       <xsl:copy>
-         <xsl:for-each select="@*">
-            <xsl:attribute name="{name()}">
-               <xsl:value-of select="."/>
-            </xsl:attribute>
-         </xsl:for-each>
-         <xsl:apply-templates select="node()" mode="enrichment"/>
+         <xsl:copy>
+            <xsl:apply-templates select="@*|node()" mode="enrichment"/>
+         </xsl:copy>
       </xsl:copy>
    </xsl:template>
+  
 </xsl:stylesheet>
