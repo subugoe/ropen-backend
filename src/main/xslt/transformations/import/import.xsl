@@ -1,9 +1,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt"
     xmlns="http://www.w3.org/1999/xhtml" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" xmlns:err="http://www.w3.org/2005/xqt-errors" exclude-result-prefixes="xs xd ropen" version="2.0">
     <!-- Imports -->
-    <xsl:import href="./metadata-enrichment.xsl"/>
-    <xsl:import href="./mets.xsl"/>
-    <xsl:include href="./lib/ropen.xsl"/>
+    <xsl:import href="../metadata-enrichment.xsl"/>
+    <xsl:import href="../mets.xsl"/>
+    <xsl:include href="../lib/ropen.xsl"/>
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>
