@@ -14,6 +14,8 @@ declare option exist:serialize "method=xml media-type=text/xml omit-xml-declarat
 
 let $document := util:catch('*', request:get-parameter("doc", ''), '')
 
+let $header := response:set-header( "Cache-Control", 'public,max-age=2592000,s-maxage=2592000')
+
 return if ($document != '' and doc-available(concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix, $document, '-enriched.xml'))) then
     let $id := $document
     let $tei-enriched-location := concat($archeao18conf:dataBase, $archeao18conf:teiEnrichedPrefix, $id, '-enriched.xml')

@@ -8,4 +8,7 @@ import module namespace archeao18conf = "http://archaeo18.sub.uni-goettingen.de/
 (:
 $archeao18conf:entities
 :)
-doc(concat($archeao18conf:configBase, $archeao18conf:facets-xml))
+let $header := response:set-header( "Cache-Control", 'public,max-age=2592000,s-maxage=2592000')
+
+
+return doc(concat($archeao18conf:configBase, $archeao18conf:facets-xml))
