@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:TEI="http://www.tei-c.org/ns/1.0"
-                xmlns:xhtml="http://www.w3.org/1999/xhtml"
-                xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"
-                xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-                exclude-result-prefixes="xd TEI a18"
-                version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xd TEI a18" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -16,43 +10,46 @@
          <xd:p/>
       </xd:desc>
    </xd:doc>
-   <xsl:param name="groupRowsParam" select="false()"/>
-   <xsl:param name="dupliatePagesParam" select="false()"/>
-   <xsl:param name="entityParam" select="'TEI:persName'"/>
-   <xsl:param name="modeParam" select="'cloud'"/>
-   <xsl:param name="docNameParam" select="''"/>
-   <xsl:param name="collectionParam" select="''"/>
-   <xsl:variable name="groupRows"
-                 select="if ($groupRowsParam castable as xs:boolean) then xs:boolean($groupRowsParam) else false()"
-                 as="xs:boolean"/>
-   <xsl:variable name="dupliatePages"
-                 select="if ($dupliatePagesParam castable as xs:boolean) then xs:boolean($dupliatePagesParam) else false()"
-                 as="xs:boolean"/>
-   <xsl:variable name="entity"
-                 select="if ($entityParam castable as xs:string) then xs:string($entityParam) else 'TEI:persName'"
-                 as="xs:string"/>
-   <xsl:variable name="mode"
-                 select="if ($modeParam castable as xs:string) then xs:string($modeParam) else 'cloud'"
-                 as="xs:string"/>
-   <xsl:variable name="doc-name"
-                 select="if ($docNameParam castable as xs:string) then xs:string($docNameParam) else ''"
-                 as="xs:string"/>
-   <xsl:variable name="collection"
-                 select="if (collection($collectionParam)) then collection($collectionParam) else ()"
-                 as="node()*"/>
+   <xsl:param name="group-rows-param" select="false()"/>
+   <xsl:param name="dupliate-pages-param" select="false()"/>
+   <xsl:param name="entity-param" select="'TEI:persName'"/>
+   <xsl:param name="mode-param" select="'cloud'"/>
+   <xsl:param name="doc-name-param" select="''"/>
+   <xsl:param name="collection-param" select="''"/>
+   <xsl:variable name="groupRows" select="if ($group-rows-param castable as xs:boolean) then xs:boolean($group-rows-param) else false()" as="xs:boolean"/>
+   <xsl:variable name="dupliatePages" select="if ($dupliate-pages-param castable as xs:boolean) then xs:boolean($dupliate-pages-param) else false()" as="xs:boolean"/>
+   <xsl:variable name="entity" select="if ($entity-param castable as xs:string) then xs:string($entity-param) else 'TEI:persName'" as="xs:string"/>
+   <xsl:variable name="mode" select="if ($mode-param castable as xs:string) then xs:string($mode-param) else 'cloud'" as="xs:string"/>
+   <xsl:variable name="doc-name" select="if ($doc-name-param castable as xs:string) then xs:string($doc-name-param) else ''" as="xs:string"/>
+   <xsl:variable name="collection" select="if (collection($collection-param)) then collection($collection-param) else ()" as="node()*"/>
    <xsl:output method="xml" indent="yes"/>
    <xsl:variable name="prefix" select="'tei:'"/>
    <xsl:include href="./lib/a18.xsl"/>
    <xsl:template match="/">
+      <xsl:variable name="content">
+         <xsl:choose>
+            <xsl:when test="not(empty($collection))">
+               <xsl:copy-of select="$collection"/>
+            </xsl:when>
+            <xsl:when test="not(empty($doc-name)) and $doc-name != ''">
+               <xsl:copy-of select="doc($doc-name)"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:copy-of select="."/>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:variable>
       <xsl:choose>
          <xsl:when test="$mode = 'cloud'">
-            <xsl:apply-templates mode="cloud"/>
+            <xsl:apply-templates select="$content" mode="cloud"/>
          </xsl:when>
          <xsl:when test="$mode = 'xhtml'">
-            <xsl:apply-templates mode="xhtml"/>
+            <xsl:apply-templates select="$content" mode="xhtml"/>
          </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates select="$content"/>
+         </xsl:otherwise>
       </xsl:choose>
-      <xsl:apply-templates/>
    </xsl:template>
    <xsl:template match="tags">
       <xsl:copy>
@@ -207,7 +204,8 @@
                         <xsl:value-of select="count(distinct-values(current-group()/@doc))"/>
                      </xsl:variable>
                      <xsl:variable name="context" select="."/>
-                            <!-- TODO: add Grouping by document --><xsl:variable name="entity-cell">
+                     <!-- TODO: add Grouping by document -->
+                     <xsl:variable name="entity-cell">
                         <td>
                            <xsl:if test="$groupRows = true()">
                               <xsl:attribute name="rowspan">
@@ -261,14 +259,16 @@
       <xsl:param name="context"/>
       <xsl:param name="doc-id"/>
       <xsl:for-each select="$context/pages/page[@doc = $doc-id]">
-            <!-- Check for duplicates here not(data(preceding-sibling::page/@n) = data(@n) and data(preceding-sibling::page/@doc) = data(@doc)) --><xsl:if test="@n and (not(data(preceding-sibling::page/@n) = data(@n) and data(preceding-sibling::page/@doc) = data(@doc)) or $dupliatePages)">
+         <!-- Check for duplicates here not(data(preceding-sibling::page/@n) = data(@n) and data(preceding-sibling::page/@doc) = data(@doc)) -->
+         <xsl:if test="@n and (not(data(preceding-sibling::page/@n) = data(@n) and data(preceding-sibling::page/@doc) = data(@doc)) or $dupliatePages)">
             <a class="editionRef">
-                    <!--
+               <!--
                 <xsl:attribute name="href">
                     <xsl:text>#p</xsl:text>
                     <xsl:value-of select="@n"/>
                 </xsl:attribute>
-                --><xsl:attribute name="rel">
+                -->
+               <xsl:attribute name="rel">
                   <xsl:value-of select="$doc-id"/>
                   <xsl:text>;</xsl:text>
                   <xsl:value-of select="@n"/>
@@ -278,7 +278,8 @@
                </xsl:if>
                <xsl:value-of select="@n"/>
             </a>
-                <!-- This only works for one document --><xsl:if test="position() != last() or not(following-sibling::page/@doc = $doc-id)">
+            <!-- This only works for one document -->
+            <xsl:if test="position() != last() or not(following-sibling::page/@doc = $doc-id)">
                <xsl:text>, </xsl:text>
             </xsl:if>
          </xsl:if>
@@ -287,7 +288,8 @@
    <xsl:template match="TEI:teiHeader" mode="#all"/>
    <xsl:function name="a18:clear-title" as="xs:string">
       <xsl:param name="variant"/>
-        <!-- Remove hyphen and the line break --><xsl:value-of select="replace(replace($variant, '-&#xA;\s*',''), '&#xA;\s*',' ')"/>
+      <!-- Remove hyphen and the line break -->
+      <xsl:value-of select="replace(replace($variant, '-&#xA;\s*',''), '&#xA;\s*',' ')"/>
    </xsl:function>
    <xsl:function name="a18:get-document" as="xs:string">
       <xsl:param name="node"/>

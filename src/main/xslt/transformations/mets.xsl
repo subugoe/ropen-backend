@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:TEI="http://www.tei-c.org/ns/1.0"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xmlns:METS="http://www.loc.gov/METS/"
-                xmlns:MODS="http://www.loc.gov/mods/v3"
-                xmlns:DC="http://purl.org/dc/elements/1.1/"
-                xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:DV="http://dfg-viewer.de/"
-                xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-                exclude-result-prefixes="xs"
-                version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:METS="http://www.loc.gov/METS/"
+   xmlns:MODS="http://www.loc.gov/mods/v3" xmlns:DC="http://purl.org/dc/elements/1.1/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:DV="http://dfg-viewer.de/"
+   xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -19,13 +11,12 @@
          <xd:p/>
       </xd:desc>
    </xd:doc>
-    <!-- 
+   <!-- 
     TODO:
     - Check if it works
     - Add a fallback to saxon:node-set() for older Saxon versions
-    --><xsl:output encoding="UTF-8" exclude-result-prefixes="#all" indent="yes"/>
-
-    <!-- Needed for EXSL vs. XSLT 2.0 related Saxon problems. --><xsl:include href="./lib/xsl-compat.xsl"/>
+    -->
+   <xsl:output encoding="UTF-8" exclude-result-prefixes="#all" indent="yes"/>
    <xsl:param name="identifier" select="string('REPLACEME')"/>
    <xsl:param name="locationPrefix">http://134.76.21.92:8080/images/</xsl:param>
    <xsl:param name="locationSuffix">.jpeg</xsl:param>
@@ -38,63 +29,43 @@
       <group width="500" locationPrefix="" locationSuffix="">MIN</group>
       <group width="120" locationPrefix="" locationSuffix="">THUMB</group>
       <group width="1200" locationPrefix="" locationSuffix="">MAX</group>
-      <group width="0"
-             locationPrefix="file:///data/images/"
-             locationSuffix=".jpg">PRESENTATION</group>
+      <group width="0" locationPrefix="file:///data/images/" locationSuffix=".jpg">PRESENTATION</group>
    </xsl:variable>
-   <xsl:template match="/">
+   <xsl:template match="/" mode="mets">
       <METS:mets>
          <xsl:if test="$identifier = 'REPLACEME'">
             <xsl:comment>Replace the string 'REPLACEME' with the real dentifier using sed, if no
                     param was given</xsl:comment>
          </xsl:if>
          <xsl:call-template name="metsHeader"/>
-            <!-- the file section --><METS:fileSec>
+         <!-- the file section -->
+         <METS:fileSec>
             <xsl:variable name="nodes" select="//TEI:pb"/>
-            <xsl:choose>
-               <xsl:when test="$useEXSL = string(true())">
-                  <xsl:for-each select="exsl:node-set($fileGroups)/group">
-                     <xsl:call-template name="pbFileSect">
-                        <xsl:with-param name="use">
-                           <xsl:value-of select="text()"/>
-                        </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes"/>
-                        <xsl:with-param name="prefix" select="@locationPrefix"/>
-                        <xsl:with-param name="suffix" select="@locationSuffix"/>
-                        <xsl:with-param name="width" select="@width"/>
-                     </xsl:call-template>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:when test="$xslVersion &gt; 1">
-                  <xsl:for-each select="$fileGroups/group">
-                     <xsl:call-template name="pbFileSect">
-                        <xsl:with-param name="use">
-                           <xsl:value-of select="text()"/>
-                        </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes"/>
-                        <xsl:with-param name="prefix" select="@locationPrefix"/>
-                        <xsl:with-param name="suffix" select="@locationSuffix"/>
-                        <xsl:with-param name="width" select="@width"/>
-                     </xsl:call-template>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:message terminate="yes">XSLT Processor is not capable of uing EXSL or
-                            not Version 2.0</xsl:message>
-               </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="$fileGroups/group">
+               <xsl:call-template name="pbFileSect">
+                  <xsl:with-param name="use">
+                     <xsl:value-of select="text()"/>
+                  </xsl:with-param>
+                  <xsl:with-param name="nodes" select="$nodes"/>
+                  <xsl:with-param name="prefix" select="@locationPrefix"/>
+                  <xsl:with-param name="suffix" select="@locationSuffix"/>
+                  <xsl:with-param name="width" select="@width"/>
+               </xsl:call-template>
+            </xsl:for-each>
          </METS:fileSec>
-            <!-- The logical struct map --><METS:structMap TYPE="LOGICAL">
+         <!-- The logical struct map -->
+         <METS:structMap TYPE="LOGICAL">
             <METS:div TYPE="Monograph" DMDID="dmdSec_00000001" ADMID="amdSec_00000001">
                <xsl:attribute name="ID">
                   <xsl:value-of select="$locPrefix"/>
                   <xsl:text>_</xsl:text>
                   <xsl:number format="00000001" value="1"/>
                </xsl:attribute>
-               <xsl:apply-templates select="/TEI:TEI/TEI:text/TEI:body"/>
+               <xsl:apply-templates select="/TEI:TEI/TEI:text/TEI:body" mode="#current"/>
             </METS:div>
          </METS:structMap>
-            <!-- The physical struct map --><METS:structMap TYPE="PHYSICAL">
+         <!-- The physical struct map -->
+         <METS:structMap TYPE="PHYSICAL">
             <METS:div TYPE="physSequence">
                <xsl:attribute name="ID">
                   <xsl:value-of select="$physPrefix"/>
@@ -105,9 +76,9 @@
             </METS:div>
          </METS:structMap>
          <METS:structLink>
-                <!-- Every page belongs to the logical structure of the whole document -->
+            <!-- Every page belongs to the logical structure of the whole document -->
 
-                <!--
+            <!--
                 <xsl:for-each select="//TEI:pb">
                     <METS:smLink>
                         <xsl:attribute name="xlink:from">
@@ -122,7 +93,8 @@
                         </xsl:attribute>
                     </METS:smLink>
                 </xsl:for-each>
-                --><METS:smLink>
+                -->
+            <METS:smLink>
                <xsl:attribute name="xlink:from">
                   <xsl:value-of select="$locPrefix"/>
                   <xsl:text>_</xsl:text>
@@ -174,7 +146,8 @@
       </METS:mets>
    </xsl:template>
 
-    <!-- Creates the physical struct map --><xsl:template name="pbPhysMap">
+   <!-- Creates the physical struct map -->
+   <xsl:template name="pbPhysMap">
       <xsl:for-each select="//TEI:pb">
          <METS:div TYPE="page">
             <xsl:variable name="pageNr">
@@ -191,43 +164,23 @@
                <xsl:text>_</xsl:text>
                <xsl:value-of select="$pageId"/>
             </xsl:attribute>
-            <xsl:choose>
-               <xsl:when test="$useEXSL = string(true())">
-                  <xsl:for-each select="exsl:node-set($fileGroups)/group">
-                     <METS:fptr>
-                        <xsl:attribute name="FILEID">
-                           <xsl:value-of select="$filePrefix"/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="."/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="$pageId"/>
-                        </xsl:attribute>
-                     </METS:fptr>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:when test="$xslVersion &gt; 1">
-                  <xsl:for-each select="$fileGroups/group">
-                     <METS:fptr>
-                        <xsl:attribute name="FILEID">
-                           <xsl:value-of select="$filePrefix"/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="."/>
-                           <xsl:text>_</xsl:text>
-                           <xsl:value-of select="$pageId"/>
-                        </xsl:attribute>
-                     </METS:fptr>
-                  </xsl:for-each>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:message terminate="yes">XSLT Processor is not capable of uing EXSL or
-                            not Version 2.0</xsl:message>
-               </xsl:otherwise>
-            </xsl:choose>
+            <xsl:for-each select="$fileGroups/group">
+               <METS:fptr>
+                  <xsl:attribute name="FILEID">
+                     <xsl:value-of select="$filePrefix"/>
+                     <xsl:text>_</xsl:text>
+                     <xsl:value-of select="."/>
+                     <xsl:text>_</xsl:text>
+                     <xsl:value-of select="$pageId"/>
+                  </xsl:attribute>
+               </METS:fptr>
+            </xsl:for-each>
          </METS:div>
       </xsl:for-each>
    </xsl:template>
 
-    <!-- Creates a file group --><xsl:template name="pbFileSect">
+   <!-- Creates a file group -->
+   <xsl:template name="pbFileSect">
       <xsl:param name="nodes"/>
       <xsl:param name="id" select="$identifier"/>
       <xsl:param name="use"/>
@@ -295,19 +248,20 @@
          </xsl:for-each>
       </METS:fileGrp>
    </xsl:template>
-   <xsl:template match="TEI:div">
+   <xsl:template match="TEI:div" mode="mets">
       <xsl:choose>
-            <!-- Get rid of empty div tags --><xsl:when test="TEI:head">
+         <!-- Get rid of empty div tags -->
+         <xsl:when test="TEI:head">
             <METS:div>
-               <xsl:apply-templates select="TEI:div|TEI:head"/>
+               <xsl:apply-templates select="TEI:div|TEI:head" mode="#current"/>
             </METS:div>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:apply-templates select="TEI:div|TEI:head"/>
+            <xsl:apply-templates select="TEI:div|TEI:head" mode="#current"/>
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:head">
+   <xsl:template match="TEI:head" mode="mets">
       <xsl:attribute name="ID">
          <xsl:value-of select="$locPrefix"/>
          <xsl:text>_</xsl:text>
@@ -317,10 +271,11 @@
          <xsl:text>Chapter</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="LABEL">
-            <!-- Use this to remove line seperators -->
-            <!--
+         <!-- Use this to remove line seperators -->
+         <!--
                     <xsl:value-of select="replace(normalize-space(.), '- ', '')"/>
-                --><xsl:value-of select="normalize-space(.)"/>
+                -->
+         <xsl:value-of select="normalize-space(.)"/>
       </xsl:attribute>
    </xsl:template>
    <xsl:template match="text()"/>
@@ -331,7 +286,7 @@
                <MODS:mods>
                   <MODS:titleInfo>
                      <MODS:title>
-                        <xsl:value-of select="TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title"/>
+                        <xsl:value-of select="TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[not(@type = 'display')]"/>
                      </MODS:title>
                   </MODS:titleInfo>
                </MODS:mods>
