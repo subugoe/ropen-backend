@@ -67,6 +67,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:variable>
+    <!-- Should result fragments contain Span Elements with classes for TEI Elements? --><xsl:variable name="result-tei-class" select="false()" as="xs:boolean"/>
    <xsl:include href="./lib/a18.xsl"/>
    <xsl:template match="/">
         <!-- TODO: Use XSLT Modes to get rid of variables --><html xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -1045,7 +1046,7 @@
          <xsl:value-of select="."/>
       </xsl:for-each>
    </xsl:function>
-    
+
     <!-- Filtering of Results --><xsl:template match="fragment">
       <xsl:variable name="fragment-clean">
          <xsl:apply-templates mode="fragment"/>
@@ -1053,75 +1054,74 @@
       <xsl:copy>
          <body>
             <p>
-               <xsl:variable name="start" as="node()">
-                  <xsl:element name="start"/>
-               </xsl:variable>
-               <xsl:choose>
-                  <xsl:when test="string-length(normalize-space($fragment-clean)) &lt; $result-width">
-                     <xsl:copy-of select="$fragment-clean"/>
-                  </xsl:when>
-                  <xsl:when test="not($fragment-clean//html:span[@class='tei:lb']) and count($fragment-clean//html:span[@class = 'exist:match']) = 1">
-                     <xsl:copy-of select="$fragment-clean"/>
-                  </xsl:when>
-                  <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) &gt; 1 and count($fragment-clean//html:span[@class = 'tei:lb']) &lt;= 4">
-                     <xsl:copy-of select="$fragment-clean"/>
-                  </xsl:when>
-                        <!--
+                    <!--
+                    <xsl:variable name="start" as="node()">
+                        <xsl:element name="start"/>
+                    </xsl:variable>
+                    <xsl:choose>
+                        <xsl:when test="string-length(normalize-space($fragment-clean)) < $result-width">
+                            <xsl:copy-of select="$fragment-clean"/>
+                        </xsl:when>
+                        <xsl:when test="not($fragment-clean//html:span[@class='tei:lb']) and count($fragment-clean//html:span[@class = 'exist:match']) = 1">
+                            <xsl:copy-of select="$fragment-clean"/>
+                        </xsl:when>
+                        <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) > 1 and count($fragment-clean//html:span[@class = 'tei:lb']) <= 4">
+                            <xsl:copy-of select="$fragment-clean"/>
+                        </xsl:when>
+                      
                         <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) = 1 and count($fragment-clean//html:span[@class = 'tei:lb']) > 4">
-                            <xsl:copy-of select="sub:chunk($fragment-clean//html:span[@class = 'exist:match']/preceding::html:span[@class='tei:lb'][1], $fragment-clean//html:span[@class = 'exist:match']/following::html:span[@class='tei:lb'][1], $fragment-clean/*)"/>
+                            <xsl:copy-of select="a18:chunk($fragment-clean//html:span[@class = 'exist:match']/preceding::html:span[@class='tei:lb'][1], $fragment-clean//html:span[@class = 'exist:match']/following::html:span[@class='tei:lb'][1], $fragment-clean/*)"/>
                         </xsl:when>
                         
-                        <xsl:when test="count($fragment-clean//html:span[@class = 'exist:match']) > 1">
-                      --><xsl:otherwise>
-                     <xsl:for-each select="$fragment-clean//html:span[@class = 'exist:match']">
-                        <xsl:variable name="start-node" as="element()">
-                           <xsl:choose>
-                              <xsl:when test="./preceding::html:span[@class='tei:lb'][1]">
-                                 <xsl:copy-of select="./preceding::html:span[@class='tei:lb'][1]"/>
-                              </xsl:when>
-                              <xsl:when test="./preceding::html:hr">
-                                 <xsl:copy-of select="./preceding::html:hr/following::*[1]"/>
-                              </xsl:when>
-                              <xsl:when test="./preceding-sibling::*[position() = last()]">
-                                 <xsl:copy-of select="./preceding-sibling::*[position() = last()]"/>
-                              </xsl:when>
-                              <xsl:when test="./preceding::*[position() = last()]">
-                                 <xsl:copy-of select="./preceding::*[position() = last()]"/>
-                              </xsl:when>
-                              <xsl:otherwise>
-                                 <xsl:copy-of select="$fragment-clean/*[1]"/>
-                              </xsl:otherwise>
-                           </xsl:choose>
-                        </xsl:variable>
-                        <xsl:variable name="end-node" as="element()">
-                           <xsl:choose>
-                              <xsl:when test="./following::html:span[@class='tei:lb'][1]">
-                                 <xsl:copy-of select="./following::html:span[@class='tei:lb'][1]"/>
-                              </xsl:when>
-                              <xsl:when test="./following::html:hr">
-                                 <xsl:copy-of select="./following::html:hr/preceding::*[1]"/>
-                              </xsl:when>
-                              <xsl:otherwise>
-                                 <xsl:copy-of select="$fragment-clean/*[position() = last()]"/>
-                              </xsl:otherwise>
-                           </xsl:choose>
-                        </xsl:variable>
-                        <xsl:copy-of select="a18:chunk($start-node, $end-node, $fragment-clean/*)"/>
-                     </xsl:for-each>
-                  </xsl:otherwise>
-                            <!--
-                        </xsl:when>
                         <xsl:otherwise>
-                            <xsl:copy-of select="$fragment-clean"/>
+                            <xsl:for-each select="$fragment-clean//html:span[@class = 'exist:match']">
+                                <xsl:variable name="start-node" as="element()">
+                                    <xsl:choose>
+                                        <xsl:when test="./preceding::html:span[@class='tei:lb'][1]">
+                                            <xsl:copy-of select="./preceding::html:span[@class='tei:lb'][1]"/>
+                                        </xsl:when>
+                                        <xsl:when test="./preceding::html:hr">
+                                            <xsl:copy-of select="./preceding::html:hr/following::*[1]"/>
+                                        </xsl:when>
+                                        <xsl:when test="./preceding-sibling::*[position() = last()]">
+                                            <xsl:copy-of select="./preceding-sibling::*[position() = last()]"/>
+                                        </xsl:when>
+                                        <xsl:when test="./preceding::*[position() = last()]">
+                                            <xsl:copy-of select="./preceding::*[position() = last()]"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:copy-of select="$fragment-clean/*[1]"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:variable>
+
+                                <xsl:variable name="end-node" as="element()">
+                                    <xsl:choose>
+                                        <xsl:when test="./following::html:span[@class='tei:lb'][1]">
+                                            <xsl:copy-of select="./following::html:span[@class='tei:lb'][1]"/>
+                                        </xsl:when>
+                                        <xsl:when test="./following::html:hr">
+                                            <xsl:copy-of select="./following::html:hr/preceding::*[1]"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:copy-of select="$fragment-clean/*[position() = last()]"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:variable>
+                                <xsl:copy-of select="a18:chunk($start-node, $end-node, $fragment-clean/*)"/>
+                            </xsl:for-each>
+
                         </xsl:otherwise>
-                            --></xsl:choose>
+
+                    </xsl:choose>
+                    --><xsl:copy-of select="$fragment-clean"/>
             </p>
          </body>
       </xsl:copy>
    </xsl:template>
 
-    
-   <!--
+
+    <!--
     <xsl:function name="sub:chunk-node">
         <xsl:param name="ms1" as="node()"/>
         <xsl:param name="ms2" as="node()"/>
@@ -1169,16 +1169,30 @@
       </span>
    </xsl:template>
    <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment">
-      <xsl:element name="{local-name(.)}">
-         <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
-         <xsl:apply-templates mode="fragment"/>
-      </xsl:element>
+      <xsl:choose>
+         <xsl:when test="$result-tei-class = true()">
+            <xsl:element name="{local-name(.)}">
+               <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
+               <xsl:apply-templates mode="fragment"/>
+            </xsl:element>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates mode="fragment"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign"
                  mode="fragment">
-      <span class="{concat($class-prefix, local-name(.))}">
-         <xsl:apply-templates mode="fragment"/>
-      </span>
+      <xsl:choose>
+         <xsl:when test="$result-tei-class = true()">
+            <span class="{concat($class-prefix, local-name(.))}">
+               <xsl:apply-templates mode="fragment"/>
+            </span>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates mode="fragment"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:lb" mode="fragment">
       <span class="{concat($class-prefix, local-name(.))}"/>
@@ -1192,16 +1206,30 @@
    </xsl:template>
     <!-- Stuf to ignore, don't apply templates --><xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment"/>
    <xsl:template match="TEI:*" mode="fragment">
-      <span class="{concat($class-prefix, local-name(.))}">
-         <xsl:apply-templates mode="fragment"/>
-      </span>
+      <xsl:choose>
+         <xsl:when test="$result-tei-class = true()">
+            <span class="{concat($class-prefix, local-name(.))}">
+               <xsl:apply-templates mode="fragment"/>
+            </span>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates mode="fragment"/>
+         </xsl:otherwise>
+      </xsl:choose>
       <xsl:message terminate="no">Unrecognized element: <xsl:value-of select="name(.)"/>
       </xsl:message>
    </xsl:template>
    <xsl:template match="TEI:hi" mode="fragment">
-      <span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
-         <xsl:apply-templates mode="fragment"/>
-      </span>
+      <xsl:choose>
+         <xsl:when test="$result-tei-class = true()">
+            <span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
+               <xsl:apply-templates mode="fragment"/>
+            </span>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:apply-templates mode="fragment"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
     <!--
     <xsl:template match="text()" mode="fragment">
@@ -1220,4 +1248,17 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-</xsl:stylesheet>
+    <!--
+    <xsl:template match="text()" mode="fragment">
+
+        <xsl:variable name="linebreak-class" select="concat('concat($class-prefix', 'lb')"></xsl:variable>
+        <xsl:choose>
+            <xsl:when test="not(preceding-sibling::html:span[@class = $linebreak-class]) and not(preceding-sibling::html:span[@class = $linebreak-class])">
+                <xsl:value-of select="."/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="."></xsl:value-of>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    --></xsl:stylesheet>
