@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-    exclude-result-prefixes="xs xd" version="2.0">
+    exclude-result-prefixes="xs xd TEI" version="2.0">
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p><xd:b>Created on:</xd:b> Oct 25, 2013</xd:p>
@@ -17,23 +17,40 @@
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <title>Entitätenstatistik</title>
+                <style type="text/css">
+                    body{
+                        font-family:verdana, arial, sans-serif;
+                        font-size:11px;
+                    }
+                    table,
+                    thead,
+                    td{
+                        border:1px solid #000000;
+                        border-collapse:collapse;
+                        border-spacing:0;
+                    }
+                    thead tr td{
+                        background:#DFDFDF;
+                        text-align:center;
+                        font-weight:bold;
+                        font-size:13px;
+                    }</style>
             </head>
             <body>
                 <table>
                     <thead>
                         <tr>
                             <td rowspan="3">Dokument</td>
-                            <td colspan="12">Entität</td>
+                            <td colspan="13">Entität</td>
                         </tr>
                         <tr>
-                            <td/>
                             <td colspan="3">Person</td>
                             <td colspan="3">Ort</td>
                             <td colspan="3">Werk</td>
                             <td colspan="3">Artefakt</td>
+                            <td rowspan="2">Insgesamt</td>
                         </tr>
                         <tr>
-                            <td/>
                             <td>Ausgezeichnet</td>
                             <td>Nicht ausgezeichnet</td>
                             <td>Insgesamt</td>
@@ -81,10 +98,12 @@
                                 </td>
                                 <!-- Work -->
                                 <td>
-                                    <xsl:value-of select="count(document(document-uri(.))//TEI:bibl[descendant::TEI:taget/@ref and descendant::TEI:taget/@ref != ''])"/>
+                                    <xsl:value-of
+                                        select="count(document(document-uri(.))//TEI:bibl[descendant::TEI:ref/@target and (descendant::TEI:ref/@target != '' or descendant::TEI:ref/@target != '#')])"/>
                                 </td>
                                 <td>
-                                    <xsl:value-of select="count(document(document-uri(.))//TEI:bibl[not(descendant::TEI:taget/@ref) or descendant::TEI:taget/@ref=''])"/>
+                                    <xsl:value-of
+                                        select="count(document(document-uri(.))//TEI:bibl[not(descendant::TEI:ref/@target) or descendant::TEI:ref/@target = '' or descendant::TEI:ref/@target = '#'])"/>
                                 </td>
                                 <td>
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:bibl)"/>
@@ -98,6 +117,12 @@
                                 </td>
                                 <td>
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:term)"/>
+                                </td>
+                                <!-- All -->
+                                <td>
+                                    <xsl:value-of
+                                        select="count(count(document(document-uri(.))//TEI:term)) + count(document(document-uri(.))//TEI:bibl) + count(document(document-uri(.))//TEI:placeName) + count(document(document-uri(.))//TEI:persName)"
+                                    />
                                 </td>
                             </tr>
                         </xsl:for-each>
@@ -125,10 +150,14 @@
                             </td>
                             <!-- Work -->
                             <td>
-                                <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl[descendant::TEI:taget/@ref and descendant::TEI:taget/@ref != ''])"/>
+                                <xsl:value-of
+                                    select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl[descendant::TEI:ref/@target and (descendant::TEI:ref/@target != '' or descendant::TEI:ref/@target != '#')])"
+                                />
                             </td>
                             <td>
-                                <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl[not(descendant::TEI:taget/@ref) or descendant::TEI:taget/@ref=''])"/>
+                                <xsl:value-of
+                                    select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl[not(descendant::TEI:ref/@target) or descendant::TEI:ref/@target = '' or descendant::TEI:ref/@target = '#'])"
+                                />
                             </td>
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl)"/>
@@ -143,7 +172,12 @@
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:term)"/>
                             </td>
-
+                            <!-- All -->
+                            <td>
+                                <xsl:value-of
+                                    select="count(collection(concat($collection, '/?select=*.xml'))//TEI:term) + count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl) + count(collection(concat($collection, '/?select=*.xml'))//TEI:placeName) + count(collection(concat($collection, '/?select=*.xml'))//TEI:persName)"
+                                />
+                            </td>
                         </tr>
                     </tbody>
                 </table>
