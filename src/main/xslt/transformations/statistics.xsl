@@ -30,10 +30,16 @@
                         border-spacing:0;
                     }
                     thead tr td{
-                        background:#DFDFDF;
+                        background:#F0F0F0;
                         text-align:center;
                         font-weight:bold;
                         font-size:13px;
+                    }
+                    .unique{
+                        background:#707070;
+                    }
+                    .sum{
+                        background:#D8D8D8;
                     }</style>
             </head>
             <body>
@@ -41,28 +47,32 @@
                     <thead>
                         <tr>
                             <td rowspan="3">Dokument</td>
-                            <td colspan="13">Entität</td>
+                            <td colspan="17">Entität</td>
                         </tr>
                         <tr>
-                            <td colspan="3">Person</td>
-                            <td colspan="3">Ort</td>
-                            <td colspan="3">Werk</td>
-                            <td colspan="3">Artefakt</td>
+                            <td colspan="4">Person</td>
+                            <td colspan="4">Ort</td>
+                            <td colspan="4">Werk</td>
+                            <td colspan="4">Artefakt</td>
                             <td rowspan="2">Insgesamt</td>
                         </tr>
                         <tr>
                             <td>Ausgezeichnet</td>
                             <td>Nicht ausgezeichnet</td>
                             <td>Insgesamt</td>
+                            <td>Eindeutig</td>
                             <td>Ausgezeichnet</td>
                             <td>Nicht ausgezeichnet</td>
                             <td>Insgesamt</td>
+                            <td>Eindeutig</td>
                             <td>Ausgezeichnet</td>
                             <td>Nicht ausgezeichnet</td>
                             <td>Insgesamt</td>
+                            <td>Eindeutig</td>
                             <td>Ausgezeichnet</td>
                             <td>Nicht ausgezeichnet</td>
                             <td>Insgesamt</td>
+                            <td>Eindeutig</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,8 +93,11 @@
                                 <td>
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:persName[not(@ref) or @ref=''])"/>
                                 </td>
-                                <td>
+                                <td class="sum">
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:persName)"/>
+                                </td>
+                                <td class="unique">
+                                    <xsl:value-of select="count(distinct-values(document(document-uri(.))//TEI:persName/@ref))"/>
                                 </td>
                                 <!-- Place -->
                                 <td>
@@ -93,8 +106,11 @@
                                 <td>
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:placeName[not(@ref) or @ref=''])"/>
                                 </td>
-                                <td>
+                                <td class="sum">
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:placeName)"/>
+                                </td>
+                                <td class="unique">
+                                    <xsl:value-of select="count(distinct-values(document(document-uri(.))//TEI:placeName/@ref))"/>
                                 </td>
                                 <!-- Work -->
                                 <td>
@@ -105,8 +121,11 @@
                                     <xsl:value-of
                                         select="count(document(document-uri(.))//TEI:bibl[not(descendant::TEI:ref/@target) or descendant::TEI:ref/@target = '' or descendant::TEI:ref/@target = '#'])"/>
                                 </td>
-                                <td>
+                                <td class="sum">
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:bibl)"/>
+                                </td>
+                                <td class="unique">
+                                    <xsl:value-of select="count(distinct-values(document(document-uri(.))//TEI:bibl//TEI:ref/@target))"/>
                                 </td>
                                 <!-- Artifact -->
                                 <td>
@@ -118,15 +137,18 @@
                                 <td>
                                     <xsl:value-of select="count(document(document-uri(.))//TEI:term)"/>
                                 </td>
+                                <td class="unique">
+                                    <xsl:value-of select="count(distinct-values(document(document-uri(.))//TEI:term/@ref))"/>
+                                </td>
                                 <!-- All -->
-                                <td>
+                                <td class="sum">
                                     <xsl:value-of
                                         select="count(count(document(document-uri(.))//TEI:term)) + count(document(document-uri(.))//TEI:bibl) + count(document(document-uri(.))//TEI:placeName) + count(document(document-uri(.))//TEI:persName)"
                                     />
                                 </td>
                             </tr>
                         </xsl:for-each>
-                        <tr>
+                        <tr class="sum">
                             <td>Insgesamt</td>
                             <!-- Person -->
                             <td>
@@ -138,6 +160,9 @@
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:persName)"/>
                             </td>
+                            <td class="unique">
+                                <xsl:value-of select="count(distinct-values(collection(concat($collection, '/?select=*.xml'))//TEI:persName/@ref))"/>
+                            </td>
                             <!-- Place -->
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:placeName[@ref and @ref != ''])"/>
@@ -147,6 +172,9 @@
                             </td>
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:placeName)"/>
+                            </td>
+                            <td class="unique">
+                                <xsl:value-of select="count(distinct-values(collection(concat($collection, '/?select=*.xml'))//TEI:placeName/@ref))"/>
                             </td>
                             <!-- Work -->
                             <td>
@@ -162,6 +190,9 @@
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:bibl)"/>
                             </td>
+                            <td class="unique">
+                                <xsl:value-of select="count(distinct-values(collection(concat($collection, '/?select=*.xml'))//TEI:bibl//TEI:ref/@target))"/>
+                            </td>
                             <!-- Artifact -->
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:term[@ref and @ref != ''])"/>
@@ -171,6 +202,9 @@
                             </td>
                             <td>
                                 <xsl:value-of select="count(collection(concat($collection, '/?select=*.xml'))//TEI:term)"/>
+                            </td>
+                            <td class="unique">
+                                <xsl:value-of select="count(distinct-values(collection(concat($collection, '/?select=*.xml'))//TEI:term/@ref))"/>
                             </td>
                             <!-- All -->
                             <td>
