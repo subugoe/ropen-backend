@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:TEI="http://www.tei-c.org/ns/1.0"
-    xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs xd" version="2.0">
+    xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:exist="http://exist.sourceforge.net/NS/exist" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt"
+    exclude-result-prefixes="xs xd a18 exist xlink xhtml ropen" version="2.0">
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p><xd:b>Created on:</xd:b> Nov 14, 2013</xd:p>
@@ -15,17 +17,16 @@
     <xsl:param name="output-collection" select="''" as="xs:string"/>
     <!-- Name of the document, used as file name prefix for pages -->
     <xsl:param name="document" as="xs:string"/>
-    <!-- Use 'xhtml' or 'tei' -->
+    <!-- Use 'xhtml', 'tei' or 'kml' -->
     <xsl:param name="mode" select="'tei'" as="xs:string"/>
     <!-- copy TEI header into every page? -->
     <xsl:param name="copy-header" select="false()" as="xs:boolean"/>
 
     <!-- Imports -->
-    <!--
     <xsl:include href="TEI2XHTML.xsl"/>
-    -->
+    <xsl:include href="./lib/ropen.xsl"/>
 
-    <xsl:template match="/">
+    <xsl:template match="/" priority="10">
         <!-- Find out if we are processing a single Document or a collection -->
         <xsl:choose>
             <xsl:when test="$input-collection != ''">
@@ -34,18 +35,18 @@
                     <xsl:variable name="input-file" select="document-uri(.)"/>
                     <xsl:message>Processing file <xsl:value-of select="$input-file"/></xsl:message>
                     <!-- Using just ./* here makes Saxon forget about the uri of the document -->
-                    <xsl:apply-templates select="doc($input-file)/*"/>
+                    <xsl:apply-templates select="doc($input-file)/TEI:TEI/*" mode="split"/>
                 </xsl:for-each>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:apply-templates/>
+                <xsl:apply-templates mode="split"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="//TEI:body">
-        <xsl:message>Document is: <xsl:value-of select="document-uri(.)"></xsl:value-of></xsl:message>
-        <xsl:variable name="page-name" select="a18:document-name(.)" as="xs:string"/> 
+    <xsl:template match="//TEI:text/TEI:body" priority="10" mode="split">
+        <xsl:message>Document is: <xsl:value-of select="document-uri(root(.))"/></xsl:message>
+        <xsl:variable name="page-name" select="a18:page-name(.)" as="xs:string"/>
         <xsl:for-each select="//TEI:pb">
             <xsl:variable name="pos" select="position()" as="xs:integer"/>
             <xsl:variable name="page" as="node()*">
@@ -61,14 +62,29 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
+            <xsl:variable name="suffix">
+                <xsl:choose>
+                    <xsl:when test="$mode = 'tei'">
+                        <xsl:value-of select="'.tei.xml'"/>
+                    </xsl:when>
+                    <xsl:when test="$mode = 'xhtml'">
+                        <xsl:value-of select="'.xhtml'"/>
+                    </xsl:when>
+                    <xsl:when test="$mode = 'kml'">
+                        <xsl:value-of select="'.kml'"/>
+                    </xsl:when>
+                    <xsl:otherwise/>
+                </xsl:choose>
+            </xsl:variable>
             <xsl:variable name="file-name">
                 <xsl:choose>
                     <xsl:when test="$output-collection != ''">
-                        <xsl:value-of select="concat($output-collection, '/', $page-name, '-', $pos, '.tei.xml')"/>
+                        <xsl:value-of select="concat($output-collection, '/', $page-name, '-', $pos, $suffix)"/>
                     </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="concat('./', $page-name, '-', $pos, '.tei.xml')"/>
-                    </xsl:otherwise>
+                    <xsl:when test="$mode = 'xhtml'">
+                        <xsl:value-of select="concat('./', $page-name, '-', $pos, $suffix)"/>
+                    </xsl:when>
+                    <xsl:otherwise/>
                 </xsl:choose>
             </xsl:variable>
             <xsl:message>Generating result file <xsl:value-of select="$file-name"/> mode: <xsl:value-of select="$mode"/></xsl:message>
@@ -80,10 +96,12 @@
                         </xsl:if>
                     </TEI:teiHeader>
                     <TEI:text>
-                        <xsl:copy-of select="a18:filter-pb($page)"/>
-                        <xsl:if test="not(a18:filter-pb($page)//TEI:pb)">
-                            <xsl:copy-of select="."/>
-                        </xsl:if>
+                        <TEI:body>
+                            <xsl:copy-of select="a18:filter-pb($page)"/>
+                            <xsl:if test="not(a18:filter-pb($page)//TEI:pb)">
+                                <xsl:copy-of select="."/>
+                            </xsl:if>
+                        </TEI:body>
                     </TEI:text>
                 </TEI:TEI>
             </xsl:variable>
@@ -92,44 +110,48 @@
                     <xsl:when test="$mode = 'tei'">
                         <xsl:copy-of select="$tei-page"/>
                     </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:apply-templates select="$tei-page" mode="xhtml"/>
-                    </xsl:otherwise>
+                    <xsl:when test="$mode = 'xhtml'">
+                        <html xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                            xmlns:bibo="http://purl.org/ontology/bibo/1.3/" version="XHTML+RDFa 1.0" type="bibo:Manuscript">
+                            <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+                            <meta charset="UTF-8"/>
+                            <title>Page <xsl:value-of select="$pos"/></title>
+                            <body>
+                                <xsl:apply-templates select="$tei-page" mode="xhtml"/>
+                            </body>
+                        </html>
+                    </xsl:when>
+                    <xsl:when test="$mode = 'kml'">
+                        <xsl:message terminate="yes">Fatal: Mode KM not implemented yet</xsl:message>
+                    </xsl:when>
+                    <xsl:otherwise/>
                 </xsl:choose>
             </xsl:result-document>
         </xsl:for-each>
     </xsl:template>
-    <xsl:function name="a18:filter-pb" as="node()*">
-        <xsl:param name="nodes" as="node()*"/>
-        <xsl:for-each select="$nodes/node()">
-            <xsl:choose>
-                <xsl:when test=". instance of element(TEI:pb)"/>
-                <xsl:otherwise>
-                    <xsl:copy>
-                        <xsl:for-each select="@*">
-                            <xsl:copy/>
-                        </xsl:for-each>
-                        <xsl:copy-of select="a18:filter-pb(.)"/>
-                    </xsl:copy>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:for-each>
-    </xsl:function>
-    <xsl:function name="a18:document-name">
+
+    <!-- Wrapper for XHTML templates-->
+    <xsl:template match="/TEI:TEI/TEI:text/TEI:body" mode="xhtml">
+        <xsl:apply-templates/>
+    </xsl:template>
+    <xsl:template match="/TEI:TEI/TEI:teiHeader" mode="xhtml"/>
+
+
+    <xsl:function name="a18:page-name">
         <xsl:param name="node" as="node()"/>
         <xsl:choose>
             <xsl:when test="$input-collection = '' and $document != ''">
                 <xsl:value-of select="$document"/>
             </xsl:when>
-            <xsl:when test="$input-collection != '' and document-uri(root($node)) != ''">
-                <xsl:variable name="input-file-name" select="replace(document-uri(root($node)), '^.*/(.*)$', '$1')" as="xs:string"/>
-                <xsl:value-of select="replace($input-file-name, '^(.*?)\.[^.]*$', '$1')"/>
+            <xsl:when test="$input-collection != '' and ropen:document-name($node) != ''">
+                <xsl:value-of select="ropen:document-name($node)"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="'page'"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+    <!--
     <xsl:function name="a18:chunk">
         <xsl:param name="ms1" as="element()"/>
         <xsl:param name="ms2" as="element()"/>
@@ -162,4 +184,5 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+    -->
 </xsl:stylesheet>
