@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:sub="http://sub.uni-goettingen.de/xslt/functions/1.0"
-                xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"
-                xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-                exclude-result-prefixes="xd a18"
-                version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:sub="http://sub.uni-goettingen.de/xslt/functions/1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" xmlns:TEI="http://www.tei-c.org/ns/1.0"
+   exclude-result-prefixes="xd a18 sub TEI" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -15,7 +11,7 @@
          <xd:p/>
       </xd:desc>
    </xd:doc>
-    <!--
+   <!--
     <xsl:param name="fatal-param" select="false()"/>
     <xsl:variable name="fatal" select="if ($fatal-param castable as xs:boolean) then xs:boolean($fatal-param) else false()" as="xs:boolean"/>
     <xsl:variable name="terminate" as="xs:string">
@@ -28,42 +24,46 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-    --><xsl:variable name="local-terminate" as="xs:string" select="'yes'"/>
+    -->
+   <xsl:variable name="local-terminate" as="xs:string" select="'yes'"/>
    <xsl:variable name="prefixes">
       <a18:prefixes>
-         <a18:prefix name="getty"
-                     uri="http://www.getty.edu/vow/TGNFullDisplay?find=&amp;place=&amp;nation=&amp;english=Y&amp;subjectid="
-                     pattern="GettyID:(\d{{7,8}})"
-                     start="GettyID"/>
-         <a18:prefix name="cerl"
-                     uri="http://thesaurus.cerl.org/cgi-bin/record.pl?rid="
-                     pattern="CerlID:(cn[pi]\d{{8,9}})"
-                     start="CerlID"/>
-         <a18:prefix name="census"
-                     uri="http://census.bbaw.de/easydb/censusID="
-                     pattern="CensusID:(\d{{6,9}})"
-                     start="CensusID"/>
+         <a18:prefix name="getty" uri="http://www.getty.edu/vow/TGNFullDisplay?find=&amp;place=&amp;nation=&amp;english=Y&amp;subjectid=" pattern="GettyID:(\d{{7,8}})" start="GettyID"/>
+         <a18:prefix name="cerl" uri="http://thesaurus.cerl.org/cgi-bin/record.pl?rid=" pattern="CerlID:(cn[pi]\d{{8,9}})" start="CerlID"/>
+         <a18:prefix name="census" uri="http://census.bbaw.de/easydb/censusID=" pattern="CensusID:(\d{{6,9}})" start="CensusID"/>
          <a18:prefix name="http" uri="http" pattern="http(s?://.*)" start="http"/>
          <a18:prefix name="page" uri="#" pattern="(p.+)" start="p"/>
-            <!-- This is needed for malformed URIs --><a18:prefix name="" uri="" pattern="(.+)" start=""/>
+         <!-- This is needed for malformed URIs -->
+         <a18:prefix name="" uri="" pattern="(.+)" start=""/>
       </a18:prefixes>
    </xsl:variable>
    <xsl:variable name="dnbURL" select="'http://d-nb.info/gnd/'" as="xs:string"/>
    <xsl:function name="a18:resolve-id" as="xs:string">
-        <!-- See XQuery implementation in modules/archaeo18lib.xq --><xsl:param name="id" as="xs:string"/>
-        <!-- Clean up leading # --><xsl:variable name="identifier"
-                    as="xs:string"
-                    select="replace($id, '^#(.*)$', '$1')"/>
+      <!-- See XQuery implementation in modules/archaeo18lib.xq -->
+      <xsl:param name="id" as="xs:string"/>
+      <!-- Clean up leading # -->
+      <xsl:variable name="identifier" as="xs:string" select="replace($id, '^#(.*)$', '$1')"/>
       <xsl:variable name="name" as="xs:string">
          <xsl:choose>
-                <!-- URIs with schema prefix --><xsl:when test="contains($identifier, ':')">
+            <!-- URIs with schema prefix -->
+            <xsl:when test="contains($identifier, ':')">
                <xsl:value-of select="$prefixes//a18:prefix[@start = substring-before($identifier, ':')]/@name"/>
             </xsl:when>
-                <!-- local anchors --><xsl:when test="matches($id, '#[\w-]')">
+            <!-- local anchors -->
+            <xsl:when test="matches($id, '#[\w-]')">
                <xsl:value-of select="$prefixes//a18:prefix[@start = replace($identifier, '([A-Za-z]+).*', '$1')]/@name"/>
             </xsl:when>
+            <!-- Empty references - mainly books -->
+            <xsl:when test="$id = '#'">
+               <xsl:message>WARNING: Empty reference found</xsl:message>
+               <xsl:value-of select="''"/>
+            </xsl:when>
+            <xsl:when test="starts-with($id, '#placeholder')">
+               <xsl:value-of select="''"/>
+            </xsl:when>
             <xsl:otherwise>
-                    <!-- This stylesheet will fail here, since a empty result for this variable will fail later on when it's given to the function. --><xsl:message terminate="{$local-terminate}">Can't extract prefix for id <xsl:value-of select="$id"/>
+               <!-- This stylesheet will fail here, since a empty result for this variable will fail later on when it's given to the function. -->
+               <xsl:message terminate="{$local-terminate}">Can't extract prefix for id <xsl:value-of select="$id"/>
                </xsl:message>
                <xsl:value-of select="$prefixes//a18:prefix[@start = '']/@name"/>
             </xsl:otherwise>
@@ -74,15 +74,17 @@
    <xsl:function name="a18:normalize-space">
       <xsl:param name="str" as="xs:string"/>
       <xsl:choose>
-            <!-- TODO: no space if the next element is a lb - and contains($str, '
-') --><xsl:when test="matches($str, '^\s*[\r\n]\s+$')">
+         <!-- TODO: no space if the next element is a lb - and contains($str, '
+') -->
+         <xsl:when test="matches($str, '^\s*[\r\n]\s+$')">
             <xsl:value-of select="' '"/>
          </xsl:when>
          <xsl:otherwise>
             <xsl:value-of select="$str"/>
-                <!--
+            <!--
                 <xsl:value-of select="normalize-space($str)"></xsl:value-of>
-           --></xsl:otherwise>
+           -->
+         </xsl:otherwise>
       </xsl:choose>
    </xsl:function>
    <xsl:function name="a18:chunk">
@@ -117,4 +119,38 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:function>
+   <xsl:function name="a18:filter-pb" as="node()*">
+      <xsl:param name="nodes" as="node()*"/>
+      <xsl:for-each select="$nodes/node()">
+         <xsl:choose>
+            <xsl:when test=". instance of element(TEI:pb)"/>
+            <xsl:otherwise>
+               <xsl:copy>
+                  <xsl:for-each select="@*">
+                     <xsl:copy/>
+                  </xsl:for-each>
+                  <xsl:copy-of select="a18:filter-pb(.)"/>
+               </xsl:copy>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:for-each>
+   </xsl:function>
+   <!-- extracts the display title of an document -->
+   <xsl:function name="a18:tei-display-title" as="xs:string*">
+      <xsl:param name="root" as="document-node()"/>
+      <xsl:value-of select="$root//TEI:teiHeader//TEI:title[@type='display']/text()"/>
+   </xsl:function>
+   <!-- Gets the page number by counting preceding pages -->
+   <xsl:function name="a18:get-page-nr" as="xs:string">
+      <xsl:param name="node" as="element()"/>
+      <xsl:choose>
+         <xsl:when test="$node/preceding::TEI:pb[1]/@n">
+            <xsl:value-of select="$node/preceding::TEI:pb[1]/@n"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:value-of select="count($node/preceding::TEI:pb)"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:function>
+
 </xsl:stylesheet>
