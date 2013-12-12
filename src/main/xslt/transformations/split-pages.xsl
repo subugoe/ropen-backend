@@ -16,15 +16,16 @@
     <!-- Output location, otherwise . -->
     <xsl:param name="output-collection" select="''" as="xs:string"/>
     <!-- Name of the document, used as file name prefix for pages -->
-    <xsl:param name="document" as="xs:string"/>
+    <xsl:param name="document" select="''" as="xs:string"/>
     <!-- Use 'xhtml', 'tei' or 'kml' -->
     <xsl:param name="mode" select="'tei'" as="xs:string"/>
     <!-- copy TEI header into every page? -->
     <xsl:param name="copy-header" select="false()" as="xs:boolean"/>
 
     <!-- Imports -->
-    <xsl:include href="TEI2XHTML.xsl"/>
+    <xsl:include href="./TEI2XHTML.xsl"/>
     <xsl:include href="./lib/ropen.xsl"/>
+    <xsl:variable name="filterAnnotations" select="true()" as="xs:boolean"/>
 
     <xsl:template match="/" priority="10">
         <!-- Find out if we are processing a single Document or a collection -->
@@ -122,7 +123,7 @@
                         </html>
                     </xsl:when>
                     <xsl:when test="$mode = 'kml'">
-                        <xsl:message terminate="yes">Fatal: Mode KM not implemented yet</xsl:message>
+                        <xsl:message terminate="yes">Fatal: Mode KML not implemented yet</xsl:message>
                     </xsl:when>
                     <xsl:otherwise/>
                 </xsl:choose>
@@ -136,6 +137,8 @@
     </xsl:template>
     <xsl:template match="/TEI:TEI/TEI:teiHeader" mode="xhtml"/>
 
+    <!-- Get rid of TEI:addName's -->
+    <xsl:template match="TEI:addName"/>
 
     <xsl:function name="a18:page-name">
         <xsl:param name="node" as="node()"/>
