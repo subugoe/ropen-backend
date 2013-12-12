@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:sub="http://sub.uni-goettingen.de/xslt/functions/1.0"
-                xmlns:TEI="http://www.tei-c.org/ns/1.0"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:html="http://www.w3.org/1999/xhtml"
-                xmlns:exist="http://exist.sourceforge.net/NS/exist"
-                xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"
-                xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-                version="2.0"
-                exclude-result-prefixes="a18 sub xd">
+<xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:sub="http://sub.uni-goettingen.de/xslt/functions/1.0"
+   xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:html="http://www.w3.org/1999/xhtml"
+   xmlns:exist="http://exist.sourceforge.net/NS/exist" xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" version="2.0"
+   exclude-result-prefixes="a18 sub xd exist xs xlink">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -22,39 +14,33 @@
    </xd:doc>
    <xsl:output method="xml" indent="no" encoding="UTF-8"/>
    <xsl:strip-space elements="TEI:persName TEI:note TEI:placeName"/>
-    <!-- External parameters are parsed --><xsl:param name="filter-annotations-param" select="true()"/>
+   <!-- External parameters are parsed -->
+   <xsl:param name="filter-annotations-param" select="true()"/>
    <xsl:param name="line-mode-param" select="false()"/>
    <xsl:param name="resolve-links-param" select="true()"/>
    <xsl:param name="fatal-param" select="false()"/>
    <xsl:param name="nested-links-param" select="false()"/>
    <xsl:param name="result-width-param" select="40"/>
-    <!-- Iternal Variables for parameters --><xsl:variable name="filterAnnotations"
-                 select="if ($filter-annotations-param castable as xs:boolean) then xs:boolean($filter-annotations-param) else true()"
-                 as="xs:boolean"/>
-   <xsl:variable name="lineMode"
-                 select="if ($line-mode-param castable as xs:boolean) then xs:boolean($line-mode-param) else false()"
-                 as="xs:boolean"/>
-   <xsl:variable name="resolve-links"
-                 select="if ($resolve-links-param castable as xs:boolean) then xs:boolean($resolve-links-param) else true()"
-                 as="xs:boolean"/>
-   <xsl:variable name="fatal"
-                 select="if ($fatal-param castable as xs:boolean) then xs:boolean($fatal-param) else false()"
-                 as="xs:boolean"/>
-   <xsl:variable name="nested-links"
-                 select="if ($nested-links-param castable as xs:boolean) then xs:boolean($nested-links-param) else false()"
-                 as="xs:boolean"/>
-   <xsl:variable name="result-width"
-                 select="if ($result-width-param castable as xs:integer) then xs:integer($result-width-param) else 40"
-                 as="xs:integer"/>
+   <xsl:param name="html-fragment-param" select="false()"/>
+   <!-- Iternal Variables for parameters -->
+   <xsl:variable name="filterAnnotations" select="if ($filter-annotations-param castable as xs:boolean) then xs:boolean($filter-annotations-param) else true()" as="xs:boolean"/>
+   <xsl:variable name="lineMode" select="if ($line-mode-param castable as xs:boolean) then xs:boolean($line-mode-param) else false()" as="xs:boolean"/>
+   <xsl:variable name="resolve-links" select="if ($resolve-links-param castable as xs:boolean) then xs:boolean($resolve-links-param) else true()" as="xs:boolean"/>
+   <xsl:variable name="fatal" select="if ($fatal-param castable as xs:boolean) then xs:boolean($fatal-param) else false()" as="xs:boolean"/>
+   <xsl:variable name="nested-links" select="if ($nested-links-param castable as xs:boolean) then xs:boolean($nested-links-param) else false()" as="xs:boolean"/>
+   <xsl:variable name="result-width" select="if ($result-width-param castable as xs:integer) then xs:integer($result-width-param) else 40" as="xs:integer"/>
+   <xsl:variable name="html-fragment" select="if ($html-fragment-param castable as xs:boolean) then xs:boolean($html-fragment-param) else false()" as="xs:boolean"/>
    <xsl:variable name="showHeader" as="xs:boolean" select="false()"/>
-    <!-- 
+   <!-- 
     Always create a <a/> tag for the outer entity, even if there is no link in it. 
-    --><xsl:variable name="always-link" select="true()" as="xs:boolean"/>
+    -->
+   <xsl:variable name="always-link" select="true()" as="xs:boolean"/>
    <xsl:variable name="class-prefix" select="'tei:'" as="xs:string"/>
-    <!-- The element indicating a match 
+   <!-- The element indicating a match 
         This isn't used anymore, since it's forces name checks uses the following XPath to make this work again:
         .[name() = name($match-element)]
-    --><xsl:variable name="match-element" as="element()">
+    -->
+   <xsl:variable name="match-element" as="element()">
       <xsl:element name="exist:match" namespace="http://exist.sourceforge.net/NS/exist"/>
    </xsl:variable>
    <xsl:variable name="terminate" as="xs:string">
@@ -67,53 +53,48 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:variable>
-    <!-- Should result fragments contain Span Elements with classes for TEI Elements? --><xsl:variable name="result-tei-class" select="false()" as="xs:boolean"/>
+   <!-- Should result fragments contain Span Elements with classes for TEI Elements? -->
+   <xsl:variable name="result-tei-class" select="false()" as="xs:boolean"/>
    <xsl:include href="./lib/a18.xsl"/>
    <xsl:template match="/">
-        <!-- TODO: Use XSLT Modes to get rid of variables --><html xmlns:dc="http://purl.org/dc/elements/1.1/"
-            xmlns:gn="http://www.geonames.org/ontology#"
-            xmlns:foaf="http://xmlns.com/foaf/0.1/"
-            xmlns:bibo="http://purl.org/ontology/bibo/1.3/"
-            version="XHTML+RDFa 1.0"
-            type="bibo:Manuscript">
-         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-         <meta charset="UTF-8"/>
-         <xsl:variable name="pageMode" as="xs:boolean">
-            <xsl:choose>
-               <xsl:when test="not(/TEI:TEI/TEI:teiHeader) and //TEI:text">
-                  <xsl:value-of select="true()"/>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:value-of select="false()"/>
-               </xsl:otherwise>
-            </xsl:choose>
-         </xsl:variable>
-         <xsl:variable name="fragmentMode" as="xs:boolean">
-            <xsl:choose>
-               <xsl:when test="not(/TEI:TEI/TEI:teiHeader) and not(//TEI:text)">
-                  <xsl:value-of select="true()"/>
-               </xsl:when>
-               <xsl:otherwise>
-                  <xsl:value-of select="false()"/>
-               </xsl:otherwise>
-            </xsl:choose>
-         </xsl:variable>
-         <xsl:if test="$fragmentMode != true()">
-            <head>
-               <xsl:if test="$pageMode != true()">
-                  <title type="dc:title">
-                     <xsl:choose>
-                        <xsl:when test="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']">
-                           <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                           <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title/text()"/>
-                        </xsl:otherwise>
-                     </xsl:choose>
-                  </title>
-               </xsl:if>
-            </head>
-         </xsl:if>
+      <!-- TODO: Use XSLT Modes to get rid of variables -->
+      <xsl:variable name="pageMode" as="xs:boolean">
+         <xsl:choose>
+            <xsl:when test="not(/TEI:TEI/TEI:teiHeader) and //TEI:text">
+               <xsl:value-of select="true()"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:value-of select="false()"/>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="fragmentMode" as="xs:boolean">
+         <xsl:choose>
+            <xsl:when test="not(/TEI:TEI/TEI:teiHeader) and not(//TEI:text)">
+               <xsl:value-of select="true()"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:value-of select="false()"/>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="html-head">
+         <head>
+            <xsl:if test="$pageMode != true()">
+               <title type="dc:title">
+                  <xsl:choose>
+                     <xsl:when test="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']">
+                        <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title/text()"/>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </title>
+            </xsl:if>
+         </head>
+      </xsl:variable>
+      <xsl:variable name="html-body">
          <body>
             <xsl:if test="$lineMode = true()">
                <xsl:call-template name="lineSpan">
@@ -124,27 +105,49 @@
                <xsl:when test="$pageMode = false() and $fragmentMode = false()">
                   <xsl:apply-templates select="/TEI:TEI/TEI:text"/>
                </xsl:when>
-                    <!-- This will be used if in document fragment mode -->
-                    <!-- This is needed if the document was cut by eXist --><xsl:when test="$pageMode = true()">
+               <!-- This will be used if in document fragment mode -->
+               <!-- This is needed if the document was cut by eXist -->
+               <xsl:when test="$pageMode = true()">
                   <xsl:apply-templates select="//TEI:text"/>
                </xsl:when>
-                    <!-- This is needed if the document was cut by Lucene (result fragments) --><xsl:when test="$fragmentMode = true()">
+               <!-- This is needed if the document was cut by Lucene (result fragments) -->
+               <xsl:when test="$fragmentMode = true()">
                   <xsl:apply-templates/>
                </xsl:when>
             </xsl:choose>
-                <!-- TODO: use a mode for this stuff --><xsl:if test="$lineMode != true()">
+            <!-- TODO: use a mode for this stuff -->
+            <xsl:if test="$lineMode != true()">
                <xsl:if test="//TEI:note">
                   <hr class="{'endOfDocument'}"/>
                   <xsl:call-template name="addNotes"/>
                </xsl:if>
             </xsl:if>
          </body>
-      </html>
+      </xsl:variable>
+      <xsl:choose>
+         <xsl:when test="$html-fragment = true()">
+            <xsl:value-of select="$html-body"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <html xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:bibo="http://purl.org/ontology/bibo/1.3/"
+               version="XHTML+RDFa 1.0" type="bibo:Manuscript">
+               <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+               <meta charset="UTF-8"/>
+               <xsl:if test="$fragmentMode != true()">
+                  <xsl:value-of select="$html-head"/>
+               </xsl:if>
+               <body>
+                  <xsl:value-of select="$html-body"/>
+               </body>
+            </html>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
-    <!-- Figures -->
-    <!--
+   <!-- Figures -->
+   <!--
   TODO: Insert Link.
-  --><xsl:template match="TEI:figure" mode="#default schema">
+  -->
+   <xsl:template match="TEI:figure" mode="#default schema">
       <div class="{concat($class-prefix, local-name(.))}">
          <span xml:lang="de">Zeichnung/Skizze: siehe Digitalisat der Handschrift</span>
          <span xml:lang="en">Figure/Sketch: see digitized manuscript</span>
@@ -159,18 +162,19 @@
       </div>
    </xsl:template>
 
-    <!-- Document blocks --><xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="#default schema">
+   <!-- Document blocks -->
+   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="#default schema">
       <xsl:element name="{local-name(.)}">
          <xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
          <xsl:apply-templates/>
       </xsl:element>
    </xsl:template>
 
-    <!-- breaks --><xsl:template match="TEI:lb|TEI:cb|TEI:handShift"
-                 name="br"
-                 mode="#default schema">
+   <!-- breaks -->
+   <xsl:template match="TEI:lb|TEI:cb|TEI:handShift" name="br" mode="#default schema">
       <br class="{concat($class-prefix, local-name(.))}"/>
-        <!-- TODO: This could be faster using a mode --><xsl:if test="$lineMode = true()">
+      <!-- TODO: This could be faster using a mode -->
+      <xsl:if test="$lineMode = true()">
          <xsl:call-template name="lineSpan"/>
       </xsl:if>
    </xsl:template>
@@ -179,9 +183,10 @@
       <xsl:call-template name="lineSpan"/>
    </xsl:template>
    <xsl:template match="TEI:pb" mode="#default schema">
-        <!--
+      <!--
         <xsl:call-template name="pageSpan"/>
-        --><xsl:variable name="page-nr">
+        -->
+      <xsl:variable name="page-nr">
          <xsl:choose>
             <xsl:when test="./@n">
                <xsl:value-of select="./@n"/>
@@ -193,7 +198,8 @@
       </xsl:variable>
       <a name="{concat('p', $page-nr)}"/>
       <hr class="{concat($class-prefix, local-name(.))}"/>
-        <!-- TODO: use a mode for this stuff --><xsl:if test="count(following-sibling::TEI:pb) &lt; 1 and $lineMode = true()">
+      <!-- TODO: use a mode for this stuff -->
+      <xsl:if test="count(following-sibling::TEI:pb) &lt; 1 and $lineMode = true()">
          <xsl:call-template name="lineSpan">
             <xsl:with-param name="nr" select="1"/>
          </xsl:call-template>
@@ -204,7 +210,8 @@
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- headings --><xsl:template match="TEI:head" mode="#default schema">
+   <!-- headings -->
+   <xsl:template match="TEI:head" mode="#default schema">
       <xsl:variable name="level">
          <xsl:choose>
             <xsl:when test="count(ancestor::TEI:div) &gt; 0">
@@ -248,7 +255,7 @@
             <xsl:when test="@resp">
                <xsl:call-template name="addClass">
                   <xsl:with-param name="additional-classes" select="true()">
-                            <!--
+                     <!--
                             <xsl:call-template name="attribute-class"/>
                             --></xsl:with-param>
                </xsl:call-template>
@@ -260,8 +267,7 @@
          <xsl:apply-templates/>
       </ins>
    </xsl:template>
-   <xsl:template match="TEI:unclear|TEI:damage|TEI:gap|TEI:foreign"
-                 mode="#default schema">
+   <xsl:template match="TEI:unclear|TEI:damage|TEI:gap|TEI:foreign" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:if test="@xml:lang">
             <xsl:attribute name="xml:lang" select="@xml:lang"/>
@@ -269,7 +275,8 @@
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- Mapping for Tags not part of Archaeo18, might be merged with others later --><xsl:template match="TEI:profession" mode="#default schema">
+   <!-- Mapping for Tags not part of Archaeo18, might be merged with others later -->
+   <xsl:template match="TEI:profession" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:apply-templates/>
       </span>
@@ -319,15 +326,16 @@
       </span>
    </xsl:template>
 
-    <!-- Column breaks inside the text --><xsl:template match="TEI:milestone" mode="#default schema">
+   <!-- Column breaks inside the text -->
+   <xsl:template match="TEI:milestone" mode="#default schema">
       <xsl:choose>
          <xsl:when test="@unit = 'column' and @type = 'start'">
-            <xsl:variable name="columns"
-                          select="./following::*[not(./preceding::TEI:milestone[@unit='column'][@type='end'])]"/>
+            <xsl:variable name="columns" select="./following::*[not(./preceding::TEI:milestone[@unit='column'][@type='end'])]"/>
 
-                <!--
+            <!--
                 ./following::*[not(./preceding::TEI:milestone[@unit='column'][@type='end'])]
-                --><xsl:for-each select="$columns//TEI:cb">
+                -->
+            <xsl:for-each select="$columns//TEI:cb">
                <div class="column">
                   <xsl:apply-templates/>
                </div>
@@ -342,21 +350,23 @@
       </xsl:choose>
    </xsl:template>
 
-    <!-- Entities (inkluding pseudo entities - everything that links) start here -->
-    <!-- 
+   <!-- Entities (inkluding pseudo entities - everything that links) start here -->
+   <!-- 
         Also match <name type="place|person|org"/>
-    --><xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']"
-                 mode="#default schema">
-        <!-- The following pattern can be used to find multiple links "#[^"]*?#.*?" for one entity 
+    -->
+   <xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']" mode="#default schema">
+      <!-- The following pattern can be used to find multiple links "#[^"]*?#.*?" for one entity 
              The following XPath can be used to fin nested linking entities
         -->
-        <!-- 
+      <!-- 
         TODO: Check if there are child, of one of the entities, if that's the case,
         create <span/>'s instead of <a/>'s.
         <span/>'s should use a xlink:to attrubute for the links
-        --><xsl:variable name="parent-links" as="xs:boolean">
+        -->
+      <xsl:variable name="parent-links" as="xs:boolean">
          <xsl:choose>
-            <xsl:when test="ancestor::TEI:term|ancestor::TEI:bibl|ancestor::TEI:placeName|ancestor::TEI:persName|ancestor::TEI:ref|ancestor::TEI:orgName|ancestor::TEI:name[@type = 'place']|ancestor::TEI:name[@type = 'pers']|ancestor::TEI:name[@type = 'org']">
+            <xsl:when
+               test="ancestor::TEI:term|ancestor::TEI:bibl|ancestor::TEI:placeName|ancestor::TEI:persName|ancestor::TEI:ref|ancestor::TEI:orgName|ancestor::TEI:name[@type = 'place']|ancestor::TEI:name[@type = 'pers']|ancestor::TEI:name[@type = 'org']">
                <xsl:value-of select="true()"/>
             </xsl:when>
             <xsl:otherwise>
@@ -381,7 +391,8 @@
          </xsl:choose>
       </xsl:variable>
 
-        <!-- select="if (sub:count-occurrences($ref-str, '#') > 1) then true() else false()"  --><xsl:variable name="nested" as="xs:boolean">
+      <!-- select="if (sub:count-occurrences($ref-str, '#') > 1) then true() else false()"  -->
+      <xsl:variable name="nested" as="xs:boolean">
          <xsl:choose>
             <xsl:when test="sub:count-occurrences($ref-str, '#') &gt; 1">
                <xsl:value-of select="true()"/>
@@ -392,21 +403,25 @@
          </xsl:choose>
       </xsl:variable>
 
-        <!-- select="if ($nested) then a18:tokenize-ids($ref-str) else $ref-str"  --><xsl:variable name="targets" as="item()*">
+      <!-- select="if ($nested) then a18:tokenize-ids($ref-str) else $ref-str"  -->
+      <xsl:variable name="targets" as="item()*">
          <xsl:choose>
             <xsl:when test="$nested">
                <xsl:copy-of select="a18:tokenize-ids($ref-str)"/>
-                    <!--
+               <!--
                     <xsl:copy-of select="tokenize($ref-str, '\s+')"/>
-                      --></xsl:when>
-                <!-- Change target to an empty sequece if link is invalid. --><xsl:when test="$ref-str = '#' or $ref-str = ''"/>
+                      -->
+            </xsl:when>
+            <!-- Change target to an empty sequece if link is invalid. -->
+            <xsl:when test="$ref-str = '#' or $ref-str = ''"/>
             <xsl:otherwise>
                <xsl:value-of select="($ref-str)"/>
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
 
-        <!-- select="if (not(empty($targets))) then 'a' else 'span'" --><xsl:variable name="element" as="xs:string">
+      <!-- select="if (not(empty($targets))) then 'a' else 'span'" -->
+      <xsl:variable name="element" as="xs:string">
          <xsl:choose>
             <xsl:when test="not(empty($targets)) and not($parent-links) and not($nested-links)">
                <xsl:text>a</xsl:text>
@@ -422,7 +437,8 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-        <!-- Put the children in a variable --><xsl:variable name="content">
+      <!-- Put the children in a variable -->
+      <xsl:variable name="content">
          <xsl:choose>
             <xsl:when test="not(. instance of element(TEI:bibl))">
                <xsl:apply-templates select="./node()"/>
@@ -432,7 +448,8 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-        <!-- Put common attributes in a variable --><xsl:variable name="attr" as="element(a18:attributes)">
+      <!-- Put common attributes in a variable -->
+      <xsl:variable name="attr" as="element(a18:attributes)">
          <a18:attributes class="{concat($class-prefix, local-name(.))}">
             <xsl:choose>
                <xsl:when test=". instance of element(TEI:name)">
@@ -457,9 +474,10 @@
                </xsl:otherwise>
             </xsl:choose>
 
-                <!--
+            <!--
                 <xsl:if test="$element = 'a' and not (. instance of element(TEI:bibl))">
-                --><xsl:if test="$element = 'a'">
+                -->
+            <xsl:if test="$element = 'a'">
                <xsl:attribute name="target" select="'_blank'"/>
             </xsl:if>
             <xsl:choose>
@@ -494,7 +512,8 @@
       <xsl:element name="{$element}">
          <xsl:copy-of select="$attr/@*"/>
          <xsl:if test="$link-attribute != ''">
-                <!-- select="if ($resolve-links = true()) then a18:resolve-id($targets[1]) else $targets[1]" --><xsl:attribute name="{$link-attribute}">
+            <!-- select="if ($resolve-links = true()) then a18:resolve-id($targets[1]) else $targets[1]" -->
+            <xsl:attribute name="{$link-attribute}">
                <xsl:choose>
                   <xsl:when test="$resolve-links = true()">
                      <xsl:value-of select="a18:resolve-id($targets[1])"/>
@@ -513,8 +532,7 @@
                   <xsl:with-param name="attributes" select="$attr"/>
                   <xsl:with-param name="resolve-links" select="$resolve-links"/>
                   <xsl:with-param name="element-name" select="if ($nested-links) then 'a' else 'span'"/>
-                  <xsl:with-param name="attribute-name"
-                                  select="if ($nested-links) then 'href' else 'xlink:to'"/>
+                  <xsl:with-param name="attribute-name" select="if ($nested-links) then 'href' else 'xlink:to'"/>
                </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
@@ -523,7 +541,8 @@
          </xsl:choose>
       </xsl:element>
    </xsl:template>
-    <!-- Dates --><xsl:template match="TEI:date" mode="#default schema">
+   <!-- Dates -->
+   <xsl:template match="TEI:date" mode="#default schema">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:if test="@when">
             <xsl:attribute name="property" select="'dc:date'"/>
@@ -532,7 +551,8 @@
          <xsl:apply-templates/>
       </span>
    </xsl:template>
-    <!-- Notes --><xsl:template match="TEI:note" mode="#default schema">
+   <!-- Notes -->
+   <xsl:template match="TEI:note" mode="#default schema">
       <xsl:choose>
          <xsl:when test="@place = 'margin'">
             <span class="{concat($class-prefix, local-name(.), ' ', $class-prefix, local-name(.),'-', translate(@place, ' ', '-'))}">
@@ -543,14 +563,15 @@
             <span style="display: none;">
                <xsl:call-template name="addClass">
                   <xsl:with-param name="additional-classes" select="true()">
-                            <!--
+                     <!--
                             <xsl:call-template name="attribute-class"/>
                             --></xsl:with-param>
                </xsl:call-template>
                <xsl:apply-templates/>
             </span>
          </xsl:when>
-            <!-- TODO: use a mode for this stuff --><xsl:when test="$lineMode != true()">
+         <!-- TODO: use a mode for this stuff -->
+         <xsl:when test="$lineMode != true()">
             <xsl:variable name="target">
                <xsl:choose>
                   <xsl:when test="@id">
@@ -561,9 +582,7 @@
                   </xsl:otherwise>
                </xsl:choose>
             </xsl:variable>
-            <a class="{concat($class-prefix, local-name(.))}"
-               href="{concat('#', $target)}"
-               name="{concat('return_', $target)}">
+            <a class="{concat($class-prefix, local-name(.))}" href="{concat('#', $target)}" name="{concat('return_', $target)}">
                <xsl:text>[</xsl:text>
                <xsl:number level="any"/>
                <xsl:text>]</xsl:text>
@@ -577,7 +596,8 @@
       </xsl:choose>
    </xsl:template>
 
-    <!-- Schema mode --><xsl:template match="TEI:body[child::TEI:schemaSpec]"/>
+   <!-- Schema mode -->
+   <xsl:template match="TEI:body[child::TEI:schemaSpec]"/>
    <xsl:template match="TEI:titlePage" mode="schema">
       <xsl:if test="./TEI:docTitle/TEI:titlePart[@type = 'main']">
          <h1 class="{concat($class-prefix, local-name(.))}">
@@ -629,13 +649,15 @@
       </li>
    </xsl:template>
 
-    <!-- Catch undeclared TEI tags -->
-    <!--
+   <!-- Catch undeclared TEI tags -->
+   <!--
         TODO:
             * Merge this with template match="*"
        
-        --><xsl:template match="TEI:*" mode="#default">
-        <!-- Check if we are processing a TEI schema --><xsl:choose>
+        -->
+   <xsl:template match="TEI:*" mode="#default">
+      <!-- Check if we are processing a TEI schema -->
+      <xsl:choose>
          <xsl:when test="ancestor-or-self::TEI:front">
             <xsl:apply-templates mode="schema"/>
          </xsl:when>
@@ -653,12 +675,12 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-    <!--
+   <!--
     <xsl:template match="TEI:text" mode="#all">
         <xsl:apply-templates/>
     </xsl:template>
     -->
-    <!--
+   <!--
     <xsl:template match="*">
         <xsl:if test="not(ancestor-or-self::TEI:teiHeader)">
             <xsl:message terminate="yes">TEI2XHTML: Undeclared Element detected <xsl:value-of select="local-name(.)"/>: <xsl:value-of select="."/>
@@ -670,10 +692,11 @@
         </xsl:if>
     </xsl:template>
     -->
-    <!-- 
+   <!-- 
         Pass unknown elements, not in the TEI namesapace to the result.
         This is needed to transfom search results as a block
-    --><xsl:template match="*">
+    -->
+   <xsl:template match="*">
       <xsl:variable name="passthru" select="true()" as="xs:boolean"/>
       <xsl:if test="$passthru = true()">
          <xsl:copy>
@@ -682,52 +705,59 @@
       </xsl:if>
    </xsl:template>
 
-    <!-- TEI Structure --><xsl:template match="TEI:text|TEI:body" mode="#all">
+   <!-- TEI Structure -->
+   <xsl:template match="TEI:text|TEI:body" mode="#default schema">
       <xsl:apply-templates/>
    </xsl:template>
 
-    <!-- Stuff to ignore --><xsl:template match="TEI:ab" mode="#all">
+   <!-- Stuff to ignore -->
+   <xsl:template match="TEI:ab" mode="#all">
       <xsl:apply-templates select="./*"/>
    </xsl:template>
 
-    <!-- 
+   <!-- 
     TODO: Check if this works
-    --><xsl:template match="TEI:addName" mode="#default">
+    -->
+   <xsl:template match="TEI:addName" mode="#default">
       <xsl:choose>
          <xsl:when test="$filterAnnotations = true() and @type = 'display'">
             <span class="{concat($class-prefix, local-name(.))}" style="display: none;">
                <xsl:apply-templates/>
             </span>
          </xsl:when>
+         <xsl:when test="$filterAnnotations = true()"/>
          <xsl:when test="not($filterAnnotations)">
             <xsl:apply-templates/>
          </xsl:when>
       </xsl:choose>
    </xsl:template>
-    <!-- 
+   <!-- 
     This is needed by the highlighting of eXist
-    --><xsl:template match="exist:match" mode="#default">
+    -->
+   <xsl:template match="exist:match" mode="#default">
       <span class="{name(.)}">
          <xsl:apply-templates/>
       </span>
    </xsl:template>
 
-    <!-- Try to normilize space 
+   <!-- Try to normilize space 
          Check if whitespace only (\s*) and contains break, replace by one space
          otherwise use normal normalize function
     -->
 
-    <!-- ./following::*[1] instance of element(TEI:lb) --><xsl:template match="TEI:p//text()" priority="1">
+   <!-- ./following::*[1] instance of element(TEI:lb) -->
+   <xsl:template match="TEI:p//text()" priority="1">
       <xsl:value-of select="a18:normalize-space(.)"/>
    </xsl:template>
 
-    <!--
+   <!--
     <xsl:template match="TEI:head//text()" priority="1">
         <xsl:value-of select="a18:normalize-space(.)"/>
     </xsl:template>
 -->
 
-    <!-- CSS Attributes --><xsl:template name="addClass">
+   <!-- CSS Attributes -->
+   <xsl:template name="addClass">
       <xsl:param name="hide" select="false()" as="xs:boolean"/>
       <xsl:param name="additional-classes" select="false()" as="xs:boolean"/>
       <xsl:attribute name="class">
@@ -740,15 +770,16 @@
                   <xsl:value-of select="' '"/>
                </xsl:if>
             </xsl:for-each>
-                <!--
+            <!--
                 <xsl:value-of select="concat(' ', $additional-classes)"/>
-                --></xsl:if>
+                -->
+         </xsl:if>
       </xsl:attribute>
       <xsl:if test="$hide = true()">
          <xsl:attribute name="style" select="'display: none;'"/>
       </xsl:if>
    </xsl:template>
-    <!--
+   <!--
     <xsl:template name="attribute-class">
         <xsl:for-each select="@*">
             <xsl:value-of select="concat(name(.), '-', data(.))"/>
@@ -758,7 +789,8 @@
         </xsl:for-each>
     </xsl:template>
 -->
-    <!-- This add the notes at the bottom --><xsl:template name="addNotes">
+   <!-- This add the notes at the bottom -->
+   <xsl:template name="addNotes">
       <xsl:for-each select="//TEI:note[not(@place = 'margin' or @type='certainty')]">
          <div class="note-link">
             <xsl:variable name="target">
@@ -771,9 +803,7 @@
                   </xsl:otherwise>
                </xsl:choose>
             </xsl:variable>
-            <a name="{$target}"
-               href="{concat('#return_', $target)}"
-               class="note-link-number">
+            <a name="{$target}" href="{concat('#return_', $target)}" class="note-link-number">
                <xsl:text>[</xsl:text>
                <xsl:number level="any"/>
                <xsl:text>]</xsl:text>
@@ -783,7 +813,8 @@
          </div>
       </xsl:for-each>
    </xsl:template>
-    <!-- needed for line and page numbering --><xsl:template name="lineSpan">
+   <!-- needed for line and page numbering -->
+   <xsl:template name="lineSpan">
       <xsl:param name="nr"/>
       <span>
          <xsl:attribute name="class">
@@ -829,8 +860,10 @@
          </xsl:attribute>
       </span>
    </xsl:template>
-    <!-- Utility templates --><xsl:template name="nestedLinks">
-        <!-- Links are supplied as tokens --><xsl:param name="links" as="item()*"/>
+   <!-- Utility templates -->
+   <xsl:template name="nestedLinks">
+      <!-- Links are supplied as tokens -->
+      <xsl:param name="links" as="item()*"/>
       <xsl:param name="pos" select="1" as="xs:integer"/>
       <xsl:param name="attributes" as="element(a18:attributes)"/>
       <xsl:param name="content"/>
@@ -868,7 +901,8 @@
       </xsl:choose>
    </xsl:template>
 
-    <!-- Templates for transformations of the header --><xsl:template match="TEI:teiHeader">
+   <!-- Templates for transformations of the header -->
+   <xsl:template match="TEI:teiHeader">
       <xsl:if test="(/TEI:teiHeader) and not(//TEI:text)">
          <div class="{concat($class-prefix, local-name(.))}">
             <h3>
@@ -903,11 +937,12 @@
    </xsl:template>
    <xsl:template match="TEI:repository" mode="header">
       <xsl:variable name="name" select="normalize-space(string-join(./text(), ''))"/>
-        <!--
+      <!--
         <xsl:variable name="name">
             <xsl:apply-templates/>
         </xsl:variable>
-        --><div class="{concat($class-prefix, local-name(.))}">
+        -->
+      <div class="{concat($class-prefix, local-name(.))}">
          <span xml:lang="en" class="tei:hi-bold">Library</span>
          <span xml:lang="de" class="tei:hi-bold">Bibliothek</span>: <xsl:value-of select="$name"/>
       </div>
@@ -928,7 +963,8 @@
       </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:title[@type = 'display']" mode="header">
-        <!-- Ignore this title if the is a regular title --><xsl:if test="not(../TEI:title[not(@type)])">
+      <!-- Ignore this title if the is a regular title -->
+      <xsl:if test="not(../TEI:title[not(@type)])">
          <xsl:choose>
             <xsl:when test="$showHeader">
                <div class="{concat($class-prefix, local-name(.))}">
@@ -946,11 +982,12 @@
    </xsl:template>
    <xsl:template match="TEI:author" mode="header">
       <xsl:variable name="name" select="normalize-space(string-join(./text(), ''))"/>
-        <!--
+      <!--
         <xsl:variable name="name">
             <xsl:apply-templates/>
         </xsl:variable>
-        --><xsl:if test="$name != ''">
+        -->
+      <xsl:if test="$name != ''">
          <div class="{concat($class-prefix, local-name(.))}">
             <span xml:lang="en" class="tei:hi-bold">Author / Copyist / Owner</span>
             <span xml:lang="de" class="tei:hi-bold">Autor / Kopist / Besitzer</span>: <xsl:value-of select="$name"/>
@@ -971,11 +1008,12 @@
    </xsl:template>
    <xsl:template match="TEI:principal" mode="header">
       <xsl:variable name="name" select="normalize-space(string-join(./text(), ''))"/>
-        <!--
+      <!--
         <xsl:variable name="name">
             <xsl:apply-templates/>
         </xsl:variable>
-        --><div class="{concat($class-prefix, local-name(.))}" style="display: none;">
+        -->
+      <div class="{concat($class-prefix, local-name(.))}" style="display: none;">
          <span xml:lang="en" class="tei:hi-bold">Contact Person</span>
          <span xml:lang="de" class="tei:hi-bold">Ansprechpartner</span>: <xsl:value-of select="$name"/>
       </div>
@@ -1023,19 +1061,20 @@
          <xsl:apply-templates/>
       </div>
    </xsl:template>
-    <!-- Add a Template to filter HTML Results for the KWIC Module http://exist-db.org/exist/apps/doc/kwic.xml  -->
-    <!--
+   <!-- Add a Template to filter HTML Results for the KWIC Module http://exist-db.org/exist/apps/doc/kwic.xml  -->
+   <!--
     <xsl:template name="hideElement">
         <xsl:attribute name="style" select="'display: none;'"/>
     </xsl:template>
     -->
-    <!--
+   <!--
     <xsl:template name="highlight-match">
         
     </xsl:template>
     -->
 
-    <!-- Library functions --><xsl:function name="sub:count-occurrences" as="xs:integer">
+   <!-- Library functions -->
+   <xsl:function name="sub:count-occurrences" as="xs:integer">
       <xsl:param name="str" as="xs:string"/>
       <xsl:param name="search" as="xs:string"/>
       <xsl:value-of select="count(tokenize($str, $search)) - 1"/>
@@ -1047,14 +1086,15 @@
       </xsl:for-each>
    </xsl:function>
 
-    <!-- Filtering of Results --><xsl:template match="fragment">
+   <!-- Filtering of Results -->
+   <xsl:template match="fragment">
       <xsl:variable name="fragment-clean">
          <xsl:apply-templates mode="fragment"/>
       </xsl:variable>
       <xsl:copy>
          <body>
             <p>
-                    <!--
+               <!--
                     <xsl:variable name="start" as="node()">
                         <xsl:element name="start"/>
                     </xsl:variable>
@@ -1114,14 +1154,15 @@
                         </xsl:otherwise>
 
                     </xsl:choose>
-                    --><xsl:copy-of select="$fragment-clean"/>
+                    -->
+               <xsl:copy-of select="$fragment-clean"/>
             </p>
          </body>
       </xsl:copy>
    </xsl:template>
 
 
-    <!--
+   <!--
     <xsl:function name="sub:chunk-node">
         <xsl:param name="ms1" as="node()"/>
         <xsl:param name="ms2" as="node()"/>
@@ -1154,7 +1195,8 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
---><xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment">
+-->
+   <xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:choose>
             <xsl:when test="./TEI:addName/exist:match and not(./descendant::exist:match[not(parent::TEI:addName)])">
@@ -1181,8 +1223,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign"
-                 mode="fragment">
+   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign" mode="fragment">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <span class="{concat($class-prefix, local-name(.))}">
@@ -1200,11 +1241,14 @@
    <xsl:template match="TEI:pb" mode="fragment">
       <hr class="{concat($class-prefix, local-name(.))}"/>
    </xsl:template>
-    <!-- Stuff to be filtered in result preview --><xsl:template match="TEI:note[@resp]" mode="fragment"/>
-    <!-- Stuff to be ignored in result preview --><xsl:template match="TEI:note|TEI:ref" mode="fragment">
+   <!-- Stuff to be filtered in result preview -->
+   <xsl:template match="TEI:note[@resp]" mode="fragment"/>
+   <!-- Stuff to be ignored in result preview -->
+   <xsl:template match="TEI:note|TEI:ref" mode="fragment">
       <xsl:apply-templates mode="fragment"/>
    </xsl:template>
-    <!-- Stuf to ignore, don't apply templates --><xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment"/>
+   <!-- Stuf to ignore, don't apply templates -->
+   <xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment"/>
    <xsl:template match="TEI:*" mode="fragment">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
@@ -1231,11 +1275,12 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-    <!--
+   <!--
     <xsl:template match="text()" mode="fragment">
         <xsl:value-of select="a18:normalize-space(.)"></xsl:value-of>
     </xsl:template>
-    --><xsl:template match="comment()" mode="fragment"/>
+    -->
+   <xsl:template match="comment()" mode="fragment"/>
    <xsl:template match="exist:match" mode="fragment">
       <xsl:choose>
          <xsl:when test="./parent::TEI:addName">
@@ -1248,7 +1293,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-    <!--
+   <!--
     <xsl:template match="text()" mode="fragment">
 
         <xsl:variable name="linebreak-class" select="concat('concat($class-prefix', 'lb')"></xsl:variable>
@@ -1261,4 +1306,5 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    --></xsl:stylesheet>
+    -->
+</xsl:stylesheet>
