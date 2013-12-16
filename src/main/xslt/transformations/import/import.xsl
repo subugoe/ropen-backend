@@ -25,8 +25,8 @@
     <xsl:param name="structure-collection" as="xs:string"/>
     <xsl:param name="url-prefix" as="xs:string"/>
 
+    <xsl:param name="output-param" select="'xhtml'"/>
     <xsl:template match="/">
-        <!-- Loop over the input collection -->
         <xsl:if test="$collection != '' ">
             <table>
                 <thead>
@@ -38,9 +38,13 @@
                     <xsl:if test="$mets-collection != ''">
                         <td>METS</td>
                     </xsl:if>
+                    <xsl:if test="$structure-collection != ''">
+                        <td>XHTML Structure</td>
+                    </xsl:if>
                 </thead>
 
                 <tr>
+                    <!-- Loop over the input collection -->
                     <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                         <td>
                             <xsl:value-of select="document-uri(.)"/>
@@ -52,12 +56,14 @@
                         <!-- Contructed file names -->
                         <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
                         <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
+                        <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
                         <td>
                             <xsl:value-of select="$in-file"/>
                         </td>
                         <xsl:if test="$tei-enriched-collection != ''">
                             <td>
                                 <span>
+                                    <!-- This needs to be an Template since result documents can't be used inside functions -->
                                     <xsl:variable name="success" as="xs:boolean">
                                         <xsl:call-template name="ropen:enrich-tei">
                                             <xsl:with-param name="input" select="document-uri(.)"/>
@@ -84,6 +90,7 @@
                         <xsl:if test="$mets-collection != ''">
                             <td>
                                 <span>
+                                    <!-- This needs to be an Template since result documents can't be used inside functions -->
                                     <xsl:variable name="success" as="xs:boolean">
                                         <xsl:call-template name="ropen:create-mets">
                                             <xsl:with-param name="input" select="document-uri(.)"/>
@@ -105,6 +112,30 @@
                                     <xsl:value-of select="$mets-file"/>
                                 </span>
                             </td>
+                        </xsl:if>
+                        <xsl:if test="$structure-collection != ''">
+                            <span>
+                                <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                <xsl:variable name="success" as="xs:boolean">
+                                    <xsl:call-template name="ropen:xhtml-structure">
+                                        <xsl:with-param name="input" select="document-uri(.)"/>
+                                        <xsl:with-param name="output" select="$structure-file"/>
+                                    </xsl:call-template>
+                                </xsl:variable>
+                                <xsl:choose>
+                                    <xsl:when test="$success">
+                                        <xsl:attribute name="style">
+                                            <xsl:text>color: green;</xsl:text>
+                                        </xsl:attribute>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <xsl:attribute name="style">
+                                            <xsl:text>color: red;</xsl:text>
+                                        </xsl:attribute>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                                <xsl:value-of select="$mets-file"/>
+                            </span>
                         </xsl:if>
                     </xsl:for-each>
                 </tr>
@@ -153,7 +184,6 @@
                                     <xsl:value-of select="$tei-enriched-file"/>
                                 </teiEnriched>
                             </xsl:if>
-
                             <pageCount>
                                 <xsl:value-of select="count(.//TEI:pb)"/>
                             </pageCount>
@@ -171,7 +201,7 @@
 
     <xsl:template match="text()|comment()|processing-instruction()"/>
 
-    <!-- TODO: There seem to be a bug in here -->
+
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
@@ -190,11 +220,13 @@
         <xsl:value-of select="true()"/>
     </xsl:template>
 
-    <xsl:function name="ropen:xhtml-structure" as="xs:boolean">
+    <xsl:template name="ropen:xhtml-structure" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <!-- TODO: finish this -->
+        <xsl:result-document href="{$output}">
+            <xsl:apply-templates select="document($input)" mode="xhtml-structure"/>
+        </xsl:result-document>
         <xsl:value-of select="true()"/>
-    </xsl:function>
+    </xsl:template>
 
 </xsl:stylesheet>
