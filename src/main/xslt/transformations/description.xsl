@@ -10,8 +10,10 @@
     </xd:doc>
     <xsl:param name="input-collection"/>
     <xsl:param name="output-collection"/>
+    
+    <xsl:include href="TEI2XHTML.xsl"/>
 
-    <xsl:template match="/">
+    <xsl:template match="/" priority="2">
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <title>Entitätenstatistik</title>
@@ -20,8 +22,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <td>Input</td>
-                            <td>Output</td>
+                            <td>Input folder</td>
+                            <td>Input file</td>
+                            <td>Output folder</td>
+                            <td>Output file</td>
                         </tr>
                     </thead>
                     <!-- Loop over the input collection -->
@@ -29,7 +33,7 @@
                         <tr>
                             <xsl:variable name="input-file" select="tokenize(document-uri(.), '/')[last()]"/>
                             <!-- Contructed file names -->
-                            <xsl:variable name="output-file" select="concat($output-collection, '/', $input-file)"/>
+                            <xsl:variable name="output-file" select="concat($output-collection, $input-file)"/>
                             <xsl:result-document href="{$output-file}" method="xml">
                                 <xsl:apply-templates select="document(document-uri(.))//TEI:teiHeader"/>
                                 <xsl:message><xsl:value-of select="$output-file"/> written.</xsl:message>
@@ -38,7 +42,13 @@
                                 <xsl:value-of select="$input-collection"/>
                             </td>
                             <td>
+                                <xsl:value-of select="$input-file"/>
+                            </td>
+                            <td>
                                 <xsl:value-of select="$output-collection"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="$output-file"/>
                             </td>
                         </tr>
                     </xsl:for-each>
