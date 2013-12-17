@@ -218,7 +218,6 @@
 
     <xsl:template match="text()|comment()|processing-instruction()"/>
 
-
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
