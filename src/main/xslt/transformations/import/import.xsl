@@ -19,11 +19,11 @@
     <xsl:output indent="no"/>
     <!-- Public params -->
     <xsl:param name="collection" as="xs:string"/>
-    <xsl:param name="mets-collection" as="xs:string"/>
-    <xsl:param name="tei-enriched-collection" as="xs:string"/>
-    <xsl:param name="document-listing-file" as="xs:string"/>
-    <xsl:param name="structure-collection" as="xs:string"/>
-    <xsl:param name="url-prefix" as="xs:string"/>
+    <xsl:param name="mets-collection" as="xs:string" select="''"/>
+    <xsl:param name="tei-enriched-collection" as="xs:string" select="''"/>
+    <xsl:param name="document-listing-file" as="xs:string" select="''"/>
+    <xsl:param name="structure-collection" as="xs:string" select="''"/>
+    <xsl:param name="url-prefix" as="xs:string" select="''"/>
 
     <xsl:param name="output-param" select="'xhtml'"/>
     <xsl:template match="/">
@@ -134,7 +134,7 @@
                                         </xsl:attribute>
                                     </xsl:otherwise>
                                 </xsl:choose>
-                                <xsl:value-of select="$mets-file"/>
+                                <xsl:value-of select="$structure-file"/>
                             </span>
                         </xsl:if>
                     </xsl:for-each>
