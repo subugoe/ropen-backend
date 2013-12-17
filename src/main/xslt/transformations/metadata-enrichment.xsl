@@ -129,7 +129,7 @@
          </xsl:attribute>
       </xsl:copy>
    </xsl:template>
-   <xsl:template match="TEI:div|TEI:p|TEI:note">
+   <xsl:template match="TEI:div|TEI:p|TEI:note" mode="enrichment">
       <xsl:copy>
          <xsl:attribute name="id">
             <xsl:value-of select="generate-id()"/>
