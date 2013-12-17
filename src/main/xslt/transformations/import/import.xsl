@@ -143,7 +143,7 @@
         </xsl:if>
         <!-- Generate document listing -->
         <xsl:if test="$document-listing != ''">
-            <xsl:variable name="doc-listing">
+            <xsl:variable name="doc-listing" as="element(doc)">
                 <docs>
                     <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                         <xsl:variable name="doc-id">
