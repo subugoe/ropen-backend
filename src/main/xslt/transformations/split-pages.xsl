@@ -148,7 +148,7 @@
     <xsl:template match="/TEI:TEI/TEI:teiHeader" mode="xhtml"/>
 
     <!-- Get rid of TEI:addName's -->
-    <xsl:template match="TEI:addName"/>
+    <xsl:template match="TEI:addName" priority="10"/>
 
     <xsl:function name="a18:page-name">
         <xsl:param name="node" as="node()"/>
