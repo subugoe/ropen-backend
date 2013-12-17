@@ -25,8 +25,10 @@
     <!-- Imports -->
     <xsl:include href="./TEI2XHTML.xsl"/>
     <xsl:include href="./lib/ropen.xsl"/>
+    <!--
     <xsl:variable name="filterAnnotations" select="true()" as="xs:boolean"/>
-
+    -->
+    
     <xsl:template match="/" priority="10">
         <!-- Find out if we are processing a single Document or a collection -->
         <xsl:choose>
@@ -154,38 +156,5 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
-    <!--
-    <xsl:function name="a18:chunk">
-        <xsl:param name="ms1" as="element()"/>
-        <xsl:param name="ms2" as="element()"/>
-        <xsl:param name="node" as="node()"/>
-        <xsl:choose>
-            <xsl:when test="$node instance of element()">
-                <xsl:choose>
-                    <xsl:when test="$node is $ms1">
-                        <xsl:copy-of select="$node"/>
-                    </xsl:when>
-                    <xsl:when test="some $n in $node/descendant::* satisfies ($n is $ms1 or $n is $ms2)">
-                        <xsl:element name="{local-name($node)}" namespace="{namespace-uri($node)}">
-                            <xsl:for-each select="$node/node() | $node/@*">
-                                <xsl:copy-of select="a18:chunk($ms1, $ms2, .)"/>
-                            </xsl:for-each>
-                        </xsl:element>
-                    </xsl:when>
-                    <xsl:when test="$node &gt;&gt; $ms1 and $node &lt;&lt; $ms2">
-                        <xsl:copy-of select="$node"/>
-                    </xsl:when>
-                </xsl:choose>
-            </xsl:when>
-            <xsl:when test="$node instance of attribute()">
-                <xsl:copy-of select="$node"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:if test="$node &gt;&gt; $ms1 and $node &lt;&lt; $ms2">
-                    <xsl:copy-of select="$node"/>
-                </xsl:if>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-    -->
+ 
 </xsl:stylesheet>
