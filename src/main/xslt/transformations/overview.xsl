@@ -265,7 +265,7 @@
                         </td>
                      </xsl:variable>
                      <!-- TODO: Check if entry contains word chars, this currently let's entries like "1ste" or roman numerals pass -->
-                     <xsl:if test="not(matches($tag, '^[\d\.\s:]*$'))">
+                     <xsl:if test="not(matches($tag, '^[\d\.\s:-]*$'))">
                         <xsl:for-each-group select="current-group()" group-by="@a18:_doc">
                            <xsl:sort select="a18:get-document(., true())" order="ascending"/>
                            <xsl:variable name="doc-id">
