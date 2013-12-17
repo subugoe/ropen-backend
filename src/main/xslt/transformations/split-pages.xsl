@@ -40,11 +40,28 @@
                     <xsl:message>Processing file <xsl:value-of select="$input-file"/></xsl:message>
                     <!-- Using just ./* here makes Saxon forget about the uri of the document -->
                     <xsl:apply-templates select="doc($input-file)/TEI:TEI/*" mode="split"/>
-                    <xsl:if test="$debug-output-collection">
-                        <xsl:variable name="debug-output-file" select="concat($debug-output-collection, '/', ropen:document-name(.), '.xhtml')"></xsl:variable>
+                    <xsl:if test="$debug-output-collection and $mode = 'xhtml'">
+                        <xsl:variable name="debug-output-file" select="concat($debug-output-collection, '/', ropen:document-name(.), '.xhtml')"/>
                         <xsl:message>Genetrating debug file <xsl:value-of select="$debug-output-file"/></xsl:message>
                         <xsl:result-document href="{$debug-output-file}">
-                            <xsl:apply-templates select="."/>
+                            <html xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                                xmlns:bibo="http://purl.org/ontology/bibo/1.3/" version="XHTML+RDFa 1.0" type="bibo:Manuscript">
+                                <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+                                <meta charset="UTF-8"/>
+                                <title>
+                                    <xsl:choose>
+                                        <xsl:when test="//TEI:title[@display]">
+                                            <xsl:value-of select="//TEI:title[@display]/text()"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="//TEI:title[1]/text()"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </title>
+                                <body>
+                                    <xsl:apply-templates select="." mode="xhtml" exclude-result-prefixes="TEI xhtml"/>
+                                </body>
+                            </html>
                         </xsl:result-document>
                     </xsl:if>
                 </xsl:for-each>
@@ -128,7 +145,7 @@
                             <meta charset="UTF-8"/>
                             <title>Page <xsl:value-of select="$pos"/></title>
                             <body>
-                                <xsl:apply-templates select="$tei-page" mode="xhtml"/>
+                                <xsl:apply-templates select="$tei-page" mode="xhtml" exclude-result-prefixes="TEI xhtml"/>
                             </body>
                         </html>
                     </xsl:when>
