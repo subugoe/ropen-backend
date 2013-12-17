@@ -21,7 +21,7 @@
     <xsl:param name="collection" as="xs:string"/>
     <xsl:param name="mets-collection" as="xs:string"/>
     <xsl:param name="tei-enriched-collection" as="xs:string"/>
-    <xsl:param name="document-listing" as="xs:string"/>
+    <xsl:param name="document-listing-file" as="xs:string"/>
     <xsl:param name="structure-collection" as="xs:string"/>
     <xsl:param name="url-prefix" as="xs:string"/>
 
@@ -142,8 +142,8 @@
             </table>
         </xsl:if>
         <!-- Generate document listing -->
-        <xsl:if test="$document-listing != ''">
-            <xsl:variable name="doc-listing" as="element(doc)">
+        <xsl:if test="$document-listing-file != ''">
+            <xsl:variable name="document-listing" as="element()">
                 <docs>
                     <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                         <xsl:variable name="doc-id">
@@ -191,11 +191,10 @@
                     </xsl:for-each>
                 </docs>
             </xsl:variable>
-            <xsl:variable name="listing-file"/>
-            <xsl:result-document href="{$listing-file}">
+            <xsl:result-document href="{$document-listing-file}">
                 <xsl:copy-of select="$document-listing"/>
             </xsl:result-document>
-            <p>Document listing saved to <xsl:value-of select="$listing-file"/>.</p>
+            <p>Document listing saved to <xsl:value-of select="$document-listing-file"/>.</p>
         </xsl:if>
     </xsl:template>
 
