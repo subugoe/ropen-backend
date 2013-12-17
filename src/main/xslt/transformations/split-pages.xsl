@@ -21,6 +21,7 @@
     <xsl:param name="mode" select="'tei'" as="xs:string"/>
     <!-- copy TEI header into every page? -->
     <xsl:param name="copy-header" select="false()" as="xs:boolean"/>
+    <xsl:param name="debug-output-collection" as="xs:string" select="''"/>
 
     <!-- Imports -->
     <xsl:include href="./TEI2XHTML.xsl"/>
@@ -28,7 +29,7 @@
     <!--
     <xsl:variable name="filterAnnotations" select="true()" as="xs:boolean"/>
     -->
-    
+
     <xsl:template match="/" priority="10">
         <!-- Find out if we are processing a single Document or a collection -->
         <xsl:choose>
@@ -39,6 +40,12 @@
                     <xsl:message>Processing file <xsl:value-of select="$input-file"/></xsl:message>
                     <!-- Using just ./* here makes Saxon forget about the uri of the document -->
                     <xsl:apply-templates select="doc($input-file)/TEI:TEI/*" mode="split"/>
+                    <xsl:if test="$debug-output-collection">
+                        <xsl:variable name="debug-output" select="concat($debug-output-collection, '/', ropen:document-name(.), '.xhtml')"></xsl:variable>
+                        <xsl:result-document href="{$debug-output}">
+                            <xsl:apply-templates select="."/>
+                        </xsl:result-document>
+                    </xsl:if>
                 </xsl:for-each>
             </xsl:when>
             <xsl:otherwise>
@@ -156,5 +163,5 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
- 
+
 </xsl:stylesheet>
