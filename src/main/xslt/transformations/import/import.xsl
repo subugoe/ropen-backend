@@ -195,9 +195,6 @@
                                     </titleShort>
                                     <!-- If METS file was created -->
                                     <xsl:if test="$mets-collection != ''">
-                                        <!--
-                                        <xsl:variable name="doc-mets-file" select="concat($mets-collection, $doc-id, '.xml')" as="xs:string"/>
-                                        -->
                                         <xsl:variable name="doc-mets-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($mets-collection, $doc-id, '.xml'))" as="xs:string"/>
                                         <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
                                         <mets>
@@ -208,9 +205,6 @@
                                             <xsl:value-of select="data($mets//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)"/>
                                         </preview>
                                     </xsl:if>
-                                    <!--
-                                    <xsl:variable name="doc-tei-file" select="concat($collection, $doc-id, '.xml')" as="xs:string"/>
-                                    -->
                                     <xsl:variable name="doc-tei-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($collection, $doc-id, '.xml'))" as="xs:string"/>
                                     <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
                                     <tei>
@@ -218,9 +212,6 @@
                                     </tei>
                                     <!-- If a enriched file was created -->
                                     <xsl:if test="$tei-enriched-collection != ''">
-                                        <!--
-                                        <xsl:variable name="doc-tei-enriched-file" select="concat($tei-enriched-collection, $doc-id, '.xml')" as="xs:string"/>
-                                        -->
                                         <xsl:variable name="doc-tei-enriched-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($tei-enriched-collection, $doc-id, '.xml'))"
                                             as="xs:string"/>
                                         <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
@@ -260,7 +251,7 @@
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="{$output}">
+        <xsl:result-document href="{$output}" exclude-result-prefixes="xhtml">
             <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
