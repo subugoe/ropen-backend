@@ -157,7 +157,7 @@
          </xsl:variable>
          <xsl:choose>
             <xsl:when test="$id != ''">
-               <xsl:element name="a" namespace="http://www.w3.org/1999/xhtml">
+               <xhtml:a>
                   <xsl:attribute name="name">
                      <xsl:value-of select="$id"/>
                   </xsl:attribute>
@@ -171,7 +171,7 @@
                             <xsl:value-of select="normalize-space(string-join($name/text(), ''))"/>
                     <xsl:apply-templates/>
                     -->
-               </xsl:element>
+               </xhtml:a>
             </xsl:when>
             <xsl:otherwise>
                <xsl:value-of select="$name"/>
