@@ -17,6 +17,7 @@
    <xsl:param name="mode-param" select="'cloud'"/>
    <xsl:param name="doc-name-param" select="''"/>
    <xsl:param name="collection-param" select="''"/>
+   <xsl:param name="verbose" select="false()" as="xs:boolean"/>
    <xsl:variable name="group-rows" select="if ($group-rows-param castable as xs:boolean) then xs:boolean($group-rows-param) else true()" as="xs:boolean"/>
    <xsl:variable name="dupliate-pages" select="if ($dupliate-pages-param castable as xs:boolean) then xs:boolean($dupliate-pages-param) else false()" as="xs:boolean"/>
    <xsl:variable name="entity" select="if ($entity-param castable as xs:string) then xs:string($entity-param) else 'TEI:persName'" as="xs:string"/>
@@ -375,16 +376,20 @@
          <xsl:if test="not(. instance of element(TEI:bibl)) and not(@ref) or @ref = '#'">
             <xsl:variable name="placeholder" select="concat($placeholder-prefix, document-uri(root(.)), '-', generate-id(.))"/>
             <xsl:attribute name="ref" select="$placeholder"/>
-            <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/> for element <xsl:value-of select="name(.)"/> at <xsl:value-of select="ropen:generate-xpath(., true())"
-               /></xsl:message>
+            <xsl:if test="$verbose">
+               <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/> for element <xsl:value-of select="name(.)"/> at <xsl:value-of
+                     select="ropen:generate-xpath(., true())"/></xsl:message>
+            </xsl:if>
          </xsl:if>
          <xsl:if test=". instance of element(TEI:bibl) and not(./TEI:ref)">
             <xsl:element name="TEI:ref">
                <xsl:attribute name="target" namespace="http://www.tei-c.org/ns/1.0">
                   <xsl:variable name="placeholder" select="concat($placeholder-prefix, document-uri(root(.)), '-', generate-id(.))"/>
                   <xsl:attribute name="target" select="$placeholder"/>
-                  <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/> for element <xsl:value-of select="name(.)"/> at <xsl:value-of
-                        select="ropen:generate-xpath(., true())"/></xsl:message>
+                  <xsl:if test="$verbose">
+                     <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/> for element <xsl:value-of select="name(.)"/> at <xsl:value-of
+                           select="ropen:generate-xpath(., true())"/></xsl:message>
+                  </xsl:if>
                </xsl:attribute>
             </xsl:element>
          </xsl:if>
@@ -399,7 +404,9 @@
          <xsl:if test="not(@target) or @target = '#'">
             <xsl:variable name="placeholder" select="concat($placeholder-prefix, document-uri(root(.)), '-', generate-id(.))"/>
             <xsl:attribute name="target" select="$placeholder"/>
-            <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/></xsl:message>
+            <xsl:if test="$verbose">
+               <xsl:message>Generated placeholder reference: <xsl:value-of select="$placeholder"/></xsl:message>
+            </xsl:if>
          </xsl:if>
          <xsl:apply-templates select="@*|node()" mode="add-doc"/>
       </xsl:copy>
