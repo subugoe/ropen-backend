@@ -5,7 +5,7 @@
     <!-- Imports -->
     <xsl:import href="../metadata-enrichment.xsl"/>
     <xsl:import href="../mets-2.0.xsl"/>
-    <xsl:import href="../structureExtractor.xsl"/>
+    <xsl:import href="../structure-extractor.xsl"/>
     <xsl:include href="../lib/ropen.xsl"/>
     <xsl:include href="../lib/a18.xsl"/>
     <xd:doc scope="stylesheet">
@@ -153,6 +153,7 @@
                                                 <xsl:with-param name="output" select="$structure-file"/>
                                             </xsl:call-template>
                                         </xsl:variable>
+                                        <xsl:message terminate="no">Warning the structure is created from TEI and dosn't contain IDs! Use structure-extractor.xsl instead.</xsl:message>
                                         <xsl:choose>
                                             <xsl:when test="$success">
                                                 <xsl:attribute name="style">

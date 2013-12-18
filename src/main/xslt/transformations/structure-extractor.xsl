@@ -193,14 +193,14 @@
       <xsl:choose>
          <!-- Get rid of empty div tags -->
          <xsl:when test="TEI:head">
-            <xsl:element name="div" namespace="http://www.w3.org/1999/xhtml">
+            <xhtml:div>
                <xsl:if test="@id">
                   <xsl:attribute name="id">
                      <xsl:value-of select="@id"/>
                   </xsl:attribute>
                </xsl:if>
                <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb|TEI:lb" mode="xhtml-structure"/>
-            </xsl:element>
+            </xhtml:div>
          </xsl:when>
          <xsl:otherwise>
             <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb" mode="xhtml-structure"/>
@@ -208,7 +208,7 @@
       </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:pb" mode="xhtml-structure">
-      <xsl:element name="hr" namespace="http://www.w3.org/1999/xhtml"/>
+      <xhtml:hr/>
    </xsl:template>
    <xsl:template match="TEI:addName" mode="#all">
       <xsl:if test="not($filter)">
