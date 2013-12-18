@@ -29,7 +29,7 @@
             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
                <xsl:variable name="out-file" select="ropen:concat-path($output-collection, $in-file)" as="xs:anyURI"/>
-               <xsl:message>Processing file <xsl:value-of select="$in-file"/> to <xsl:value-of select="$out-file"/>, Mode: <xsl:value-of select="$output"/></xsl:message>
+               <xsl:message>Processing file <xsl:value-of select="document-uri(.)"/> to <xsl:value-of select="$out-file"/>, Mode: <xsl:value-of select="$output"/></xsl:message>
                <xsl:result-document href="{$output}">
                   <xsl:choose>
                      <xsl:when test="$output = 'tei'">
@@ -190,7 +190,7 @@
          </xsl:variable>
          <xsl:choose>
             <xsl:when test="$id != ''">
-               <xhtml:a>
+               <a>
                   <xsl:attribute name="name">
                      <xsl:value-of select="$id"/>
                   </xsl:attribute>
@@ -204,7 +204,7 @@
                             <xsl:value-of select="normalize-space(string-join($name/text(), ''))"/>
                     <xsl:apply-templates/>
                     -->
-               </xhtml:a>
+               </a>
             </xsl:when>
             <xsl:otherwise>
                <xsl:value-of select="$name"/>
@@ -226,14 +226,14 @@
       <xsl:choose>
          <!-- Get rid of empty div tags -->
          <xsl:when test="TEI:head">
-            <xhtml:div>
+            <div>
                <xsl:if test="@id">
                   <xsl:attribute name="id">
                      <xsl:value-of select="@id"/>
                   </xsl:attribute>
                </xsl:if>
                <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb|TEI:lb" mode="xhtml-structure"/>
-            </xhtml:div>
+            </div>
          </xsl:when>
          <xsl:otherwise>
             <xsl:apply-templates select="TEI:div|TEI:head|TEI:pb" mode="xhtml-structure"/>
@@ -241,7 +241,7 @@
       </xsl:choose>
    </xsl:template>
    <xsl:template match="TEI:pb" mode="xhtml-structure">
-      <xhtml:hr/>
+      <hr/>
    </xsl:template>
    <xsl:template match="TEI:addName" mode="#all">
       <xsl:if test="not($filter)">
