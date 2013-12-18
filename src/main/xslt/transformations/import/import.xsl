@@ -120,15 +120,6 @@
                                                     <xsl:with-param name="input" select="document-uri(.)"/>
                                                     <xsl:with-param name="output" select="$mets-file"/>
                                                     <xsl:with-param name="doc-name"/>
-                                                    <!-- TODO: Set this params for METS
-                                                        <xsl:param name="identifier" select="string('REPLACEME')"/>
-    <xsl:param name="locationPrefix">http://134.76.21.92:8080/images/</xsl:param>
-                                                    
-                                                    -->
-
-                                                    <!-- TODO: Add another Param dor the image URLs
-                                                         134.76.21.92/images/berlin-ms-germ-qrt-1666/1200
-                                                    -->
                                                 </xsl:call-template>
                                             </xsl:variable>
                                             <xsl:call-template name="check-success">
