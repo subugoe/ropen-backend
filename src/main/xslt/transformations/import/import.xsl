@@ -237,11 +237,11 @@
                             </xsl:for-each>
                         </docs>
                     </xsl:variable>
-                    <xsl:result-document href="{$document-listing-file}" exclude-result-prefixes="xlink xhtml">
+                    <xsl:result-document href="{$document-listing-file}" exclude-result-prefixes="xlink xhtml" encoding="UTF-8">
                         <xsl:copy-of select="$document-listing"/>
                     </xsl:result-document>
-                    <xsl:element name="p" namespace="http://www.w3.org/1999/xhtml">
-                Document listing saved to <xsl:value-of select="$document-listing-file"/>.</xsl:element>
+                    <p>
+                Document listing saved to <xsl:value-of select="$document-listing-file"/>.</p>
                 </xsl:if>
             </body>
         </html>
@@ -252,7 +252,7 @@
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="{$output}" exclude-result-prefixes="xhtml">
+        <xsl:result-document href="{$output}" exclude-result-prefixes="xhtml" encoding="UTF-8">
             <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
@@ -261,7 +261,7 @@
     <xsl:template name="ropen:enrich-tei" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="{$output}">
+        <xsl:result-document href="{$output}" encoding="UTF-8">
             <xsl:apply-templates select="document($input)" mode="enrichment"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
@@ -270,7 +270,7 @@
     <xsl:template name="ropen:xhtml-structure" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
-        <xsl:result-document href="{$output}">
+        <xsl:result-document href="{$output}" encoding="UTF-8">
             <xsl:apply-templates select="document($input)" mode="xhtml-structure"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
