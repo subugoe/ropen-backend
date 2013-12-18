@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:METS="http://www.loc.gov/METS/"
-   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-   xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt"
-   xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xd xs METS TEI xsl ropen" version="2.0">
+   xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
+   exclude-result-prefixes="xd xs METS TEI xsl ropen" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -18,7 +17,7 @@
    <xsl:param name="collection" select="''" as="xs:string"/>
    <xsl:param name="output-collection" select="''" as="xs:string"/>
    <xsl:variable name="output" select="if ($output-param castable as xs:string) then xs:string($output-param) else 'tei'" as="xs:string"/>
-   
+
    <xsl:strip-space elements="TEI:*"/>
 
    <!-- input seed here -->
@@ -30,7 +29,24 @@
             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
                <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
                <xsl:variable name="out-file" select="ropen:concat-path($output-collection, $in-file)" as="xs:anyURI"/>
-               
+               <xsl:message>Processing file <xsl:value-of select="$in-file"/> to <xsl:value-of select="$out-file"/>, Mode: <xsl:value-of select="$output"/></xsl:message>
+               <xsl:result-document href="{$output}">
+                  <xsl:choose>
+                     <xsl:when test="$output = 'tei'">
+                        <xsl:apply-templates select="." mode="tei"/>
+                     </xsl:when>
+                     <xsl:when test="$output = 'mets'">
+                        <xsl:apply-templates select="." mode="mets"/>
+                     </xsl:when>
+                     <xsl:when test="$output = 'xhtml'">
+                        <xsl:apply-templates select="." mode="xhtml-structure"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:message terminate="yes">Unknown output mode: <xsl:value-of select="$output"/>
+                        </xsl:message>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </xsl:result-document>
             </xsl:for-each>
          </xsl:when>
          <xsl:otherwise>
@@ -52,7 +68,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   
+
    <xsl:template match="TEI:TEI" mode="tei">
       <TEI:TEI>
          <TEI:teiHeader> </TEI:teiHeader>
@@ -63,7 +79,7 @@
          </TEI:text>
       </TEI:TEI>
    </xsl:template>
-   
+
    <xsl:template match="TEI:TEI" mode="mets">
       <METS:mets>
          <METS:structMap TYPE="LOGICAL">
@@ -78,7 +94,7 @@
          </METS:structMap>
       </METS:mets>
    </xsl:template>
-   
+
    <xsl:template match="TEI:TEI" mode="xhtml-structure">
       <html xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns="http://www.w3.org/1999/xhtml" xmlns:foaf="http://xmlns.com/foaf/0.1/"
          xmlns:bibo="http://purl.org/ontology/bibo/1.3/" version="XHTML+RDFa 1.0">
@@ -93,7 +109,7 @@
          </body>
       </html>
    </xsl:template>
-   
+
    <xsl:template match="TEI:div" mode="mets">
       <xsl:choose>
          <!-- Get rid of empty div tags -->
