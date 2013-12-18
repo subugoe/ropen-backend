@@ -103,18 +103,9 @@
                                                     <xsl:with-param name="output" select="$tei-enriched-file"/>
                                                 </xsl:call-template>
                                             </xsl:variable>
-                                            <xsl:choose>
-                                                <xsl:when test="$success">
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: green;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:when>
-                                                <xsl:otherwise>
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: red;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:otherwise>
-                                            </xsl:choose>
+                                            <xsl:call-template name="check-success">
+                                                <xsl:with-param name="success" select="$success"/>
+                                            </xsl:call-template>
                                             <xsl:value-of select="$tei-enriched-file"/>
                                         </span>
                                         <xsl:value-of select="$tei-enriched-file"/>
@@ -128,49 +119,41 @@
                                                 <xsl:call-template name="ropen:create-mets">
                                                     <xsl:with-param name="input" select="document-uri(.)"/>
                                                     <xsl:with-param name="output" select="$mets-file"/>
+                                                    <xsl:with-param name="doc-name"/>
+                                                    <!-- TODO: Set this params for METS
+                                                        <xsl:param name="identifier" select="string('REPLACEME')"/>
+    <xsl:param name="locationPrefix">http://134.76.21.92:8080/images/</xsl:param>
+                                                    
+                                                    -->
+
+                                                    <!-- TODO: Add another Param dor the image URLs
+                                                         134.76.21.92/images/berlin-ms-germ-qrt-1666/1200
+                                                    -->
                                                 </xsl:call-template>
                                             </xsl:variable>
-                                            <xsl:choose>
-                                                <xsl:when test="$success">
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: green;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:when>
-                                                <xsl:otherwise>
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: red;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:otherwise>
-                                            </xsl:choose>
+                                            <xsl:call-template name="check-success">
+                                                <xsl:with-param name="success" select="$success"/>
+                                            </xsl:call-template>
                                             <xsl:value-of select="$mets-file"/>
                                         </span>
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$structure-collection != ''">
                                     <td>
-                                    <span>
-                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                        <xsl:variable name="success" as="xs:boolean">
-                                            <xsl:call-template name="ropen:xhtml-structure">
-                                                <xsl:with-param name="input" select="document-uri(.)"/>
-                                                <xsl:with-param name="output" select="$structure-file"/>
+                                        <span>
+                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                            <xsl:variable name="success" as="xs:boolean">
+                                                <xsl:call-template name="ropen:xhtml-structure">
+                                                    <xsl:with-param name="input" select="document-uri(.)"/>
+                                                    <xsl:with-param name="output" select="$structure-file"/>
+                                                </xsl:call-template>
+                                            </xsl:variable>
+                                            <xsl:message terminate="no">Warning the structure is created from TEI and dosn't contain IDs! Use structure-extractor.xsl instead.</xsl:message>
+                                            <xsl:call-template name="check-success">
+                                                <xsl:with-param name="success" select="$success"/>
                                             </xsl:call-template>
-                                        </xsl:variable>
-                                        <xsl:message terminate="no">Warning the structure is created from TEI and dosn't contain IDs! Use structure-extractor.xsl instead.</xsl:message>
-                                        <xsl:choose>
-                                            <xsl:when test="$success">
-                                                <xsl:attribute name="style">
-                                                    <xsl:text>color: green;</xsl:text>
-                                                </xsl:attribute>
-                                            </xsl:when>
-                                            <xsl:otherwise>
-                                                <xsl:attribute name="style">
-                                                    <xsl:text>color: red;</xsl:text>
-                                                </xsl:attribute>
-                                            </xsl:otherwise>
-                                        </xsl:choose>
-                                        <xsl:value-of select="$structure-file"/>
-                                    </span>
+                                            <xsl:value-of select="$structure-file"/>
+                                        </span>
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$xhtml-collection != ''">
@@ -183,18 +166,9 @@
                                                     <xsl:with-param name="output" select="$xhtml-content-file"/>
                                                 </xsl:call-template>
                                             </xsl:variable>
-                                            <xsl:choose>
-                                                <xsl:when test="$success">
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: green;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:when>
-                                                <xsl:otherwise>
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: red;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:otherwise>
-                                            </xsl:choose>
+                                            <xsl:call-template name="check-success">
+                                                <xsl:with-param name="success" select="$success"/>
+                                            </xsl:call-template>
                                             <xsl:value-of select="$xhtml-content-file"/>
                                         </span>
                                     </td>
@@ -209,19 +183,10 @@
                                                     <xsl:with-param name="output" select="$xhtml-header-file"/>
                                                 </xsl:call-template>
                                             </xsl:variable>
-                                            <xsl:choose>
-                                                <xsl:when test="$success">
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: green;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:when>
-                                                <xsl:otherwise>
-                                                    <xsl:attribute name="style">
-                                                        <xsl:text>color: red;</xsl:text>
-                                                    </xsl:attribute>
-                                                </xsl:otherwise>
-                                            </xsl:choose>
-                                            <xsl:value-of select="$xhtml-content-file"/>
+                                            <xsl:call-template name="check-success">
+                                                <xsl:with-param name="success" select="$success"/>
+                                            </xsl:call-template>
+                                            <xsl:value-of select="$xhtml-header-file"/>
                                         </span>
                                     </td>
                                 </xsl:if>
@@ -308,6 +273,10 @@
     <xsl:template name="ropen:create-mets" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
+        <xsl:param name="doc-name" as="xs:string"/>
+        <!-- This should overwite the parameters for the image locations -->
+        <xsl:variable name="locationPrefix" select="$url-prefix"/>
+        <xsl:variable name="identifier" select="ropen:uri-to-name($input)"/>
         <xsl:result-document href="{$output}" exclude-result-prefixes="xhtml" encoding="UTF-8">
             <xsl:apply-templates select="document($input)" mode="mets"/>
         </xsl:result-document>
@@ -346,7 +315,7 @@
         </xsl:choose>
     </xsl:function>
 
-    <!-- TODO: Finish this -->
+    <!-- TODO: Test this -->
     <xsl:template name="ropen:xhtml-content" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
@@ -362,6 +331,20 @@
             <xsl:apply-templates select="document($input)//TEI:header"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
+    </xsl:template>
+
+    <xsl:template name="check-success" as="attribute()">
+        <xsl:param name="success" as="xs:boolean"/>
+        <xsl:attribute name="style">
+            <xsl:choose>
+                <xsl:when test="$success">
+                    <xsl:text>color: green;</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>color: red;</xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
     </xsl:template>
 
 </xsl:stylesheet>
