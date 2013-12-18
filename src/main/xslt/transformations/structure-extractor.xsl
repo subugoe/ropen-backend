@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:METS="http://www.loc.gov/METS/"
-   xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xd xs METS TEI xsl" version="2.0">
+   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+   xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt"
+   xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xd xs METS TEI xsl ropen" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -10,9 +12,13 @@
          <xd:p/>
       </xd:desc>
    </xd:doc>
+   <xsl:include href="./lib/ropen.xsl"/>
    <xsl:param name="output-param" select="'tei'"/>
    <xsl:param name="filter" select="true()" as="xs:boolean"/>
+   <xsl:param name="collection" select="''" as="xs:string"/>
+   <xsl:param name="output-collection" select="''" as="xs:string"/>
    <xsl:variable name="output" select="if ($output-param castable as xs:string) then xs:string($output-param) else 'tei'" as="xs:string"/>
+   
    <xsl:strip-space elements="TEI:*"/>
 
    <!-- input seed here -->
@@ -20,18 +26,29 @@
    <xsl:variable name="locPrefix">loc</xsl:variable>
    <xsl:template match="/">
       <xsl:choose>
-         <xsl:when test="$output = 'tei'">
-            <xsl:apply-templates mode="tei"/>
-         </xsl:when>
-         <xsl:when test="$output = 'mets'">
-            <xsl:apply-templates mode="mets"/>
-         </xsl:when>
-         <xsl:when test="$output = 'xhtml'">
-            <xsl:apply-templates mode="xhtml-structure"/>
+         <xsl:when test="$collection != '' and $output-collection != ''">
+            <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
+               <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
+               <xsl:variable name="out-file" select="ropen:concat-path($output-collection, $in-file)" as="xs:anyURI"/>
+               
+            </xsl:for-each>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:message terminate="yes">Unknown output mode: <xsl:value-of select="$output"/>
-            </xsl:message>
+            <xsl:choose>
+               <xsl:when test="$output = 'tei'">
+                  <xsl:apply-templates mode="tei"/>
+               </xsl:when>
+               <xsl:when test="$output = 'mets'">
+                  <xsl:apply-templates mode="mets"/>
+               </xsl:when>
+               <xsl:when test="$output = 'xhtml'">
+                  <xsl:apply-templates mode="xhtml-structure"/>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:message terminate="yes">Unknown output mode: <xsl:value-of select="$output"/>
+                  </xsl:message>
+               </xsl:otherwise>
+            </xsl:choose>
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
