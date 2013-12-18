@@ -40,6 +40,7 @@
                     <xsl:message>Processing file <xsl:value-of select="$input-file"/></xsl:message>
                     <!-- Using just ./* here makes Saxon forget about the uri of the document -->
                     <xsl:apply-templates select="doc($input-file)/TEI:TEI/*" mode="split"/>
+                    <!--
                     <xsl:if test="$debug-output-collection and $mode = 'xhtml'">
                         <xsl:variable name="debug-output-file" select="concat($debug-output-collection, '/', ropen:document-name(.), '.xhtml')"/>
                         <xsl:message>Genetrating debug file <xsl:value-of select="$debug-output-file"/></xsl:message>
@@ -64,6 +65,7 @@
                             </html>
                         </xsl:result-document>
                     </xsl:if>
+                    -->
                 </xsl:for-each>
             </xsl:when>
             <xsl:otherwise>
