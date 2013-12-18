@@ -30,7 +30,7 @@
                <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
                <xsl:variable name="out-file" select="ropen:concat-path($output-collection, $in-file)" as="xs:anyURI"/>
                <xsl:message>Processing file <xsl:value-of select="document-uri(.)"/> to <xsl:value-of select="$out-file"/>, Mode: <xsl:value-of select="$output"/></xsl:message>
-               <xsl:result-document href="{$output}">
+               <xsl:result-document href="{$out-file}">
                   <xsl:choose>
                      <xsl:when test="$output = 'tei'">
                         <xsl:apply-templates select="." mode="tei"/>
