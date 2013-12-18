@@ -34,9 +34,9 @@
     <!-- Prefix to prepend -->
     <xsl:param name="prepend-prefix" as="xs:string" select="''"/>
     <!-- Collection XHTML files containing the whole document -->
-    <!--
     <xsl:param name="xhtml-collection" as="xs:string" select="''"/>
-    -->
+    <!-- Collection XHTML files containing the header -->
+    <xsl:param name="xhtml-header-collection" as="xs:string" select="''"/>
     <!-- TODO: Make this work for METS -->
     <xsl:param name="url-prefix" as="xs:string" select="''"/>
     <!-- 
@@ -69,6 +69,12 @@
                             <xsl:if test="$structure-collection != ''">
                                 <td>XHTML Structure</td>
                             </xsl:if>
+                            <xsl:if test="$xhtml-collection != ''">
+                                <td>XHTML Content</td>
+                            </xsl:if>
+                            <xsl:if test="$xhtml-header-collection != ''">
+                                <td>XHTML Header</td>
+                            </xsl:if>
                         </thead>
 
                         <tr>
@@ -77,17 +83,13 @@
                                 <td>
                                     <xsl:value-of select="document-uri(.)"/>
                                 </td>
-                                <xsl:variable name="in-file">
-                                    <xsl:value-of select="tokenize(document-uri(.), '/')[last()]"/>
-                                </xsl:variable>
-
+                                <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
                                 <!-- Contructed file names -->
                                 <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
                                 <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
                                 <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
-                                <!--
-                                <xsl:variable name="xhtml-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
-                                -->
+                                <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
+                                <xsl:variable name="xhtml-header-file" select="ropen:concat-path($xhtml-header-collection, $in-file)" as="xs:anyURI"/>
                                 <td>
                                     <xsl:value-of select="$in-file"/>
                                 </td>
@@ -145,6 +147,7 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$structure-collection != ''">
+                                    <td>
                                     <span>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -168,6 +171,59 @@
                                         </xsl:choose>
                                         <xsl:value-of select="$structure-file"/>
                                     </span>
+                                    </td>
+                                </xsl:if>
+                                <xsl:if test="$xhtml-collection != ''">
+                                    <td>
+                                        <span>
+                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                            <xsl:variable name="success" as="xs:boolean">
+                                                <xsl:call-template name="ropen:xhtml-content">
+                                                    <xsl:with-param name="input" select="document-uri(.)"/>
+                                                    <xsl:with-param name="output" select="$xhtml-content-file"/>
+                                                </xsl:call-template>
+                                            </xsl:variable>
+                                            <xsl:choose>
+                                                <xsl:when test="$success">
+                                                    <xsl:attribute name="style">
+                                                        <xsl:text>color: green;</xsl:text>
+                                                    </xsl:attribute>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:attribute name="style">
+                                                        <xsl:text>color: red;</xsl:text>
+                                                    </xsl:attribute>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                            <xsl:value-of select="$xhtml-content-file"/>
+                                        </span>
+                                    </td>
+                                </xsl:if>
+                                <xsl:if test="$xhtml-header-collection != ''">
+                                    <td>
+                                        <span>
+                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                            <xsl:variable name="success" as="xs:boolean">
+                                                <xsl:call-template name="ropen:xhtml-header">
+                                                    <xsl:with-param name="input" select="document-uri(.)"/>
+                                                    <xsl:with-param name="output" select="$xhtml-header-file"/>
+                                                </xsl:call-template>
+                                            </xsl:variable>
+                                            <xsl:choose>
+                                                <xsl:when test="$success">
+                                                    <xsl:attribute name="style">
+                                                        <xsl:text>color: green;</xsl:text>
+                                                    </xsl:attribute>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:attribute name="style">
+                                                        <xsl:text>color: red;</xsl:text>
+                                                    </xsl:attribute>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                            <xsl:value-of select="$xhtml-content-file"/>
+                                        </span>
+                                    </td>
                                 </xsl:if>
                             </xsl:for-each>
                         </tr>
@@ -291,15 +347,21 @@
     </xsl:function>
 
     <!-- TODO: Finish this -->
-    <!--
-    <xsl:template name="ropen:xhtml-file" as="xs:boolean">
+    <xsl:template name="ropen:xhtml-content" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)" mode="xhtml-structure"/>
+            <xsl:apply-templates select="document($input)"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
-    -->
+    <xsl:template name="ropen:xhtml-header" as="xs:boolean">
+        <xsl:param name="input" as="xs:anyURI"/>
+        <xsl:param name="output" as="xs:anyURI"/>
+        <xsl:result-document href="{$output}">
+            <xsl:apply-templates select="document($input)//TEI:header"/>
+        </xsl:result-document>
+        <xsl:value-of select="true()"/>
+    </xsl:template>
 
 </xsl:stylesheet>
