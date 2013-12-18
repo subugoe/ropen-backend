@@ -29,17 +29,27 @@
     <xsl:param name="document-listing-file" as="xs:string" select="''"/>
     <!-- Collection XHTML files containing the document structure -->
     <xsl:param name="structure-collection" as="xs:string" select="''"/>
+    <!-- Prefix to replace -->
+    <xsl:param name="replace-prefix" as="xs:string" select="''"/>
+    <!-- Prefix to prepend -->
+    <xsl:param name="prepend-prefix" as="xs:string" select="''"/>
     <!-- Collection XHTML files containing the whole document -->
+    <!--
     <xsl:param name="xhtml-collection" as="xs:string" select="''"/>
+    -->
     <!-- TODO: Make this work for METS -->
     <xsl:param name="url-prefix" as="xs:string" select="''"/>
     <!-- 
          This avoids checks if files exist, since some versions of Saxon reading
          a file written during a transformation consider this an error while 
-         other versions only generate a warning 
-    -->
+         other versions only generate a warning...
+         Error XTRE1500
+    
     <xsl:param name="check-files" as="xs:boolean" select="false()"/>
 
+        This feature has been disabled since Saxon seems to be problematic here,
+        jus add calls to ropen:file-exists($file) at the appropriate places.
+    -->
     <xsl:param name="output-param" select="'xhtml'"/>
     <xsl:template match="/">
         <html xmlns="http://www.w3.org/1999/xhtml">
@@ -75,7 +85,9 @@
                                 <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
                                 <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
                                 <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
+                                <!--
                                 <xsl:variable name="xhtml-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
+                                -->
                                 <td>
                                     <xsl:value-of select="$in-file"/>
                                 </td>
@@ -181,8 +193,13 @@
                                     <titleShort>
                                         <xsl:value-of select="./TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[@type = 'display']/text()"/>
                                     </titleShort>
-                                    <xsl:variable name="doc-mets-file" select="concat($mets-collection, $doc-id, '.xml')" as="xs:string"/>
-                                    <xsl:if test="not($check-files) or ropen:file-exists($doc-mets-file)">
+                                    <!-- If METS file was created -->
+                                    <xsl:if test="$mets-collection != ''">
+                                        <!--
+                                        <xsl:variable name="doc-mets-file" select="concat($mets-collection, $doc-id, '.xml')" as="xs:string"/>
+                                        -->
+                                        <xsl:variable name="doc-mets-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($mets-collection, $doc-id, '.xml'))" as="xs:string"/>
+                                        <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
                                         <mets>
                                             <xsl:value-of select="$doc-mets-file"/>
                                         </mets>
@@ -191,14 +208,22 @@
                                             <xsl:value-of select="data($mets//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)"/>
                                         </preview>
                                     </xsl:if>
+                                    <!--
                                     <xsl:variable name="doc-tei-file" select="concat($collection, $doc-id, '.xml')" as="xs:string"/>
-                                    <xsl:if test="not($check-files) or ropen:file-exists($doc-tei-file)">
-                                        <tei>
-                                            <xsl:value-of select="$doc-tei-file"/>
-                                        </tei>
-                                    </xsl:if>
-                                    <xsl:variable name="doc-tei-enriched-file" select="concat($tei-enriched-collection, $doc-id, '.xml')" as="xs:string"/>
-                                    <xsl:if test="not($check-files) or ropen:file-exists($doc-tei-enriched-file)">
+                                    -->
+                                    <xsl:variable name="doc-tei-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($collection, $doc-id, '.xml'))" as="xs:string"/>
+                                    <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
+                                    <tei>
+                                        <xsl:value-of select="$doc-tei-file"/>
+                                    </tei>
+                                    <!-- If a enriched file was created -->
+                                    <xsl:if test="$tei-enriched-collection != ''">
+                                        <!--
+                                        <xsl:variable name="doc-tei-enriched-file" select="concat($tei-enriched-collection, $doc-id, '.xml')" as="xs:string"/>
+                                        -->
+                                        <xsl:variable name="doc-tei-enriched-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($tei-enriched-collection, $doc-id, '.xml'))"
+                                            as="xs:string"/>
+                                        <!-- Wrap this in a file check if needed, see ropen:file-exists($file) -->
                                         <teiEnriched>
                                             <xsl:value-of select="$doc-tei-enriched-file"/>
                                         </teiEnriched>
@@ -206,6 +231,16 @@
                                     <pageCount>
                                         <xsl:value-of select="count(.//TEI:pb)"/>
                                     </pageCount>
+                                    <fulltext>
+                                        <xsl:choose>
+                                            <xsl:when test=".//TEI:body/*">
+                                                <xsl:text>true</xsl:text>
+                                            </xsl:when>
+                                            <xsl:otherwise>
+                                                <xsl:text>false</xsl:text>
+                                            </xsl:otherwise>
+                                        </xsl:choose>
+                                    </fulltext>
                                 </doc>
                             </xsl:for-each>
                         </docs>
@@ -248,8 +283,23 @@
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
-    
+
+    <xsl:function name="ropen:create-path" as="xs:string">
+        <xsl:param name="prepend" as="xs:string"/>
+        <xsl:param name="replace" as="xs:string"/>
+        <xsl:param name="path-parts" as="xs:string*"/>
+        <xsl:choose>
+            <xsl:when test="$replace = ''">
+                <xsl:value-of select="concat($prepend, string-join($path-parts, '/'))"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="concat($prepend, replace(string-join($path-parts, '/'), $replace, ''))"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
     <!-- TODO: Finish this -->
+    <!--
     <xsl:template name="ropen:xhtml-file" as="xs:boolean">
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
@@ -258,5 +308,6 @@
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
+    -->
 
 </xsl:stylesheet>
