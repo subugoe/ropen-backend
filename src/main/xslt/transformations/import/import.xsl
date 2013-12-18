@@ -80,29 +80,25 @@
                         <tr>
                             <!-- Loop over the input collection -->
                             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
+                                <xsl:message>Importing <xsl:value-of select="document-uri(.)"/></xsl:message>
                                 <td>
                                     <xsl:value-of select="document-uri(.)"/>
                                 </td>
                                 <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
-                                <!-- Contructed file names -->
-                                <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
-                                <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
-                                <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
-                                <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
-                                <xsl:variable name="xhtml-header-file" select="ropen:concat-path($xhtml-header-collection, $in-file)" as="xs:anyURI"/>
                                 <td>
                                     <xsl:value-of select="$in-file"/>
                                 </td>
                                 <xsl:if test="$tei-enriched-collection != ''">
+                                    <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
                                     <td>
+                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                        <xsl:variable name="success" as="xs:boolean">
+                                            <xsl:call-template name="ropen:enrich-tei">
+                                                <xsl:with-param name="input" select="document-uri(.)"/>
+                                                <xsl:with-param name="output" select="$tei-enriched-file"/>
+                                            </xsl:call-template>
+                                        </xsl:variable>
                                         <span>
-                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                            <xsl:variable name="success" as="xs:boolean">
-                                                <xsl:call-template name="ropen:enrich-tei">
-                                                    <xsl:with-param name="input" select="document-uri(.)"/>
-                                                    <xsl:with-param name="output" select="$tei-enriched-file"/>
-                                                </xsl:call-template>
-                                            </xsl:variable>
                                             <xsl:call-template name="check-success">
                                                 <xsl:with-param name="success" select="$success"/>
                                             </xsl:call-template>
@@ -112,16 +108,17 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$mets-collection != ''">
+                                    <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
                                     <td>
+                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                        <xsl:variable name="success" as="xs:boolean">
+                                            <xsl:call-template name="ropen:create-mets">
+                                                <xsl:with-param name="input" select="document-uri(.)"/>
+                                                <xsl:with-param name="output" select="$mets-file"/>
+                                                <xsl:with-param name="doc-name"/>
+                                            </xsl:call-template>
+                                        </xsl:variable>
                                         <span>
-                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                            <xsl:variable name="success" as="xs:boolean">
-                                                <xsl:call-template name="ropen:create-mets">
-                                                    <xsl:with-param name="input" select="document-uri(.)"/>
-                                                    <xsl:with-param name="output" select="$mets-file"/>
-                                                    <xsl:with-param name="doc-name"/>
-                                                </xsl:call-template>
-                                            </xsl:variable>
                                             <xsl:call-template name="check-success">
                                                 <xsl:with-param name="success" select="$success"/>
                                             </xsl:call-template>
@@ -130,15 +127,16 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$structure-collection != ''">
+                                    <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
                                     <td>
+                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                        <xsl:variable name="success" as="xs:boolean">
+                                            <xsl:call-template name="ropen:xhtml-structure">
+                                                <xsl:with-param name="input" select="document-uri(.)"/>
+                                                <xsl:with-param name="output" select="$structure-file"/>
+                                            </xsl:call-template>
+                                        </xsl:variable>
                                         <span>
-                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                            <xsl:variable name="success" as="xs:boolean">
-                                                <xsl:call-template name="ropen:xhtml-structure">
-                                                    <xsl:with-param name="input" select="document-uri(.)"/>
-                                                    <xsl:with-param name="output" select="$structure-file"/>
-                                                </xsl:call-template>
-                                            </xsl:variable>
                                             <xsl:message terminate="no">Warning the structure is created from TEI and dosn't contain IDs! Use structure-extractor.xsl instead.</xsl:message>
                                             <xsl:call-template name="check-success">
                                                 <xsl:with-param name="success" select="$success"/>
@@ -148,15 +146,16 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$xhtml-collection != ''">
+                                    <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
                                     <td>
+                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                        <xsl:variable name="success" as="xs:boolean">
+                                            <xsl:call-template name="ropen:xhtml-content">
+                                                <xsl:with-param name="input" select="document-uri(.)"/>
+                                                <xsl:with-param name="output" select="$xhtml-content-file"/>
+                                            </xsl:call-template>
+                                        </xsl:variable>
                                         <span>
-                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                            <xsl:variable name="success" as="xs:boolean">
-                                                <xsl:call-template name="ropen:xhtml-content">
-                                                    <xsl:with-param name="input" select="document-uri(.)"/>
-                                                    <xsl:with-param name="output" select="$xhtml-content-file"/>
-                                                </xsl:call-template>
-                                            </xsl:variable>
                                             <xsl:call-template name="check-success">
                                                 <xsl:with-param name="success" select="$success"/>
                                             </xsl:call-template>
@@ -165,15 +164,16 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$xhtml-header-collection != ''">
+                                    <xsl:variable name="xhtml-header-file" select="ropen:concat-path($xhtml-header-collection, $in-file)" as="xs:anyURI"/>
                                     <td>
+                                        <!-- This needs to be an Template since result documents can't be used inside functions -->
+                                        <xsl:variable name="success" as="xs:boolean">
+                                            <xsl:call-template name="ropen:xhtml-header">
+                                                <xsl:with-param name="input" select="document-uri(.)"/>
+                                                <xsl:with-param name="output" select="$xhtml-header-file"/>
+                                            </xsl:call-template>
+                                        </xsl:variable>
                                         <span>
-                                            <!-- This needs to be an Template since result documents can't be used inside functions -->
-                                            <xsl:variable name="success" as="xs:boolean">
-                                                <xsl:call-template name="ropen:xhtml-header">
-                                                    <xsl:with-param name="input" select="document-uri(.)"/>
-                                                    <xsl:with-param name="output" select="$xhtml-header-file"/>
-                                                </xsl:call-template>
-                                            </xsl:variable>
                                             <xsl:call-template name="check-success">
                                                 <xsl:with-param name="success" select="$success"/>
                                             </xsl:call-template>
