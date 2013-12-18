@@ -13,7 +13,7 @@
     - Check if it works
     - Add a fallback to saxon:node-set() for older Saxon versions
     -->
-    <xsl:output encoding="UTF-8" exclude-result-prefixes="#all" indent="yes"/>
+    <xsl:output encoding="UTF-8" exclude-result-prefixes="TEI xs xd" indent="yes"/>
     <xsl:param name="identifier" select="string('REPLACEME')"/>
     <xsl:param name="locationPrefix">http://134.76.21.92:8080/images/</xsl:param>
     <xsl:param name="locationSuffix">.jpeg</xsl:param>
@@ -314,4 +314,5 @@
             </METS:digiprovMD>
         </METS:amdSec>
     </xsl:template>
+    <xsl:template match="TEI:note" mode="#default mets"/>
 </xsl:stylesheet>
