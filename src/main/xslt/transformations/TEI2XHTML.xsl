@@ -56,7 +56,7 @@
    <!-- Should result fragments contain Span Elements with classes for TEI Elements? -->
    <xsl:variable name="result-tei-class" select="false()" as="xs:boolean"/>
    <xsl:include href="./lib/a18.xsl"/>
-   <xsl:template match="/">
+   <xsl:template match="/" mode="#default xhtml">
       <!-- TODO: Use XSLT Modes to get rid of variables -->
       <xsl:variable name="pageMode" as="xs:boolean">
          <xsl:choose>
