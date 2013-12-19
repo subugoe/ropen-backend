@@ -250,6 +250,7 @@
                                         <mets>
                                             <xsl:value-of select="$doc-mets-file"/>
                                         </mets>
+                                        <!-- This might causes an error XTRE1500 -->
                                         <xsl:variable name="mets" select="document($doc-mets-file)"/>
                                         <preview>
                                             <xsl:value-of select="data($mets//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)"/>
@@ -356,7 +357,7 @@
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)//TEI:header" mode="xhtml"/>
+            <xsl:apply-templates select="document($input)//TEI:teiHeader" mode="xhtml"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
