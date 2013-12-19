@@ -54,8 +54,23 @@
     -->
     <xsl:param name="output-param" select="'xhtml'"/>
     <xsl:template match="/">
+        <xsl:if test="$verbose">
+            <xsl:message>Param $collection: <xsl:value-of select="$collection"/></xsl:message>
+            <xsl:message>Param $mets-collection: <xsl:value-of select="$mets-collection"/></xsl:message>
+            <xsl:message>Param $tei-enriched-collection: <xsl:value-of select="$tei-enriched-collection"/></xsl:message>
+            <xsl:message>Param $document-listing-file: <xsl:value-of select="$document-listing-file"/></xsl:message>
+            <xsl:message>Param $structure-collection: <xsl:value-of select="$structure-collection"/></xsl:message>
+            <xsl:message>Param $replace-prefix: <xsl:value-of select="$replace-prefix"/></xsl:message>
+            <xsl:message>Param $prepend-prefix: <xsl:value-of select="$prepend-prefix"/></xsl:message>
+            <xsl:message>Param $xhtml-collection: <xsl:value-of select="$xhtml-collection"/></xsl:message>
+            <xsl:message>Param $xhtml-header-collection: <xsl:value-of select="$xhtml-header-collection"/></xsl:message>
+            <xsl:message>Param $url-prefix: <xsl:value-of select="$url-prefix"/></xsl:message>
+        </xsl:if>
+        
         <html xmlns="http://www.w3.org/1999/xhtml">
-            <head/>
+            <head>
+                <title>Import report</title>
+            </head>
             <body>
                 <xsl:if test="$collection != '' ">
                     <table>
