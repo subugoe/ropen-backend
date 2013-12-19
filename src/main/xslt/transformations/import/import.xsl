@@ -348,7 +348,7 @@
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)"/>
+            <xsl:apply-templates select="document($input)" mode="xhtml"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
@@ -356,7 +356,7 @@
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)//TEI:header"/>
+            <xsl:apply-templates select="document($input)//TEI:header" mode="xhtml"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
