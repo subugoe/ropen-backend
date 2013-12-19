@@ -39,6 +39,8 @@
     <xsl:param name="xhtml-header-collection" as="xs:string" select="''"/>
     <!-- TODO: Make this work for METS -->
     <xsl:param name="url-prefix" as="xs:string" select="''"/>
+    <!-- Enable debug output -->
+    <xsl:param name="verbose" select="true()" as="xs:boolean"/>
     <!-- 
          This avoids checks if files exist, since some versions of Saxon reading
          a file written during a transformation consider this an error while 
@@ -80,7 +82,9 @@
                         <tr>
                             <!-- Loop over the input collection -->
                             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
-                                <xsl:message>Importing <xsl:value-of select="document-uri(.)"/></xsl:message>
+                                <xsl:if test="$verbose">
+                                    <xsl:message>Importing <xsl:value-of select="document-uri(.)"/></xsl:message>
+                                </xsl:if>
                                 <td>
                                     <xsl:value-of select="document-uri(.)"/>
                                 </td>
@@ -90,6 +94,9 @@
                                 </td>
                                 <xsl:if test="$tei-enriched-collection != ''">
                                     <xsl:variable name="tei-enriched-file" select="ropen:concat-path($tei-enriched-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:if test="$verbose">
+                                        <xsl:message>Generating enriched file <xsl:value-of select="$tei-enriched-file"/></xsl:message>
+                                    </xsl:if>
                                     <td>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -109,6 +116,9 @@
                                 </xsl:if>
                                 <xsl:if test="$mets-collection != ''">
                                     <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:if test="$verbose">
+                                        <xsl:message>Generating METS file <xsl:value-of select="$mets-file"/></xsl:message>
+                                    </xsl:if>
                                     <td>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -128,6 +138,9 @@
                                 </xsl:if>
                                 <xsl:if test="$structure-collection != ''">
                                     <xsl:variable name="structure-file" select="ropen:concat-path($structure-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:if test="$verbose">
+                                        <xsl:message>Generating structure file <xsl:value-of select="$structure-file"/></xsl:message>
+                                    </xsl:if>
                                     <td>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -147,6 +160,9 @@
                                 </xsl:if>
                                 <xsl:if test="$xhtml-collection != ''">
                                     <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:if test="$verbose">
+                                        <xsl:message>Generating enriched file <xsl:value-of select="$xhtml-content-file"/></xsl:message>
+                                    </xsl:if>
                                     <td>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -165,6 +181,9 @@
                                 </xsl:if>
                                 <xsl:if test="$xhtml-header-collection != ''">
                                     <xsl:variable name="xhtml-header-file" select="ropen:concat-path($xhtml-header-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:if test="$verbose">
+                                        <xsl:message>Generating enriched file <xsl:value-of select="$xhtml-header-file"/></xsl:message>
+                                    </xsl:if>
                                     <td>
                                         <!-- This needs to be an Template since result documents can't be used inside functions -->
                                         <xsl:variable name="success" as="xs:boolean">
@@ -187,6 +206,9 @@
                 </xsl:if>
                 <!-- Generate document listing -->
                 <xsl:if test="$document-listing-file != ''">
+                    <xsl:if test="$verbose">
+                        <xsl:message>Generating document listing <xsl:value-of select="$document-listing-file"/></xsl:message>
+                    </xsl:if>
                     <xsl:variable name="document-listing" as="element()">
                         <docs xmlns="">
                             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
