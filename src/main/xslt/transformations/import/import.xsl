@@ -66,7 +66,7 @@
             <xsl:message>Param $xhtml-header-collection: <xsl:value-of select="$xhtml-header-collection"/></xsl:message>
             <xsl:message>Param $url-prefix: <xsl:value-of select="$url-prefix"/></xsl:message>
         </xsl:if>
-        
+
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <title>Import report</title>
@@ -224,12 +224,11 @@
                     <xsl:if test="$verbose">
                         <xsl:message>Generating document listing <xsl:value-of select="$document-listing-file"/></xsl:message>
                     </xsl:if>
-                    <xsl:variable name="document-listing" as="element()">
+                    <xsl:result-document href="{$document-listing-file}" exclude-result-prefixes="xlink xhtml" encoding="UTF-8">
                         <docs xmlns="">
                             <xsl:for-each select="collection(concat($collection, '/?select=*.xml'))">
-                                <xsl:variable name="doc-id">
-                                    <xsl:value-of select="ropen:uri-to-name(document-uri(root(.)))"/>
-                                </xsl:variable>
+                                <xsl:variable name="doc-id" select="ropen:uri-to-name(document-uri(root(.)))"/>
+                                <xsl:variable name="in-file" select="tokenize(document-uri(.), '/')[last()]" as="xs:string"/>
                                 <!--
                         <xsl:variable name="filename" select="document(.)"/>
                         -->
@@ -250,10 +249,32 @@
                                         <mets>
                                             <xsl:value-of select="$doc-mets-file"/>
                                         </mets>
-                                        <!-- This might causes an error XTRE1500 -->
-                                        <xsl:variable name="mets" select="document($doc-mets-file)"/>
                                         <preview>
-                                            <xsl:value-of select="data($mets//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)"/>
+                                            <!-- TODO: This is currrently a small hack, since the name of the document isn't passed to the 
+                                                       METS generator and the identifier isn't correct.
+                                                       This doesn't work and might causes an error XTRE1500
+                                                       <xsl:variable name="mets-file" select="ropen:concat-path($mets-collection, $in-file)"/>
+                                                       <xsl:variable name="mets" select="document($mets-file)"/>
+                                                       <xsl:variable name="url" select="data($mets//METS:fileGrp[@USE = 'MIN']//METS:file[1]/METS:FLocat/@xlink:href)"/>
+                                                       Just regenerate the METS file entry for the first file and extract the URL
+                                            -->
+                                            <xsl:variable name="file-grp" select="'THUMB'" as="xs:string"/>
+                                            <xsl:variable name="mets-fileGrp" as="element(METS:fileGrp)">
+                                                <xsl:call-template name="mets-fileGrp">
+                                                    <xsl:with-param name="nodes" select="(//TEI:pb)[1]"/>
+                                                    <xsl:with-param name="id" select="$identifier"/>
+                                                    <xsl:with-param name="use" select="$file-grp"/>
+                                                    <xsl:with-param name="prefix" select="$locationPrefix"/>
+                                                    <xsl:with-param name="suffix" select="$locationSuffix"/>
+                                                    <xsl:with-param name="width" select="$fileGroups/group[./text() = $file-grp]/@width"/>
+                                                </xsl:call-template>
+                                            </xsl:variable>
+                                            <!-- TODO: this is for debuging purposes -->
+                                            <xsl:if test="not(($mets-fileGrp//METS:FLocat[1])/@xlink:href)">
+                                                <xsl:message terminate="yes">Missing Preview URL for <xsl:value-of select="$doc-id"/></xsl:message>
+                                            </xsl:if>
+                                            <xsl:variable name="url" select="string(($mets-fileGrp//METS:FLocat[1])/@xlink:href)" as="xs:string"/>
+                                            <xsl:value-of select="replace($url, 'REPLACEME', $doc-id)"/>
                                         </preview>
                                     </xsl:if>
                                     <xsl:variable name="doc-tei-file" select="ropen:create-path($prepend-prefix, $replace-prefix, concat($collection, $doc-id, '.xml'))" as="xs:string"/>
@@ -286,12 +307,8 @@
                                 </doc>
                             </xsl:for-each>
                         </docs>
-                    </xsl:variable>
-                    <xsl:result-document href="{$document-listing-file}" exclude-result-prefixes="xlink xhtml" encoding="UTF-8">
-                        <xsl:copy-of select="$document-listing"/>
                     </xsl:result-document>
-                    <p>
-                Document listing saved to <xsl:value-of select="$document-listing-file"/>.</p>
+                    <p>Document listing saved to <xsl:value-of select="$document-listing-file"/>.</p>
                 </xsl:if>
             </body>
         </html>
