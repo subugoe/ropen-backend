@@ -1,4 +1,6 @@
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:METS="http://www.loc.gov/METS/" xmlns:MODS="http://www.loc.gov/mods/v3" xmlns:DC="http://purl.org/dc/elements/1.1/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:DV="http://dfg-viewer.de/" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs" version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:METS="http://www.loc.gov/METS/"
+    xmlns:MODS="http://www.loc.gov/mods/v3" xmlns:DC="http://purl.org/dc/elements/1.1/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:DV="http://dfg-viewer.de/"
+    xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" exclude-result-prefixes="xs" version="2.0">
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>
@@ -39,7 +41,7 @@
             <METS:fileSec>
                 <xsl:variable name="nodes" select="//TEI:pb"/>
                 <xsl:for-each select="$fileGroups/group">
-                    <xsl:call-template name="pbFileSect">
+                    <xsl:call-template name="mets-fileGrp">
                         <xsl:with-param name="use">
                             <xsl:value-of select="text()"/>
                         </xsl:with-param>
@@ -177,7 +179,7 @@
     </xsl:template>
 
     <!-- Creates a file group -->
-    <xsl:template name="pbFileSect">
+    <xsl:template name="mets-fileGrp" as="element(METS:fileGrp)">
         <xsl:param name="nodes"/>
         <xsl:param name="id" select="$identifier"/>
         <xsl:param name="use"/>
@@ -189,59 +191,16 @@
                 <xsl:value-of select="$use"/>
             </xsl:attribute>
             <xsl:for-each select="$nodes">
-                <METS:file MIMETYPE="image/jpeg">
-                    <xsl:attribute name="ID">
-                        <xsl:value-of select="$filePrefix"/>
-                        <xsl:text>_</xsl:text>
-                        <xsl:value-of select="$use"/>
-                        <xsl:text>_</xsl:text>
-                        <xsl:number format="00000001" level="any" count="//TEI:pb"/>
-                    </xsl:attribute>
-                    <METS:FLocat LOCTYPE="URL">
-                        <xsl:attribute name="xlink:href">
-                            <xsl:choose>
-                                <xsl:when test="$prefix = ''">
-                                    <xsl:value-of select="$locationPrefix"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="$prefix"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                            <xsl:if test="$id = ''">
-                                <xsl:message terminate="yes">No identifier given!</xsl:message>
-                            </xsl:if>
-                            <xsl:value-of select="$id"/>
-                            <xsl:choose>
-                                <xsl:when test="$useOrWidth = 'use'">
-                                    <xsl:text>/</xsl:text>
-                                    <xsl:value-of select="$use"/>
-                                    <xsl:text>/</xsl:text>
-                                </xsl:when>
-                                <xsl:when test="$useOrWidth = 'width'">
-                                    <xsl:if test="$width = ''">
-                                        <xsl:message terminate="yes">No width given!</xsl:message>
-                                    </xsl:if>
-                                    <xsl:text>/</xsl:text>
-                                    <xsl:value-of select="$width"/>
-                                    <xsl:text>/</xsl:text>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:message terminate="yes">Wrong URL type, valid is 'use' and
-                                        'width'</xsl:message>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                            <xsl:number format="00000001" level="any" count="//TEI:pb"/>
-                            <xsl:choose>
-                                <xsl:when test="$suffix = ''">
-                                    <xsl:value-of select="$locationSuffix"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="$suffix"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:attribute>
-                    </METS:FLocat>
-                </METS:file>
+                <xsl:call-template name="mets-file">
+                    <xsl:with-param name="filePrefix" select="$filePrefix"/>
+                    <xsl:with-param name="use" select="$use"/>
+                    <xsl:with-param name="prefix" select="$prefix"/>
+                    <xsl:with-param name="width" select="$width"/>
+                    <xsl:with-param name="id" select="$id"/>
+                    <xsl:with-param name="suffix" select="$suffix"/>
+                    <xsl:with-param name="locationSuffix" select="$locationSuffix"/>
+                    <xsl:with-param name="useOrWidth" select="$useOrWidth"/>
+                </xsl:call-template>
             </xsl:for-each>
         </METS:fileGrp>
     </xsl:template>
@@ -313,6 +272,70 @@
                 </METS:mdWrap>
             </METS:digiprovMD>
         </METS:amdSec>
+    </xsl:template>
+    <!-- Creates a single METS file entry -->
+    <xsl:template name="mets-file" as="element(METS:file)">
+        <xsl:param name="filePrefix"/>
+        <xsl:param name="use"/>
+        <xsl:param name="prefix"/>
+        <xsl:param name="width"/>
+        <xsl:param name="id"/>
+        <xsl:param name="suffix"/>
+        <xsl:param name="locationSuffix"/>
+        <xsl:param name="useOrWidth"/>
+        <METS:file MIMETYPE="image/jpeg">
+            <xsl:attribute name="ID">
+                <xsl:value-of select="$filePrefix"/>
+                <xsl:text>_</xsl:text>
+                <xsl:value-of select="$use"/>
+                <xsl:text>_</xsl:text>
+                <xsl:number format="00000001" level="any" count="//TEI:pb"/>
+            </xsl:attribute>
+            <METS:FLocat LOCTYPE="URL">
+                <xsl:attribute name="xlink:href">
+                    <xsl:choose>
+                        <xsl:when test="$prefix = ''">
+                            <xsl:value-of select="$locationPrefix"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$prefix"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:if test="$id = ''">
+                        <xsl:message terminate="yes">No identifier given!</xsl:message>
+                    </xsl:if>
+                    <xsl:value-of select="$id"/>
+                    <xsl:choose>
+                        <xsl:when test="$useOrWidth = 'use'">
+                            <xsl:text>/</xsl:text>
+                            <xsl:value-of select="$use"/>
+                            <xsl:text>/</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="$useOrWidth = 'width'">
+                            <xsl:if test="$width = ''">
+                                <xsl:message terminate="yes">No width given!</xsl:message>
+                            </xsl:if>
+                            <xsl:text>/</xsl:text>
+                            <xsl:value-of select="$width"/>
+                            <xsl:text>/</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:message terminate="yes">Wrong URL type, valid is 'use' and
+                                'width'</xsl:message>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:number format="00000001" level="any" count="//TEI:pb"/>
+                    <xsl:choose>
+                        <xsl:when test="$suffix = ''">
+                            <xsl:value-of select="$locationSuffix"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$suffix"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
+            </METS:FLocat>
+        </METS:file>
     </xsl:template>
     <xsl:template match="TEI:note" mode="#default mets"/>
 </xsl:stylesheet>
