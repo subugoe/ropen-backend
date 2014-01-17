@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI:TEI xmlns:TEI="http://www.tei-c.org/ns/1.0">
+    <TEI:teiHeader/>
+    <TEI:text>
+        <TEI:body>
+            <TEI:div>
+                <TEI:p>
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr,<TEI:lb/>
+                sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,<TEI:lb/>
+                sed diam voluptua.<TEI:lb/><TEI:pb/>
+                At vero eos et accusam et justo duo dolores et ea rebum.<TEI:lb/>
+                </TEI:p>
+                <TEI:p>
+                Duis autem vel eum iriure <TEI:pb/>dolor in hendrerit in vulputate velit esse molestie consequat,<TEI:lb/>
+                vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio<TEI:lb/>
+                dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.<TEI:lb/>
+                </TEI:p>
+            </TEI:div>
+            <TEI:pb/>
+            <TEI:div>
+                <TEI:p>
+                Ut wisi enim ad minim veniam,<TEI:lb/>
+                quis nostrud exerci tation ullamcorper suscipit lobortis nisl<TEI:lb/><TEI:pb/>
+                ut aliquip ex ea commodo consequat.<TEI:lb/>
+                </TEI:p>
+                <TEI:p>
+                Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet<TEI:lb/> 
+                doming id quod mazim placerat facer possim assum.<TEI:lb/>
+                </TEI:p>
+                <TEI:pb/>
+                <TEI:p>
+                Duis autem vel eum iriure dolor in hendrerit in vulputate velit<TEI:lb/>
+                esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.<TEI:lb/>
+                </TEI:p>
+                <TEI:p>
+                At vero eos et accusam et justo duo dolores et ea rebum.<TEI:lb/><TEI:pb/>
+                Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<TEI:lb/>
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr,<TEI:lb/>
+                sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.<TEI:lb/>
+                </TEI:p>
+            </TEI:div>
+        </TEI:body>
+    </TEI:text>
+</TEI:TEI>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><body xmlns="http://www.tei-c.org/ns/1.0"><TEI:div xmlns:TEI="http://www.tei-c.org/ns/1.0">
+                <TEI:p>
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr,<TEI:lb/>
+                sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,<TEI:lb/>
+                sed diam voluptua.<TEI:lb/><TEI:pb/>
+                At vero eos et accusam et justo duo dolores et ea rebum.<TEI:lb/>
+                </TEI:p>
+                <TEI:p>
+                Duis autem vel eum iriure <TEI:pb/>dolor in hendrerit in vulputate velit esse molestie consequat,<TEI:lb/>
+                vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio<TEI:lb/>
+                dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.<TEI:lb/>
+                </TEI:p>
+            </TEI:div>
+            <TEI:pb xmlns:TEI="http://www.tei-c.org/ns/1.0"/>
+            <div>
+                <TEI:p xmlns:TEI="http://www.tei-c.org/ns/1.0">
+                Ut wisi enim ad minim veniam,<TEI:lb/>
+                quis nostrud exerci tation ullamcorper suscipit lobortis nisl<TEI:lb/><TEI:pb/>
+                ut aliquip ex ea commodo consequat.<TEI:lb/>
+                </TEI:p>
+                <TEI:p xmlns:TEI="http://www.tei-c.org/ns/1.0">
+                Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet<TEI:lb/> 
+                doming id quod mazim placerat facer possim assum.<TEI:lb/>
+                </TEI:p>
+                </div></body>
