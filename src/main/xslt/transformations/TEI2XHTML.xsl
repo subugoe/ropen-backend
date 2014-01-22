@@ -714,6 +714,7 @@
    <xsl:template match="TEI:ab" mode="#all">
       <xsl:apply-templates select="./*"/>
    </xsl:template>
+   <xsl:template match="TEI:milestone"/>
 
    <!-- 
     TODO: Check if this works
