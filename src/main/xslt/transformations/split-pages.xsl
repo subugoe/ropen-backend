@@ -14,11 +14,11 @@
     <!-- If a collection shoulb be processed, use this parameter otherwise the given document will be processed -->
     <xsl:param name="input-collection" select="''" as="xs:string"/>
     <!-- Output location, otherwise . -->
-    <xsl:param name="output-collection" select="'/home/tech/archaeo18/transformations/results'" as="xs:string"/>
+    <xsl:param name="output-collection" select="''" as="xs:string"/>
     <!-- Name of the document, used as file name prefix for pages -->
     <xsl:param name="document" select="''" as="xs:string"/>
     <!-- Use 'xhtml', 'tei' or 'kml' -->
-    <xsl:param name="mode" select="''" as="xs:string"/>
+    <xsl:param name="mode" select="'tei'" as="xs:string"/>
     <!-- copy TEI header into every page? -->
     <xsl:param name="copy-header" select="false()" as="xs:boolean"/>
     <xsl:param name="debug-output-collection" as="xs:string" select="''"/>
