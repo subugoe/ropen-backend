@@ -166,10 +166,10 @@
             <TEI:text>
                 <TEI:body>
                     <xsl:copy-of select="a18:filter-pb($page)"/>
-                    <TEI:pb />
-                    <!-- <xsl:if test="not(a18:filter-pb($page)//TEI:pb)">                   
-                        <xsl:copy-of select="."/>
-                    </xsl:if> -->
+                    <xsl:if test="not(a18:filter-pb($page)//TEI:pb)">  
+                        <TEI:pb />
+                        <!-- <xsl:copy-of select="."/> -->
+                    </xsl:if> 
                 </TEI:body>
             </TEI:text>
         </TEI:TEI>
