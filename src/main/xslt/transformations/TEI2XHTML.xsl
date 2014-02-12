@@ -249,7 +249,7 @@
          <xsl:apply-templates/>
       </em>
    </xsl:template>
-   <xsl:template match="TEI:add|TEI:expan|TEI:supplied" mode="#default schema">
+   <xsl:template match="TEI:add|TEI:expan|TEI:supplied" mode="#default schema xhtml">
       <ins>
          <xsl:choose>
             <xsl:when test="@resp">
@@ -354,7 +354,7 @@
    <!-- 
         Also match <name type="place|person|org"/>
     -->
-   <xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']" mode="#default schema">
+   <xsl:template match="TEI:term|TEI:bibl|TEI:placeName|TEI:persName|TEI:ref|TEI:orgName|TEI:name[@type = 'place']|TEI:name[@type = 'pers']|TEI:name[@type = 'org']" mode="#default schema xhtml">
       <!-- The following pattern can be used to find multiple links "#[^"]*?#.*?" for one entity 
              The following XPath can be used to fin nested linking entities
         -->
@@ -1224,7 +1224,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign" mode="fragment">
+   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign" mode="fragment xhtml">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <span class="{concat($class-prefix, local-name(.))}">
@@ -1248,8 +1248,8 @@
    <xsl:template match="TEI:note|TEI:ref" mode="fragment">
       <xsl:apply-templates mode="fragment"/>
    </xsl:template>
-   <!-- Stuf to ignore, don't apply templates -->
-   <xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment"/>
+   <!-- Stuff to ignore, don't apply templates -->
+   <xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment xhtml"/>
    <xsl:template match="TEI:*" mode="fragment">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
