@@ -126,7 +126,7 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
-    <!-- Checks id an file exists -->
+    <!-- Checks if an file exists -->
     <xsl:function name="ropen:file-exists" as="xs:boolean">
         <xsl:param name="location" as="xs:string"/>
         <xsl:choose>
@@ -150,4 +150,30 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+    <!-- Extract the path name of a file -->
+    <xsl:function name="ropen:dirname" as="xs:string">
+        <xsl:param name="path" as="xs:string"/>
+        <xsl:choose>
+            <xsl:when test="contains($path, '/')">
+                <xsl:value-of select="concat(replace($path, '^(.*)/.*$', '$1'), '/')"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="''"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    <!-- Extract the path name for a given node -->
+    <xsl:function name="ropen:node-dirname" as="xs:string">
+        <xsl:param name="node" as="node()"/>
+        <xsl:variable name="doc-uri" as="xs:anyURI" select="document-uri(root($node))"/>
+        <xsl:choose>
+            <xsl:when test="$doc-uri != ''">
+                <xsl:value-of select="ropen:dirname($doc-uri)"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="''"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
 </xsl:stylesheet>
