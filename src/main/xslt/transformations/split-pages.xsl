@@ -186,7 +186,7 @@
                     <meta charset="UTF-8"/>
                     <title>Page <xsl:value-of select="$pos"/></title>
                     <body>
-                        <xsl:apply-templates select="$tei-page" mode="xhtml" exclude-result-prefixes="TEI xhtml"/>
+                        <xsl:apply-templates select="$tei-page" mode="fragment" exclude-result-prefixes="TEI xhtml"/>
                     </body>
                 </html>
             </xsl:when>
