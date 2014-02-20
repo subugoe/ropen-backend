@@ -712,7 +712,7 @@
 
    <!-- Stuff to ignore -->
    <xsl:template match="TEI:ab" mode="#all">
-      <xsl:apply-templates select="./*"/>
+      <xsl:apply-templates select="./*|./text()"/>
    </xsl:template>
    <xsl:template match="TEI:milestone"/>
 
@@ -810,7 +810,7 @@
                <xsl:text>]</xsl:text>
             </a>
             <br/>
-            <xsl:apply-templates select="./*"/>
+            <xsl:apply-templates select="./*|./text()"/>
          </div>
       </xsl:for-each>
    </xsl:template>
@@ -1211,7 +1211,7 @@
          </xsl:choose>
       </span>
    </xsl:template>
-   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q|TEI:ab" mode="fragment">
+   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <xsl:element name="{local-name(.)}">
