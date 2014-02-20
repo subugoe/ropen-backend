@@ -1211,7 +1211,7 @@
          </xsl:choose>
       </span>
    </xsl:template>
-   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment">
+   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q|TEI:ab" mode="fragment">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <xsl:element name="{local-name(.)}">
