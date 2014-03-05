@@ -711,7 +711,8 @@
    </xsl:template>
 
    <!-- Stuff to ignore -->
-   <xsl:template match="TEI:ab" mode="#all">
+<xsl:template match="TEI:ab" mode="#all">
+<!--    <xsl:template match="TEI:ab" mode="schema xhtml-structure header" > -->
       <xsl:apply-templates select="./*|./text()"/>
    </xsl:template>
    <xsl:template match="TEI:milestone"/>
@@ -1197,7 +1198,7 @@
         </xsl:choose>
     </xsl:function>
 -->
-   <xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment">
+   <xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment xhtml-content">
       <span class="{concat($class-prefix, local-name(.))}">
          <xsl:choose>
             <xsl:when test="./TEI:addName/exist:match and not(./descendant::exist:match[not(parent::TEI:addName)])">
@@ -1211,7 +1212,7 @@
          </xsl:choose>
       </span>
    </xsl:template>
-   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment">
+   <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment xhtml-content">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <xsl:element name="{local-name(.)}">
@@ -1224,7 +1225,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign" mode="fragment xhtml">
+   <xsl:template match="TEI:emph|TEI:head|TEI:bibl|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign|TEI:ab" mode="fragment xhtml xhtml-content">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <span class="{concat($class-prefix, local-name(.))}">
@@ -1236,21 +1237,21 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   <xsl:template match="TEI:lb" mode="fragment">
+   <xsl:template match="TEI:lb" mode="fragment xhtml-content">
       <span class="{concat($class-prefix, local-name(.))}"/>
    </xsl:template>
-   <xsl:template match="TEI:pb" mode="fragment">
+   <xsl:template match="TEI:pb" mode="fragment xhtml-content">
       <hr class="{concat($class-prefix, local-name(.))}"/>
    </xsl:template>
    <!-- Stuff to be filtered in result preview -->
-   <xsl:template match="TEI:note[@resp]" mode="fragment"/>
+   <xsl:template match="TEI:note[@resp]" mode="fragment xhtml-content"/>
    <!-- Stuff to be ignored in result preview -->
-   <xsl:template match="TEI:note|TEI:ref" mode="fragment">
+   <xsl:template match="TEI:note|TEI:ref" mode="fragment xhtml-content">
       <xsl:apply-templates mode="fragment"/>
    </xsl:template>
    <!-- Stuff to ignore, don't apply templates -->
-   <xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment xhtml"/>
-   <xsl:template match="TEI:*" mode="fragment">
+   <xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment xhtml xhtml-content"/>
+   <xsl:template match="TEI:*" mode="fragment xhtml-content">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <span class="{concat($class-prefix, local-name(.))}">
@@ -1264,7 +1265,7 @@
       <xsl:message terminate="no">Unrecognized element: <xsl:value-of select="name(.)"/>
       </xsl:message>
    </xsl:template>
-   <xsl:template match="TEI:hi" mode="fragment">
+   <xsl:template match="TEI:hi" mode="fragment xhtml-content">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
             <span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
@@ -1281,8 +1282,8 @@
         <xsl:value-of select="a18:normalize-space(.)"></xsl:value-of>
     </xsl:template>
     -->
-   <xsl:template match="comment()" mode="fragment"/>
-   <xsl:template match="exist:match" mode="fragment">
+   <xsl:template match="comment()" mode="fragment xhtml-content"/>
+   <xsl:template match="exist:match" mode="fragment xhtml-content">
       <xsl:choose>
          <xsl:when test="./parent::TEI:addName">
             <xsl:apply-templates mode="fragment"/>

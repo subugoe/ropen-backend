@@ -180,8 +180,8 @@
       </TEI:pb>
    </xsl:template>
    <!-- <xsl:template match="TEI:note" mode="#all"/>-->
-<xsl:template match="TEI:note" mode="mets tei xhtml-structure xhtml"/>
-   <xsl:template match="TEI:head" mode="xhtml-structure">
+<xsl:template match="TEI:note" mode="mets tei xhtml-structure xhtml xhtml-content"/>
+   <xsl:template match="TEI:head" mode="xhtml-structure xhtml-content">
       <xsl:element name="{concat('h', count(ancestor::TEI:div))}" namespace="http://www.w3.org/1999/xhtml">
          <xsl:variable name="id">
             <xsl:value-of select="parent::TEI:div/@id"/>
@@ -246,7 +246,7 @@
    </xsl:template>
    <xsl:template match="TEI:addName" mode="#all">
       <xsl:if test="not($filter)">
-         <xsl:apply-templates/>
+         <xsl:apply-templates mode="#current"/>
       </xsl:if>
    </xsl:template>
    <!--
