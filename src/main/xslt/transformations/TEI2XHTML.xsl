@@ -1198,20 +1198,6 @@
         </xsl:choose>
     </xsl:function>
 -->
-   <xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment xhtml-content">
-      <span class="{concat($class-prefix, local-name(.))}">
-         <xsl:choose>
-            <xsl:when test="./TEI:addName/exist:match and not(./descendant::exist:match[not(parent::TEI:addName)])">
-               <span class="{name($match-element)}">
-                  <xsl:apply-templates mode="fragment"/>
-               </span>
-            </xsl:when>
-            <xsl:otherwise>
-               <xsl:apply-templates mode="fragment"/>
-            </xsl:otherwise>
-         </xsl:choose>
-      </span>
-   </xsl:template>
    <xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment xhtml-content">
       <xsl:choose>
          <xsl:when test="$result-tei-class = true()">
