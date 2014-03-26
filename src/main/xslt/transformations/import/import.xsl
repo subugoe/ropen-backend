@@ -3,6 +3,7 @@
     xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" xmlns:err="http://www.w3.org/2005/xqt-errors" xmlns:METS="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/1999/xlink"
     exclude-result-prefixes="err METS xs xd TEI a18 ropen xlink xhtml" version="2.0">
     <!-- Imports -->
+    <xsl:import href="../TEI2XHTML.xsl" />
     <xsl:import href="../metadata-enrichment.xsl"/>
     <xsl:import href="../mets-2.0.xsl"/>
     <xsl:import href="../structure-extractor.xsl"/>
@@ -366,7 +367,7 @@
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)" mode="xhtml"/>
+            <xsl:apply-templates select="document($input)" mode="xhtml-content"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
@@ -374,7 +375,7 @@
         <xsl:param name="input" as="xs:anyURI"/>
         <xsl:param name="output" as="xs:anyURI"/>
         <xsl:result-document href="{$output}">
-            <xsl:apply-templates select="document($input)//TEI:teiHeader" mode="xhtml"/>
+            <xsl:apply-templates select="document($input)//TEI:teiHeader" mode="xhtml-header"/>
         </xsl:result-document>
         <xsl:value-of select="true()"/>
     </xsl:template>
@@ -392,5 +393,22 @@
             </xsl:choose>
         </xsl:attribute>
     </xsl:template>
+
+
+    <xsl:template match="TEI:TEI" mode="xhtml-content">
+        <html xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns="http://www.w3.org/1999/xhtml" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+            xmlns:bibo="http://purl.org/ontology/bibo/1.3/" version="XHTML+RDFa 1.0">
+            <head>
+                <title>
+                    <xsl:attribute name="type">dc:title</xsl:attribute>
+                    <xsl:value-of select="/TEI:TEI/TEI:teiHeader/TEI:fileDesc/TEI:titleStmt/TEI:title[not(@type = 'display')]/text()"/>
+                </title>
+            </head>
+            <body>
+                <xsl:apply-templates select="/TEI:TEI/TEI:text/TEI:body" mode="xhtml-content"/>
+            </body>
+        </html>
+    </xsl:template>
+
 
 </xsl:stylesheet>
