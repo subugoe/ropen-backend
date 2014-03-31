@@ -1238,7 +1238,7 @@
 		</xsl:choose>
 	</xsl:template>
 	<xsl:template match="TEI:lb" mode="fragment xhtml-content">
-		<span class="{concat($class-prefix, local-name(.))}"/>
+		<br class="{concat($class-prefix, local-name(.))}"/>
 	</xsl:template>
 	<xsl:template match="TEI:pb" mode="fragment xhtml-content">
 		<hr class="{concat($class-prefix, local-name(.))}"/>
