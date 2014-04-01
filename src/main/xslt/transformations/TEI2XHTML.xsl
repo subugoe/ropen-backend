@@ -1237,7 +1237,7 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	<xsl:template match="TEI:lb" mode="fragment xhtml-content">
+	<xsl:template match="TEI:lb" mode="fragment xhtml-content">	
 		<br class="{concat($class-prefix, local-name(.))}"/>
 	</xsl:template>
 	<xsl:template match="TEI:pb" mode="fragment xhtml-content">
@@ -1245,9 +1245,14 @@
 	</xsl:template>
 	<!-- Stuff to be filtered in result preview -->
 	<xsl:template match="TEI:note[@resp]" mode="fragment xhtml-content"/>
-	<!-- Stuff to be ignored in result preview -->
-	<xsl:template match="TEI:note|TEI:ref" mode="fragment xhtml-content">
-		<xsl:apply-templates mode="fragment"/>
+			<!-- Stuff to be ignored in result preview -->
+	<xsl:template match="TEI:note[@place='margin']" mode="fragment xhtml-content" >
+		<span class="{concat($class-prefix, local-name(.))} tei:note-margin">
+			<xsl:apply-templates mode="#current"/>
+		</span>
+	</xsl:template>
+	<xsl:template match="TEI:note[not(@place='margin')]|TEI:ref" mode="fragment xhtml-content">
+		<xsl:apply-templates mode="#current"/>
 	</xsl:template>
 	<!-- Stuff to ignore, don't apply templates -->
 	<xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment xhtml xhtml-content"/>
