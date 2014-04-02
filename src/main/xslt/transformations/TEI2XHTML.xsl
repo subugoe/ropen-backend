@@ -439,14 +439,15 @@
 		</xsl:variable>
 		<!-- Put the children in a variable -->
 		<xsl:variable name="content">
-			<xsl:choose>
+			<xsl:apply-templates mode="#current" />
+			<!-- <xsl:choose>
 				<xsl:when test="not(. instance of element(TEI:bibl))">
 					<xsl:apply-templates select="./node()"/>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:apply-templates select="./TEI:ref/node()"/>
 				</xsl:otherwise>
-			</xsl:choose>
+			</xsl:choose> -->
 		</xsl:variable>
 		<!-- Put common attributes in a variable -->
 		<xsl:variable name="attr" as="element(a18:attributes)">
@@ -1091,7 +1092,7 @@
 	<!-- Filtering of Results -->
 	<xsl:template match="fragment">
 		<xsl:variable name="fragment-clean">
-			<xsl:apply-templates mode="fragment"/>
+			<xsl:apply-templates mode="#current"/>
 		</xsl:variable>
 		<xsl:copy>
 			<body>
@@ -1198,30 +1199,17 @@
 		</xsl:choose>
 		</xsl:function>
 	-->
-	<!--  <xsl:template match="TEI:persName|TEI:placeName|TEI:term" mode="fragment xhtml-content">
-		<span class="{concat($class-prefix, local-name(.))}">
-		<xsl:choose>
-		<xsl:when test="./TEI:addName/exist:match and not(./descendant::exist:match[not(parent::TEI:addName)])">
-		<span class="{name($match-element)}">
-		<xsl:apply-templates mode="fragment"/>
-		</span>
-		</xsl:when>
-		<xsl:otherwise>
-		<xsl:apply-templates mode="fragment"/>
-		</xsl:otherwise>
-		</xsl:choose>
-		</span>
-		</xsl:template> -->
+
 	<xsl:template match="TEI:div|TEI:p|TEI:del|TEI:q" mode="fragment xhtml-content">
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<xsl:element name="{local-name(.)}">
 					<xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
-					<xsl:apply-templates mode="fragment"/>
+					<xsl:apply-templates mode="#current"/>
 				</xsl:element>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates mode="fragment"/>
+				<xsl:apply-templates mode="#current"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -1229,11 +1217,11 @@
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.))}">
-					<xsl:apply-templates mode="fragment"/>
+					<xsl:apply-templates mode="#current"/>
 				</span>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates mode="fragment"/>
+				<xsl:apply-templates mode="#current"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -1260,11 +1248,11 @@
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.))}">
-					<xsl:apply-templates mode="fragment"/>
+					<xsl:apply-templates mode="#current"/>
 				</span>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates mode="fragment"/>
+				<xsl:apply-templates mode="#current"/>
 			</xsl:otherwise>
 		</xsl:choose>
 		<xsl:message terminate="no">Unrecognized element: <xsl:value-of select="name(.)"/>
@@ -1274,16 +1262,16 @@
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.), '-', translate(@rend, ' ', '-'))}">
-					<xsl:apply-templates mode="fragment"/>
+					<xsl:apply-templates mode="#current"/>
 				</span>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates mode="fragment"/>
+				<xsl:apply-templates mode="#current"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 	<!--
-		<xsl:template match="text()" mode="fragment">
+		<xsl:template match="text()" mode="#current">
 		<xsl:value-of select="a18:normalize-space(.)"></xsl:value-of>
 		</xsl:template>
 	-->
@@ -1291,17 +1279,17 @@
 	<xsl:template match="exist:match" mode="fragment xhtml-content">
 		<xsl:choose>
 			<xsl:when test="./parent::TEI:addName">
-				<xsl:apply-templates mode="fragment"/>
+				<xsl:apply-templates mode="#current"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<span class="{name(.)}">
-					<xsl:apply-templates mode="fragment"/>
+					<xsl:apply-templates mode="#current"/>
 				</span>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 	<!--
-		<xsl:template match="text()" mode="fragment">
+		<xsl:template match="text()" mode="#current">
 		
 		<xsl:variable name="linebreak-class" select="concat('concat($class-prefix', 'lb')"></xsl:variable>
 		<xsl:choose>
