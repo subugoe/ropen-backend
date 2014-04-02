@@ -350,7 +350,7 @@
 		</xsl:choose>
 	</xsl:template>
 	
-	<!-- Entities (inkluding pseudo entities - everything that links) start here  and comment-->
+	<!-- Entities (inkluding pseudo entities - everything that links) start here -->
 	<!-- 
 		Also match <name type="place|person|org"/>
 	-->
