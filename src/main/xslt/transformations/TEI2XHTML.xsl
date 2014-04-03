@@ -244,7 +244,7 @@
 			<xsl:message terminate="yes">TEI2XHTML: Nesting to high, max is 9, <xsl:value-of select="count(ancestor::TEI:div)"/> given!</xsl:message>
 		</xsl:if>
 	</xsl:template>
-	<xsl:template match="TEI:emph" mode="#default schema">
+	<xsl:template match="TEI:emph" mode="#default schema xhtml-content fragment">
 		<em class="{concat($class-prefix, local-name(.))}">
 			<xsl:apply-templates/>
 		</em>
@@ -295,7 +295,7 @@
 			</xsl:attribute>
 		</a>
 	</xsl:template>
-	<xsl:template match="TEI:fw" mode="#default schema">
+	<xsl:template match="TEI:fw" mode="#default schema xhtml-content fragment">
 		<xsl:choose>
 			<xsl:when test="@place ='top'">
 				<span class="{concat($class-prefix, local-name(.), ' ', $class-prefix, local-name(.),'-', translate(@place, ' ', '-'))}">
@@ -440,14 +440,7 @@
 		<!-- Put the children in a variable -->
 		<xsl:variable name="content">
 			<xsl:apply-templates mode="#current" />
-			<!-- <xsl:choose>
-				<xsl:when test="not(. instance of element(TEI:bibl))">
-					<xsl:apply-templates select="./node()"/>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:apply-templates select="./TEI:ref/node()"/>
-				</xsl:otherwise>
-			</xsl:choose> -->
+			<!-- :q-->
 		</xsl:variable>
 		<!-- Put common attributes in a variable -->
 		<xsl:variable name="attr" as="element(a18:attributes)">
@@ -1213,7 +1206,7 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	<xsl:template match="TEI:emph|TEI:head|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign|TEI:ab" mode="fragment xhtml xhtml-content">
+	<xsl:template match="TEI:head|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign|TEI:ab" mode="fragment xhtml xhtml-content">
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.))}">
