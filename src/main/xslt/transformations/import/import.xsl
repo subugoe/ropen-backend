@@ -293,7 +293,7 @@
                                         </teiEnriched>
                                     </xsl:if>
                                     <pageCount>
-                                        <xsl:value-of select="count(.//TEI:pb)"/>
+                                        <xsl:value-of select="count(.//TEI:pb) + 1"/>
                                     </pageCount>
                                     <fulltext>
                                         <xsl:choose>
