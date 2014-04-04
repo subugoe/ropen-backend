@@ -50,7 +50,7 @@
                         {$tei-enriched-location}</teiEnriched>
                     <mets><xsl:value-of select=""></xsl:value-of>
                         {$metsFile}</mets>
-                    <pageCount><xsl:value-of select="count(.//TEI:pb)"></xsl:value-of>
+                    <pageCount><xsl:value-of select="count(.//TEI:pb)+1"></xsl:value-of>
                         {$pageCount}</pageCount>
                 </doc>
 <!-- 
