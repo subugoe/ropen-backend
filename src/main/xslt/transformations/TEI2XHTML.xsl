@@ -246,7 +246,7 @@
 	</xsl:template>
 	<xsl:template match="TEI:emph" mode="#default schema xhtml-content fragment">
 		<em class="{concat($class-prefix, local-name(.))}">
-			<xsl:apply-templates mode="#current"/>
+			<xsl:apply-templates/>
 		</em>
 	</xsl:template>
 	<xsl:template match="TEI:add|TEI:expan|TEI:supplied" mode="#default schema xhtml">
