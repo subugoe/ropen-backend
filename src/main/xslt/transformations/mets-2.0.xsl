@@ -203,6 +203,17 @@
                     <xsl:with-param name="number"><xsl:number format="00000001" level="any" count="//TEI:pb"/></xsl:with-param>
                 </xsl:call-template>
             </xsl:for-each>
+            <!-- last page (pb +1) -->
+            <xsl:call-template name="mets-file">
+                <xsl:with-param name="filePrefix" select="$filePrefix"/>
+                <xsl:with-param name="use" select="$use"/>
+                <xsl:with-param name="prefix" select="$prefix"/>
+                <xsl:with-param name="width" select="$width"/>
+                <xsl:with-param name="id" select="$id"/>
+                <xsl:with-param name="suffix" select="$suffix"/>
+                <xsl:with-param name="locationSuffix" select="$locationSuffix"/>
+                <xsl:with-param name="useOrWidth" select="$useOrWidth"/>
+            </xsl:call-template>
         </METS:fileGrp>
     </xsl:template>
     <xsl:template match="TEI:div" mode="#default mets">
