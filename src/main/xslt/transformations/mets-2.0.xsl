@@ -45,7 +45,7 @@
                         <xsl:with-param name="use">
                             <xsl:value-of select="text()"/>
                         </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes"/>
+                        <xsl:with-param name="nodes" select="$nodes | element(TEI:pb)"/>
                         <xsl:with-param name="prefix" select="@locationPrefix"/>
                         <xsl:with-param name="suffix" select="@locationSuffix"/>
                         <xsl:with-param name="width" select="@width"/>
@@ -200,6 +200,7 @@
                     <xsl:with-param name="suffix" select="$suffix"/>
                     <xsl:with-param name="locationSuffix" select="$locationSuffix"/>
                     <xsl:with-param name="useOrWidth" select="$useOrWidth"/>
+                    <xsl:with-param name="number"><xsl:number format="00000001" level="any" count="//TEI:pb"/></xsl:with-param>
                 </xsl:call-template>
             </xsl:for-each>
         </METS:fileGrp>
@@ -283,13 +284,14 @@
         <xsl:param name="suffix"/>
         <xsl:param name="locationSuffix"/>
         <xsl:param name="useOrWidth"/>
+        <xsl:param name="number" />
         <METS:file MIMETYPE="image/jpeg">
             <xsl:attribute name="ID">
                 <xsl:value-of select="$filePrefix"/>
                 <xsl:text>_</xsl:text>
                 <xsl:value-of select="$use"/>
                 <xsl:text>_</xsl:text>
-                <xsl:number format="00000001" level="any" count="//TEI:pb"/>
+                <xsl:value-of select="$number" />
             </xsl:attribute>
             <METS:FLocat LOCTYPE="URL">
                 <xsl:attribute name="xlink:href">
@@ -324,7 +326,7 @@
                                 'width'</xsl:message>
                         </xsl:otherwise>
                     </xsl:choose>
-                    <xsl:number format="00000001" level="any" count="//TEI:pb"/>
+                    <xsl:value-of select="$number" />
                     <xsl:choose>
                         <xsl:when test="$suffix = ''">
                             <xsl:value-of select="$locationSuffix"/>
