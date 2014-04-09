@@ -45,7 +45,7 @@
                         <xsl:with-param name="use">
                             <xsl:value-of select="text()"/>
                         </xsl:with-param>
-                        <xsl:with-param name="nodes" select="$nodes | element(TEI:pb)"/>
+                        <xsl:with-param name="nodes" select="$nodes | node()"/>
                         <xsl:with-param name="prefix" select="@locationPrefix"/>
                         <xsl:with-param name="suffix" select="@locationSuffix"/>
                         <xsl:with-param name="width" select="@width"/>
@@ -200,7 +200,7 @@
                     <xsl:with-param name="suffix" select="$suffix"/>
                     <xsl:with-param name="locationSuffix" select="$locationSuffix"/>
                     <xsl:with-param name="useOrWidth" select="$useOrWidth"/>
-                    <xsl:with-param name="number"><xsl:number format="00000001" level="any" count="//TEI:pb"/></xsl:with-param>
+                    <xsl:with-param name="number"><xsl:number format="00000001" value="position()"/></xsl:with-param>
                 </xsl:call-template>
             </xsl:for-each>
         </METS:fileGrp>
