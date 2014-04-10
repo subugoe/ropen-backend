@@ -1198,6 +1198,9 @@
 			<xsl:when test="$result-tei-class = true()">
 				<xsl:element name="{local-name(.)}">
 					<xsl:attribute name="class" select="concat($class-prefix, local-name(.))"/>
+					<xsl:if test="./@id">
+						<xsl:attribute name="id" select="./@id" />                     
+               		</xsl:if>
 					<xsl:apply-templates mode="#current"/>
 				</xsl:element>
 			</xsl:when>
