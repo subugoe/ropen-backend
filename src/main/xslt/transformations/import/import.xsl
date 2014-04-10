@@ -175,7 +175,7 @@
                                     </td>
                                 </xsl:if>
                                 <xsl:if test="$xhtml-collection != ''">
-                                    <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>
+                                    <xsl:variable name="xhtml-content-file" select="ropen:concat-path($xhtml-collection, $in-file)" as="xs:anyURI"/>                         
                                     <xsl:if test="$verbose">
                                         <xsl:message>Generating enriched file <xsl:value-of select="$xhtml-content-file"/></xsl:message>
                                     </xsl:if>
