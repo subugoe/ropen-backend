@@ -272,7 +272,7 @@
 			<xsl:if test="@xml:lang">
 				<xsl:attribute name="xml:lang" select="@xml:lang"/>
 			</xsl:if>
-			<xsl:apply-templates/>
+			<xsl:apply-templates mode="#current"/>
 		</span>
 	</xsl:template>
 	<!-- Mapping for Tags not part of Archaeo18, might be merged with others later -->
@@ -281,7 +281,7 @@
 			<xsl:apply-templates/>
 		</span>
 	</xsl:template>
-	<xsl:template match="TEI:anchor" mode="#default schema">
+	<xsl:template match="TEI:anchor" mode="#default schema xhtml-content fragment">
 		<a>
 			<xsl:attribute name="name">
 				<xsl:value-of select="@xml:id"/>
@@ -295,7 +295,7 @@
 			</xsl:attribute>
 		</a>
 	</xsl:template>
-	<xsl:template match="TEI:fw" mode="#default schema xhtml-content fragment">
+	<xsl:template match="TEI:fw" mode="#default schema">
 		<xsl:choose>
 			<xsl:when test="@place ='top'">
 				<span class="{concat($class-prefix, local-name(.), ' ', $class-prefix, local-name(.),'-', translate(@place, ' ', '-'))}">
@@ -1209,7 +1209,8 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	<xsl:template match="TEI:head|TEI:expan|TEI:date|TEI:gap|TEI:corr|TEI:choice|TEI:sic|TEI:foreign|TEI:ab" mode="fragment xhtml xhtml-content">
+	<xsl:template match="TEI:fw|TEI:head|TEI:expan|TEI:date|TEI:gap|TEI:unclear|TEI:damage|
+		TEI:corr|TEI:choice|TEI:sic|TEI:foreign|TEI:ab|TEI:profession" mode="fragment xhtml xhtml-content">
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.))}">
@@ -1240,7 +1241,7 @@
 	</xsl:template>
 	<!-- Stuff to ignore, don't apply templates -->
 	<xsl:template match="TEI:addName|TEI:cb|TEI:handShift" mode="fragment xhtml xhtml-content"/>
-	<xsl:template match="TEI:*" mode="fragment xhtml-content">
+	<xsl:template match="TEI:*" mode="fragment xhtml-content xhtml">
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
 				<span class="{concat($class-prefix, local-name(.))}">
@@ -1254,6 +1255,13 @@
 		<xsl:message terminate="no">Unrecognized element: <xsl:value-of select="name(.)"/>
 		</xsl:message>
 	</xsl:template>
+	
+	<xsl:template match="TEI:teiHeader|TEI:body|TEI:text|TEI:TEI" mode="fragment xhtml xhtml-content">
+		<xsl:apply-templates mode="#current"/>
+	</xsl:template>
+	<!-- ignore milestone in running text -->
+	<xsl:template match="TEI:milestone" mode="xhtml-content" />
+	
 	<xsl:template match="TEI:hi" mode="fragment xhtml-content">
 		<xsl:choose>
 			<xsl:when test="$result-tei-class = true()">
