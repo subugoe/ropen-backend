@@ -179,9 +179,9 @@
          </xsl:attribute>
       </TEI:pb>
    </xsl:template>
-   <!-- <xsl:template match="TEI:note" mode="#all"/>-->
-<xsl:template match="TEI:note" mode="mets tei xhtml-structure xhtml xhtml-content"/>
-   <xsl:template match="TEI:head" mode="xhtml-structure xhtml-content">
+   <!-- <xsl:template match="TEI:note" mode="#all"/> rm mode xhtml-content-->
+<xsl:template match="TEI:note" mode="mets tei xhtml-structure xhtml"/>
+   <xsl:template match="TEI:head" mode="xhtml-structure">
       <xsl:element name="{concat('h', count(ancestor::TEI:div))}" namespace="http://www.w3.org/1999/xhtml">
          <xsl:variable name="id">
             <xsl:value-of select="parent::TEI:div/@id"/>

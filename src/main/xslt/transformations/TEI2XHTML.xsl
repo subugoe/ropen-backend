@@ -584,7 +584,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<div class="{concat($class-prefix, local-name(.))}">
-					<xsl:apply-templates/>
+					<xsl:apply-templates mode="#current"/>
 				</div>
 			</xsl:otherwise>
 		</xsl:choose>
@@ -660,7 +660,7 @@
 				</xsl:message>
 				<xsl:element name="{name()}">
 					<xsl:copy-of select="@*"/>
-					<xsl:apply-templates/>
+					<xsl:apply-templates mode="#current"/>
 				</xsl:element>
 			</xsl:when>
 			<xsl:otherwise>
@@ -705,9 +705,9 @@
 	</xsl:template>
 	
 	<!-- Stuff to ignore -->
-	<xsl:template match="TEI:ab" mode="#all">
+	<xsl:template match="TEI:ab" mode="schema xhtml-structure header">
 		<!--    <xsl:template match="TEI:ab" mode="schema xhtml-structure header" > -->
-		<xsl:apply-templates select="./*|./text()"/>
+		<xsl:apply-templates select="./*|./text()" mode="#current"/>
 	</xsl:template>
 	<xsl:template match="TEI:milestone"/>
 	
@@ -805,7 +805,7 @@
 					<xsl:text>]</xsl:text>
 				</a>
 				<br/>
-				<xsl:apply-templates select="./*|./text()"/>
+				<xsl:apply-templates select="./*|./text()" mode="#current"/>
 			</div>
 		</xsl:for-each>
 	</xsl:template>
@@ -1236,7 +1236,7 @@
 			<xsl:apply-templates mode="#current"/>
 		</span>
 	</xsl:template>
-	<xsl:template match="TEI:note[not(@place='margin')]|TEI:ref" mode="fragment xhtml-content">
+	<xsl:template match="TEI:note[not(@place='margin')]|TEI:ref" mode="fragment xhtml-content xhtml">
 		<xsl:apply-templates mode="#current"/>
 	</xsl:template>
 	<!-- Stuff to ignore, don't apply templates -->
