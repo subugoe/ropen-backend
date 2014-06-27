@@ -24,6 +24,7 @@
     <xsl:param name="debug-output-collection" as="xs:string" select="''"/>
 
     <!-- Imports -->
+    <xsl:include href="./gettyQuery.xsl"/>
     <xsl:include href="./TEI2XHTML.xsl"/>
     <xsl:include href="./lib/ropen.xsl"/>
     <!--
@@ -137,7 +138,10 @@
                 <xsl:when test="$mode = 'xhtml'">
                     <xsl:value-of select="concat('./', $page-name, '-', $pos, $suffix)"/>
                 </xsl:when>
-                <xsl:otherwise/>
+                <xsl:when test="$mode = 'kml'">
+                    <xsl:value-of select="concat('./', $page-name, '-', $pos, $suffix)"/>
+                </xsl:when>
+                   <xsl:otherwise/>
             </xsl:choose>
         </xsl:variable>
         <xsl:call-template name="a18:generate-page">
@@ -191,7 +195,12 @@
                 </html>
             </xsl:when>
             <xsl:when test="$mode = 'kml'">
-                <xsl:message terminate="yes">Fatal: Mode KML not implemented yet</xsl:message>
+                <!-- <xsl:message terminate="yes">Starting kml transformation (for single pages)</xsl:message> -->
+                <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:kml="http://www.opengis.net/kml/2.2">
+                    <Document>
+                        <xsl:apply-templates select="$tei-page//TEI:placeName" mode='kml' />
+                    </Document>
+                </kml>
             </xsl:when>
             <xsl:otherwise/>
         </xsl:choose>

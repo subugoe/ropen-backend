@@ -29,7 +29,7 @@
    <xsl:param name="filter" select="true()" as="xs:boolean"/>
    <xsl:variable name="imageURLSuffix">.jpeg</xsl:variable>
    <xsl:variable name="normalizeFactor" select="$normalizeBase div count(//TEI:pb)"/>
-   <xsl:output encoding="UTF-8" method="xml" indent="yes"/>
+   <!-- <xsl:output encoding="UTF-8" method="xml" indent="yes"/> -->
    <xsl:template match="/">
       <xsl:message>
          <xsl:text>Configuration: </xsl:text>
@@ -58,7 +58,7 @@
          </Document>
       </kml>
    </xsl:template>
-   <xsl:template match="TEI:placeName">
+   <xsl:template match="TEI:placeName" mode='kml'>
       <xsl:variable name="gettyID" select="translate(@ref, $getty-id-prefix, '')"/>
       <xsl:if test="$gettyID != '' and $gettyID != '#'">
          <xsl:variable name="gettyEntry">
@@ -200,7 +200,7 @@
          </Placemark>
       </xsl:if>
    </xsl:template>
-   <xsl:template match="TEI:addName">
+   <xsl:template match="TEI:addName" mode='kml'>
       <xsl:if test="not($filter)">
          <xsl:apply-templates/>
       </xsl:if>
@@ -209,7 +209,7 @@
     <xsl:template match="text()" mode="name">
         <xsl:value-of select="normalize-space(.)"></xsl:value-of>
     </xsl:template>
-    --><xsl:template match="text()" mode="#all"/>
+    --><xsl:template match="text()" mode='kml'/>
    <xsl:template name="CDATA">
       <xsl:param name="node"/>
       <xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>
