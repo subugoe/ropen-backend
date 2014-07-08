@@ -13,18 +13,21 @@
    </xd:doc>
    <xsl:param name="group-rows-param" select="false()"/>
    <xsl:param name="dupliate-pages-param" select="true()"/>
-   <xsl:param name="entity-param" select="'TEI:persName'"/>
-   <xsl:param name="mode-param" select="'cloud'"/>
+   <xsl:param name="entity-param" select="''"/>
+   <xsl:param name="mode-param" select="'cloud'"/> 
+   <xsl:param name="cloudout-param" select="''" />
    <xsl:param name="doc-name-param" select="''"/>
    <xsl:param name="collection-param" select="''"/>
    <xsl:param name="verbose" select="false()" as="xs:boolean"/>
    <xsl:variable name="group-rows" select="if ($group-rows-param castable as xs:boolean) then xs:boolean($group-rows-param) else true()" as="xs:boolean"/>
    <xsl:variable name="dupliate-pages" select="if ($dupliate-pages-param castable as xs:boolean) then xs:boolean($dupliate-pages-param) else false()" as="xs:boolean"/>
-   <xsl:variable name="entity" select="if ($entity-param castable as xs:string) then xs:string($entity-param) else 'TEI:persName'" as="xs:string"/>
+   <xsl:variable name="entity" select="if ($entity-param castable as xs:string and $entity-param != '') then xs:string($entity-param) else 'TEI:persName|TEI:placeName|TEI:term|TEI:bibl'" as="xs:string"/>
    <xsl:variable name="mode" select="if ($mode-param castable as xs:string) then xs:string($mode-param) else 'cloud'" as="xs:string"/>
+   <xsl:variable name="cloudout" select="if ($cloudout-param castable as xs:string) then xs:string($cloudout-param) else ''" as="xs:string"/>
    <xsl:variable name="doc-name" select="if ($doc-name-param castable as xs:string) then xs:string($doc-name-param) else ''" as="xs:string"/>
    <xsl:variable name="collection" select="if ($collection-param != '' and collection($collection-param)) then collection($collection-param) else ()" as="node()*"/>
    <xsl:output method="xml" indent="yes"/>
+   <xsl:param name="pages" select="''" />
    <xsl:variable name="prefix" select="'tei:'"/>
    <xsl:variable name="placeholder-prefix" select="'#placeholder-'"/>
    <xsl:include href="./lib/a18.xsl"/>
@@ -51,7 +54,30 @@
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="$mode = 'cloud'">
+            <xsl:choose>
+            <xsl:when test="$cloudout != ''">             
+               <xsl:for-each select="collection(concat($collection-param, '/?select=*.xml'))">
+                  <xsl:variable name="in-file" select="ropen:uri-to-name(replace(tokenize(document-uri(.), '/')[last()], '.tei', ''))" as="xs:string"/>
+                  <xsl:variable name="page-id" select="if( $pages != '0') then '' else concat('-', $pages)"/>
+                  <xsl:variable name="entity-id" select="if (contains($entity, '|')) then '' else concat('-', tokenize($entity, ':')[last()])" as="xs:string"/>
+                  <xsl:variable name="outfile" select="ropen:concat-path($cloudout, concat($in-file, $page-id, $entity-id, '.xml'))" as="xs:anyURI"/>    
+                  <xsl:message terminate="no">Generating tag file <xsl:value-of select="$outfile"/></xsl:message>
+                  <xsl:variable name="thiscont">
+                     <xsl:apply-templates select="//TEI:body" mode="add-doc"/>
+                     <!--<xsl:copy-of select="doc($doc-name)"/>-->
+                  </xsl:variable>
+                  <xsl:result-document href="{$outfile}" encoding="UTF-8">
+                     <xsl:call-template name="writeCloud">
+                        <xsl:with-param name="bodycontent" select="$thiscont" />
+                        <xsl:with-param name="docname" select="$in-file" />
+                     </xsl:call-template>
+                  </xsl:result-document>
+               </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise>
             <xsl:apply-templates select="$content" mode="cloud"/>
+            </xsl:otherwise>
+            </xsl:choose>
          </xsl:when>
          <xsl:when test="$mode = 'xhtml'">
             <xsl:apply-templates select="$content" mode="xhtml"/>
@@ -127,6 +153,64 @@
    <xsl:template match="text()">
       <xsl:value-of select="normalize-space(.)"/>
    </xsl:template>
+   
+   <xsl:template name="writeCloud" >
+      <xsl:param name="bodycontent" as="node()"/>
+      <xsl:param name="docname" as="xs:string"/>
+      <tags>
+         <xsl:for-each-group select="a18:resolve-entity($entity, $bodycontent)" group-by="@ref|$bodycontent/TEI:ref/@target">
+            <tag>
+               <tag>
+                  <xsl:choose>
+                     <xsl:when test="current-group()[1]//TEI:addName[@type = 'display']/text()">
+                        <xsl:value-of select="current-group()[1]//TEI:addName[@type = 'display']/text()"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:apply-templates select="current-group()[1]/*"/>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </tag>
+               <facet>
+                  <xsl:value-of select="concat($prefix, local-name(current-group()[1]))"/>
+               </facet>
+               <xsl:for-each select="distinct-values(current-group()[1]//*/@ref)">
+                  <link>
+                     <xsl:value-of select="a18:resolve-id(.)"/>
+                  </link>
+               </xsl:for-each>
+               <count>
+                  <xsl:value-of select="count(current-group())"/>
+               </count>
+               <pages>
+                  <xsl:for-each select="current-group()">
+                     <page>
+                        <xsl:variable name="variant" as="text()*">
+                           <xsl:apply-templates/>
+                        </xsl:variable>
+                        <xsl:attribute name="doc">
+                           <xsl:value-of select="$docname"/>
+                        </xsl:attribute>
+                        <xsl:attribute name="n">
+                           <xsl:choose>
+                              <xsl:when test="@a18:_n">
+                                 <xsl:value-of select="@a18:_n"/>
+                              </xsl:when>
+                              <xsl:otherwise>
+                                 <xsl:value-of select="a18:get-page-nr($bodycontent)"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </xsl:attribute>
+                        <xsl:attribute name="variant">
+                           <xsl:value-of select="ropen:normalize-space($variant)"/>
+                        </xsl:attribute>
+                     </page>
+                  </xsl:for-each>
+               </pages>
+            </tag>
+         </xsl:for-each-group>
+      </tags>
+   </xsl:template>
+  
    <xsl:template match="//TEI:body" mode="cloud">
       <tags>
          <xsl:for-each-group select="a18:resolve-entity($entity, .)" group-by="@ref|./TEI:ref/@target">
@@ -505,10 +589,24 @@
    <xsl:function name="a18:resolve-entity" as="element()*">
       <xsl:param name="entity"/>
       <xsl:param name="nodes" as="node()*"/>
+     
       <xsl:if test="contains($entity, ',')">
          <xsl:message terminate="yes">Only one entity is currently supported</xsl:message>
       </xsl:if>
-      <xsl:choose>
+      <xsl:if test="contains($entity, 'pers')">
+         <xsl:copy-of select="$nodes//TEI:persName"/>
+      </xsl:if>
+      <xsl:if test="contains($entity, 'place')">
+         <xsl:copy-of select="$nodes//TEI:placeName"/>
+      </xsl:if>
+      <xsl:if test="contains($entity, 'term')">
+         <xsl:copy-of select="$nodes//TEI:term"/>
+      </xsl:if>
+      <xsl:if test="contains($entity, 'bibl')">
+         <xsl:copy-of select="$nodes//TEI:bibl"/>
+      </xsl:if>
+      
+     <!-- <xsl:choose>
          <xsl:when test="contains($entity, 'pers')">
             <xsl:copy-of select="$nodes//TEI:persName"/>
          </xsl:when>
@@ -525,7 +623,7 @@
             <xsl:message terminate="yes">Unsupported entity: <xsl:value-of select="$entity"/>
             </xsl:message>
          </xsl:otherwise>
-      </xsl:choose>
+      </xsl:choose> -->
    </xsl:function>
    <!--
    <xsl:function name="a18:add-doc" as="node()*">
