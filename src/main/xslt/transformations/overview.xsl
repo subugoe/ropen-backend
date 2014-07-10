@@ -146,7 +146,7 @@
       <xsl:copy/>
    </xsl:template>
    <!-- Tags to ignore -->
-   <xsl:template match="TEI:addName|TEI:note"/>
+   <xsl:template match="TEI:addName"/>
    <xsl:template match="TEI:persName|TEI:placeName|TEI:term|TEI:bibl">
       <xsl:apply-templates/>
    </xsl:template>
