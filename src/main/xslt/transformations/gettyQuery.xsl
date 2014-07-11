@@ -30,7 +30,7 @@
    <xsl:variable name="imageURLSuffix">.jpeg</xsl:variable>
    <xsl:variable name="normalizeFactor" select="$normalizeBase div count(//TEI:pb)"/>
    <!-- <xsl:output encoding="UTF-8" method="xml" indent="yes"/> -->
-   <xsl:template match="/">
+   <xsl:template match="/" mode="'kml'">
       <xsl:message>
          <xsl:text>Configuration: </xsl:text>
          <xsl:text>Variables: </xsl:text>

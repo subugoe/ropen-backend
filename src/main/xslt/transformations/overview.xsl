@@ -504,7 +504,7 @@
       </xsl:copy>
    </xsl:template>
    <!-- Stuff to ignore -->
-   <xsl:template match="TEI:addName[not(@type)]|TEI:lb|comment()|processing-instruction()|TEI:note" mode="add-doc"/>
+   <xsl:template match="TEI:addName[not(@type)]|TEI:lb|comment()|processing-instruction()" mode="add-doc"/>
    <xsl:template match="TEI:teiHeader" mode="add-doc"/>
    <!-- Text handling -->
    <xsl:template match="@*|text()" mode="add-doc">
