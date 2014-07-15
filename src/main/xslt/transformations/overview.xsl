@@ -63,14 +63,12 @@
                   <xsl:variable name="outfile" select="ropen:concat-path($cloudout, concat($in-file, $page-id, $entity-id, '.xml'))" as="xs:anyURI"/>    
                   <xsl:message terminate="no">Generating tag file <xsl:value-of select="$outfile"/></xsl:message>
                   <xsl:variable name="thiscont">
-                     <xsl:apply-templates select="//TEI:body" mode="add-doc"/>
-                     <!--<xsl:copy-of select="doc($doc-name)"/>-->
+                     <xsl:element name="TEI:body">
+                        <xsl:apply-templates select="//TEI:body/*" mode="add-doc"/>
+                     </xsl:element>
                   </xsl:variable>
                   <xsl:result-document href="{$outfile}" encoding="UTF-8">
-                     <xsl:call-template name="writeCloud">
-                        <xsl:with-param name="bodycontent" select="$thiscont" />
-                        <xsl:with-param name="docname" select="$in-file" />
-                     </xsl:call-template>
+                     <xsl:apply-templates select="$thiscont" mode="cloud"/>
                   </xsl:result-document>
                </xsl:for-each>
             </xsl:when>
@@ -154,62 +152,7 @@
       <xsl:value-of select="normalize-space(.)"/>
    </xsl:template>
    
-   <xsl:template name="writeCloud" >
-      <xsl:param name="bodycontent" as="node()"/>
-      <xsl:param name="docname" as="xs:string"/>
-      <tags>
-         <xsl:for-each-group select="a18:resolve-entity($entity, $bodycontent)" group-by="@ref|$bodycontent/TEI:ref/@target">
-            <tag>
-               <tag>
-                  <xsl:choose>
-                     <xsl:when test="current-group()[1]//TEI:addName[@type = 'display']/text()">
-                        <xsl:value-of select="current-group()[1]//TEI:addName[@type = 'display']/text()"/>
-                     </xsl:when>
-                     <xsl:otherwise>
-                        <xsl:apply-templates select="current-group()[1]/*"/>
-                     </xsl:otherwise>
-                  </xsl:choose>
-               </tag>
-               <facet>
-                  <xsl:value-of select="concat($prefix, local-name(current-group()[1]))"/>
-               </facet>
-               <xsl:for-each select="distinct-values(current-group()[1]//*/@ref)">
-                  <link>
-                     <xsl:value-of select="a18:resolve-id(.)"/>
-                  </link>
-               </xsl:for-each>
-               <count>
-                  <xsl:value-of select="count(current-group())"/>
-               </count>
-               <pages>
-                  <xsl:for-each select="current-group()">
-                     <page>
-                        <xsl:variable name="variant" as="text()*">
-                           <xsl:apply-templates/>
-                        </xsl:variable>
-                        <xsl:attribute name="doc">
-                           <xsl:value-of select="$docname"/>
-                        </xsl:attribute>
-                        <xsl:attribute name="n">
-                           <xsl:choose>
-                              <xsl:when test="@a18:_n">
-                                 <xsl:value-of select="@a18:_n"/>
-                              </xsl:when>
-                              <xsl:otherwise>
-                                 <xsl:value-of select="a18:get-page-nr($bodycontent)"/>
-                              </xsl:otherwise>
-                           </xsl:choose>
-                        </xsl:attribute>
-                        <xsl:attribute name="variant">
-                           <xsl:value-of select="ropen:normalize-space($variant)"/>
-                        </xsl:attribute>
-                     </page>
-                  </xsl:for-each>
-               </pages>
-            </tag>
-         </xsl:for-each-group>
-      </tags>
-   </xsl:template>
+   
   
    <xsl:template match="//TEI:body" mode="cloud">
       <tags>
