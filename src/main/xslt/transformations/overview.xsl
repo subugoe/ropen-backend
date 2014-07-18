@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:TEI="http://www.tei-c.org/ns/1.0" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xs="http://www.w3.org/2001/XMLSchema"
    xmlns:a18="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt" xmlns:ropen="http://ropen.sub.uni-goettingen.de/ropen-backend/xslt" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-   xmlns="http://www.w3.org/1999/xhtml" exclude-result-prefixes="xd TEI a18 ropen xs" version="2.0">
+   xmlns="http://www.w3.org/1999/xhtml" version="2.0">
    <xd:doc scope="stylesheet">
       <xd:desc>
          <xd:p>
@@ -13,8 +13,8 @@
    </xd:doc>
    <xsl:param name="group-rows-param" select="false()"/>
    <xsl:param name="dupliate-pages-param" select="true()"/>
-   <xsl:param name="entity-param" select="''"/>
-   <xsl:param name="mode-param" select="'cloud'"/> 
+   <xsl:param name="entity-param" select="'TEI:persName'"/>
+   <xsl:param name="mode-param" select="''"/> 
    <xsl:param name="cloudout-param" select="''" />
    <xsl:param name="doc-name-param" select="''"/>
    <xsl:param name="collection-param" select="''"/>
@@ -28,7 +28,7 @@
    <xsl:variable name="collection" select="if ($collection-param != '' and collection($collection-param)) then collection($collection-param) else ()" as="node()*"/>
    <xsl:output method="xml" indent="yes"/>
    <xsl:param name="pages" select="''" />
-   <xsl:variable name="prefix" select="'tei:'"/>
+   <xsl:variable name="prefix" select="'TEI:'"/>
    <xsl:variable name="placeholder-prefix" select="'#placeholder-'"/>
    <xsl:include href="./lib/a18.xsl"/>
    <xsl:include href="./lib/ropen.xsl"/>
@@ -52,8 +52,8 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-      <xsl:choose>
-         <xsl:when test="$mode = 'cloud'">
+      <xsl:choose>      
+         <xsl:when test="$mode = 'cloud' or $mode= 'cloud-pages'">
             <xsl:choose>
             <xsl:when test="$cloudout != ''">             
                <xsl:for-each select="collection(concat($collection-param, '/?select=*.xml'))">
@@ -64,11 +64,19 @@
                   <xsl:message terminate="no">Generating tag file <xsl:value-of select="$outfile"/></xsl:message>
                   <xsl:variable name="thiscont">
                      <xsl:element name="TEI:body">
-                        <xsl:apply-templates select="//TEI:body/*" mode="add-doc"/>
+                     <xsl:apply-templates select="//TEI:body/*" mode="add-doc"/>
                      </xsl:element>
+                     <!--<xsl:copy-of select="." />-->
                   </xsl:variable>
                   <xsl:result-document href="{$outfile}" encoding="UTF-8">
-                     <xsl:apply-templates select="$thiscont" mode="cloud"/>
+                     <xsl:choose>
+                        <xsl:when test="$mode = 'cloud'">
+                           <xsl:apply-templates select="$thiscont" mode="cloud"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <xsl:apply-templates select="$thiscont" mode="cloud-pages"/>
+                        </xsl:otherwise>
+                     </xsl:choose> 
                   </xsl:result-document>
                </xsl:for-each>
             </xsl:when>
@@ -151,12 +159,47 @@
    <xsl:template match="text()">
       <xsl:value-of select="normalize-space(.)"/>
    </xsl:template>
-   
-   
-  
+
+ <xsl:template match="//TEI:body" mode="cloud-pages">
+      <tags>
+         <xsl:for-each-group select="a18:resolve-entity($entity, .)" group-by="@ref|./TEI:ref/@target">      
+            <tag>
+               <tag>
+                  <xsl:choose>
+                     <xsl:when test="current-group()[1]//TEI:addName[@type = 'display']/text()">
+                        <xsl:value-of select="current-group()[1]//TEI:addName[@type = 'display']/text()"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:apply-templates select="current-group()[1]/*"/>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </tag>
+               <facet>
+                  <xsl:value-of select="concat(lower-case($prefix), local-name(current-group()[1]))"/>
+               </facet>
+               <xsl:for-each select="distinct-values(current-group()[1]/@ref)">
+                  <link>
+                     <xsl:value-of select="a18:resolve-id(.)"/>
+                  </link>
+               </xsl:for-each>
+               <count>
+                  <xsl:value-of select="count(current-group())"/>
+               </count>
+               <nodes> 
+                  <xsl:element name="{name()}">
+                     <xsl:attribute name="ref"><xsl:value-of select="./@ref" /></xsl:attribute>
+                     <xsl:attribute name="key"><xsl:value-of select="./@key" /></xsl:attribute>
+                     <xsl:copy-of select="current-group()[1]/*" />
+                  </xsl:element>
+               </nodes>
+            </tag>
+         </xsl:for-each-group>
+      </tags>
+   </xsl:template>
+
    <xsl:template match="//TEI:body" mode="cloud">
       <tags>
-         <xsl:for-each-group select="a18:resolve-entity($entity, .)" group-by="@ref|./TEI:ref/@target">
+         <xsl:for-each-group select="a18:resolve-entity($entity, .)" group-by="@ref|./TEI:ref/@target">      
             <tag>
                <tag>
                   <xsl:choose>
@@ -378,7 +421,7 @@
    </xsl:function>
 
    <!-- Ignore the header -->
-   <xsl:template match="TEI:teiHeader" mode="cloud xhtml"/>
+   <xsl:template match="TEI:teiHeader" mode="cloud xhtml cloud-pages"/>
    <!-- Templates to add the document name of a element to each element -->
    <!-- Entities -->
    <!--
@@ -390,7 +433,8 @@
       </xsl:copy>
    </xsl:template>
    -->
-   <xsl:template match="TEI:addName[@type]" mode="add-doc">
+<!--   <xsl:template match="TEI:addName[@type]" mode="add-doc"> -->
+      <xsl:template match="TEI:addName" mode="add-doc">
       <xsl:copy>
          <xsl:apply-templates select="@*|node()" mode="add-doc"/>
       </xsl:copy>
@@ -447,7 +491,9 @@
       </xsl:copy>
    </xsl:template>
    <!-- Stuff to ignore -->
-   <xsl:template match="TEI:addName[not(@type)]|TEI:lb|comment()|processing-instruction()" mode="add-doc"/>
+   <xsl:template match="TEI:lb|comment()|processing-instruction()|TEI:note" mode="add-doc"/>
+   
+<!--   <xsl:template match="TEI:addName[not(@type)]|TEI:lb|comment()|processing-instruction()|TEI:note" mode="add-doc"/> -->
    <xsl:template match="TEI:teiHeader" mode="add-doc"/>
    <!-- Text handling -->
    <xsl:template match="@*|text()" mode="add-doc">
