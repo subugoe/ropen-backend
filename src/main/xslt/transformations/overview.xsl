@@ -176,21 +176,52 @@
                </tag>
                <facet>
                   <xsl:value-of select="concat(lower-case($prefix), local-name(current-group()[1]))"/>
-               </facet>
-               <xsl:for-each select="distinct-values(current-group()[1]/@ref)">
-                  <link>
-                     <xsl:value-of select="a18:resolve-id(.)"/>
-                  </link>
-               </xsl:for-each>
+               </facet>             
+               <xsl:choose>
+                  <xsl:when test="current-group()[1]/@ref">
+                     <xsl:for-each select="distinct-values(current-group()[1]/@ref)">
+                        <link>
+                           <xsl:choose>
+                              <xsl:when test="contains(., 'http')">
+                                 <xsl:value-of select="replace(., '#', '')" />
+                              </xsl:when>
+                              <xsl:when test="contains(., 'placeholder')"/>                              
+                              <xsl:otherwise>
+                                 <xsl:value-of select="a18:resolve-id(.)"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </link>
+                     </xsl:for-each>
+                  </xsl:when>
+                  <xsl:when test="current-group()[1]//@target">
+                     <xsl:for-each select="distinct-values(current-group()[1]//@target)">
+                        <link>
+                           <xsl:choose><xsl:when test="contains(., 'placeholder')"/>                                                 
+                              <xsl:otherwise>
+                                 <xsl:value-of select="replace(., '#', '')" />
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </link>
+                     </xsl:for-each>
+                  </xsl:when>
+                  <xsl:otherwise>  
+                     <xsl:for-each select="distinct-values(current-group()[1]//*/@ref)">
+                        <link>
+                           <xsl:choose>
+                              <xsl:when test="contains(., 'placeholder')"/>
+                              <xsl:otherwise>
+                                 <xsl:value-of select="a18:resolve-id(.)"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </link>
+                     </xsl:for-each>
+                  </xsl:otherwise>
+               </xsl:choose>          
                <count>
                   <xsl:value-of select="count(current-group())"/>
                </count>
                <nodes> 
-                  <xsl:element name="{name()}">
-                     <xsl:attribute name="ref"><xsl:value-of select="./@ref" /></xsl:attribute>
-                     <xsl:attribute name="key"><xsl:value-of select="./@key" /></xsl:attribute>
-                     <xsl:copy-of select="current-group()[1]/*" />
-                  </xsl:element>
+       <xsl:copy-of select ="." />
                </nodes>
             </tag>
          </xsl:for-each-group>
@@ -441,8 +472,10 @@
    </xsl:template>
    <xsl:template match="TEI:bibl|TEI:placeName|TEI:persName|TEI:term" mode="add-doc">
       <xsl:copy>
+           <xsl:if test="$mode = 'cloud'" >
          <xsl:attribute name="_doc" select="document-uri(root(.))" namespace="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"/>
          <xsl:attribute name="_n" select="count(preceding::TEI:pb) + 1" namespace="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"/>
+           </xsl:if>
          <!-- no reference or bogus attribute -->
          <xsl:if test="not(. instance of element(TEI:bibl)) and not(@ref) or @ref = '#'">
             <xsl:variable name="placeholder" select="concat($placeholder-prefix, document-uri(root(.)), '-', generate-id(.))"/>
@@ -469,8 +502,10 @@
    </xsl:template>
    <xsl:template match="TEI:ref" mode="add-doc">
       <xsl:copy>
+         <xsl:if test="$mode = 'cloud'" >
          <xsl:attribute name="_doc" select="document-uri(root(.))" namespace="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"/>
          <xsl:attribute name="_n" select="count(preceding::TEI:pb) + 1" namespace="http://sub.uni-goettingen.de/DB/ENT/projects/archaeo18/xslt"/>
+         </xsl:if>
          <!-- no reference or bogus attribute -->
          <xsl:if test="not(@target) or @target = '#'">
             <xsl:variable name="placeholder" select="concat($placeholder-prefix, document-uri(root(.)), '-', generate-id(.))"/>
