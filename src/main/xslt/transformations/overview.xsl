@@ -243,7 +243,7 @@
                   </xsl:choose>
                </tag>
                <facet>
-                  <xsl:value-of select="concat($prefix, local-name(current-group()[1]))"/>
+                  <xsl:value-of select="concat(lower-case($prefix), local-name(current-group()[1]))"/>
                </facet>
                <xsl:for-each select="distinct-values(current-group()[1]//*/@ref)">
                   <link>
